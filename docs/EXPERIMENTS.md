@@ -114,3 +114,21 @@ What the pilot showed:
 2. **TD3 vs the tuned adaptive VSG:** no significant difference on any frequency metric. TD3 wins in 60 % of scenarios (median return +1.9). Its *mean* is worse because of a few high-load scenarios: there all seeds choose low damping to avoid headroom saturation, which the reward penalises with `w_sat`. TD3 saturates the headroom **about half as often** (0.062 s vs 0.133 s). This is the feasibility trade-off the paper is about. How much it is worth depends on `w_sat` and `w_bess`, so run the reward-weight sensitivity study.
 3. **Design fixes found by the pilot (already in the code):** (a) residual action mapping gives consistent seeds; (b) action-rate weight 0.3 removes bang-bang inertia switching; (c) the direction-aware projection removed the over-frequency failure mode (validation return −43 → −32).
 4. **Training budget:** seeds agree closely (best validation −30 to −34). Going from 300 to 1000 episodes did not change test performance in an earlier variant, so 1000 episodes is enough.
+
+---
+
+## Interim results on the 2024 site data (Nakhon Ratchasima)
+
+200 held-out test scenarios (weekly-block test split; 10.7 % adequacy rejection). Baselines tuned on the validation split. TD3 = 4 seeds × 1000 episodes, residual mapping centred on the *standard* VSG (H = 3 s, D = 20); this run is stored as `runs/td3_resnominal`.
+
+| Controller | Max \|Δf\| (Hz) | Max RoCoF (Hz/s) | QSS \|Δf\| (Hz) | Saturation (s) | Return |
+|---|---|---|---|---|---|
+| Fixed VSG, tuned (H 5 s, D 50 = max, α 0.7) | 0.164 | 0.757 | 0.130 | 0.011 | −17.4 |
+| Adaptive-RoCoF VSG, tuned (k_d 480) | 0.165 | 0.835 | 0.130 | 0.012 | −17.7 |
+| TD3, residual on standard VSG | 0.188 | 0.776 | 0.156 | 0.001 | −27.2 |
+| Bang-bang VSG | 0.328 | 0.922 | 0.275 | 0.002 | −64.8 |
+| Fixed VSG, standard (H 3, D 20) | 0.330 | 0.998 | 0.275 | 0.002 | −65.0 |
+| BESS droop (no inertia) | 0.547 | 4.872 | 0.274 | 0.045 | −104.5 |
+| Diesel only | 3.04 (91 % collapse) | 7.16 | 0.84 | 0 | −491.9 |
+
+**Key finding: the single-event problem has a trivial optimum.** Tuning shows that *maximum damping* is optimal for both fixed and adaptive VSGs, even with a 10× BESS-usage cost (`w_bess` 0.5). After a 0.2–0.4 MW step the diesel has only 0.1–0.2 MW spare, so the BESS must deliver the energy anyway; damping only sets how much frequency error is tolerated meanwhile. Within one 10 s event, nothing makes a lower damping worthwhile, so a fixed max-damping VSG is a near-optimal benchmark that RL cannot clearly beat. To show the value of learned, headroom-aware scheduling, the formulation needs a real trade-off (see the options in PAPER_OUTLINE / the session notes).
