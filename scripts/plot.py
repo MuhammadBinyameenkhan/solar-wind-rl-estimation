@@ -21,14 +21,18 @@ from vsgrl.data.hybrid import load_processed  # noqa: E402
 
 # Categorical palette (validated reference order) — colour follows the controller, never its rank.
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
-ORDER = ["td3", "ddpg", "fixed", "bang_bang", "adaptive_rocof", "fixed_tuned", "droop", "none"]
+ORDER = ["td3", "ddpg", "fixed", "bang_bang", "adaptive_rocof", "fixed_tuned", "td3_final", "ddpg_final"]
+REFERENCE = {"droop": "#8a8985", "none": "#b5b4ae", "fixed_feasible": "#6f6e69"}   # neutral references
 LABEL = {"td3": "TD3-VSG (proposed)", "ddpg": "DDPG-VSG", "fixed": "Fixed VSG", "bang_bang": "Bang-bang VSG",
          "adaptive_rocof": "Adaptive VSG", "fixed_feasible": "Fixed VSG (projected)", "fixed_tuned": "Fixed VSG (tuned)",
-         "droop": "BESS droop (no inertia)", "none": "No support"}
+         "droop": "BESS droop (no inertia)", "none": "No support",
+         "td3_final": "TD3-VSG (final ckpt)", "ddpg_final": "DDPG-VSG (final ckpt)"}
 INK, MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 
 
 def color(c):
+    if c in REFERENCE:
+        return REFERENCE[c]
     if c in ORDER:
         return PALETTE[ORDER.index(c)]
     return PALETTE[(abs(hash(c)) % 3) + 5]

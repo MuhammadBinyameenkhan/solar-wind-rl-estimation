@@ -27,9 +27,14 @@ def mlp(inp, out, hidden, out_act=None):
 
 
 class Actor(nn.Module):
-    def __init__(self, obs_dim, act_dim, hidden):
+    def __init__(self, obs_dim, act_dim, hidden, zero_init=False):
         super().__init__()
         self.net = mlp(obs_dim, act_dim, hidden, nn.Tanh())
+        if zero_init:
+            # Residual RL: output exactly 0 at start → the untrained policy IS the base controller
+            last = self.net[-2]
+            nn.init.zeros_(last.weight)
+            nn.init.zeros_(last.bias)
 
     def forward(self, o):
         return self.net(o)
@@ -76,7 +81,7 @@ class TD3Agent:
         torch.manual_seed(seed)
         self.rng = np.random.default_rng(seed)
         hidden = list(c["hidden"])
-        self.actor = Actor(obs_dim, act_dim, hidden).to(self.device)
+        self.actor = Actor(obs_dim, act_dim, hidden, zero_init=c.get("actor_zero_init", False)).to(self.device)
         self.critic = Critic(obs_dim, act_dim, hidden, twin=self.td3).to(self.device)
         self.actor_t = copy.deepcopy(self.actor)
         self.critic_t = copy.deepcopy(self.critic)

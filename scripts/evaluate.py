@@ -36,7 +36,7 @@ def representative(scs):
     return sorted(idx)
 
 
-def controllers_for(names, cfg, df, split):
+def controllers_for(names, cfg, df, split, checkpoint="best"):
     """Yield (name, seed, controller, env). An RL run is evaluated with the `env` section it
     was trained with (action mapping, projection), and the current `system` section (so
     robustness studies with --set system.* still apply)."""
@@ -46,7 +46,7 @@ def controllers_for(names, cfg, df, split):
         if n in BASELINES:
             yield n, 0, make_baseline(n, cfg, base_env), base_env
             continue
-        ckpts = sorted((runs / n).glob("seed*/best.pt"))
+        ckpts = sorted((runs / n).glob(f"seed*/{checkpoint}.pt"))
         if not ckpts:
             print(f"[skip] no trained checkpoints for '{n}' in {runs / n}")
             continue
@@ -58,7 +58,8 @@ def controllers_for(names, cfg, df, split):
                 c = copy.deepcopy(cfg)
                 c["env"] = yaml.safe_load(run_cfg_file.read_text())["env"]
             env = VSGEnv(c, df, split=split, record_trace=True)
-            yield n, seed, PolicyController(n, TD3Agent.load(ck, cfg["train"])), env
+            label = n if checkpoint == "best" else f"{n}_{checkpoint}"
+            yield label, seed, PolicyController(label, TD3Agent.load(ck, cfg["train"])), env
 
 
 if __name__ == "__main__":
@@ -66,6 +67,9 @@ if __name__ == "__main__":
     p.add_argument("--controllers", nargs="*", default=None)
     p.add_argument("--n", type=int, default=None, help="number of test scenarios")
     p.add_argument("--split", default="test")
+    p.add_argument("--checkpoint", choices=["best", "final"], default="best",
+                   help="RL checkpoint: best = validation-selected (default), final = end of training "
+                        "(reported as <algo>_final)")
     a = p.parse_args()
     cfg = setup(a)
     out = resolve_path(cfg["eval"]["out_dir"])
@@ -84,7 +88,8 @@ if __name__ == "__main__":
     reps = representative(scs)
 
     rows = []
-    for name, seed, ctrl, cenv in controllers_for(a.controllers or cfg["eval"]["controllers"], cfg, df, a.split):
+    for name, seed, ctrl, cenv in controllers_for(a.controllers or cfg["eval"]["controllers"], cfg, df, a.split,
+                                               a.checkpoint):
         for k, sc in enumerate(scs):
             m, tr = run_episode(cenv, ctrl, sc)
             rows.append({"controller": name, "seed": seed, "scenario": k, **sc.to_dict(), **m})

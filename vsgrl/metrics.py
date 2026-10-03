@@ -50,6 +50,9 @@ def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
         "bess_peak_mw": float(np.max(np.abs(p_b - p_b[0]))),
         "bess_rms_mw": float(np.sqrt(np.mean((p_b - p_b[0]) ** 2))),
         "pv_headroom_energy_kwh": float(np.sum(np.abs(p_pv)) * dt * 1000 / 3600),
+        # VSG power above its secondary set-point = the inertial + damping response H and D control
+        "vsg_fast_energy_kwh": float(np.sum(np.abs(tr["p_vsg_mw"].to_numpy() - tr["p_set_mw"].to_numpy()))
+                                     * dt * 1000 / 3600) if "p_set_mw" in tr else float("nan"),
         "saturation_s": float(np.sum(tr["sat_mw"].to_numpy() > 1e-4) * dt),
         "soc_drop": float(tr["soc"].iloc[0] - tr["soc"].iloc[-1]),
         "f_violation": bool(np.max(np.abs(df)) > gc["f_dev_limit_hz"]),

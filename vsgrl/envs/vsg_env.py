@@ -202,7 +202,9 @@ class VSGEnv(gym.Env):
                 + rw.get("w_fast", 0.0) * st["ms_pfast"] / self.mg.Pb_max ** 2
                 + rw["w_sat"] * st["mean_sat"] / 0.05
                 + rw["w_violation"] * st["viol_frac"]
-                + rw["w_action_rate"] * float(np.dot(da, da)))
+                + rw["w_action_rate"] * float(np.dot(da, da))
+                # residual trust region: deviating from the tuned base VSG must earn its keep
+                + rw.get("w_action_mag", 0.0) * float(np.dot(action, action)))
         reward = -cost
         self._prev_a = np.asarray(action, dtype=np.float32)
 

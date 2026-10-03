@@ -9,7 +9,8 @@ from vsgrl.microgrid import Microgrid, Scenario
 def mg(cfg):
     c = dict(cfg)
     c["system"] = {**cfg["system"], "wind": {**cfg["system"]["wind"], "turbulence_intensity": 0.0},
-                   "load": {**cfg["system"]["load"], "noise_frac": 0.0}}
+                   "load": {**cfg["system"]["load"], "noise_frac": 0.0},
+                   "ems": {"enabled": False}}            # plant physics only: BESS base power 0
     return Microgrid(c, wind_curve_from_cfg(c))
 
 

@@ -19,7 +19,7 @@ def test_projection_shrinks_with_headroom(cfg, df):
     hi = env.param_bounds()
     env.mg.soc = 0.12
     lo = env.param_bounds()
-    assert lo[0] < hi[0] and lo[1] < hi[1]
+    assert lo[0] < hi[0] and lo[1] <= hi[1]          # inertia bound shrinks; damping may stay capped by d_max
     env.headroom_constraint = False
     assert env.param_bounds() == (cfg["system"]["vsg"]["h_max_s"], cfg["system"]["vsg"]["d_max_pu"])
 
@@ -56,3 +56,13 @@ def test_agent_update_save_load_and_matlab_parity(cfg, df, tmp_path):
         x = m[f"W{i}"] @ x + m[f"b{i}"].ravel()
         x = np.maximum(x, 0) if i < n else np.tanh(x)
     assert np.allclose(x, ag.act(o), atol=1e-5)
+
+
+def test_zero_init_residual_policy_is_base_controller(cfg, df):
+    env = VSGEnv(cfg, df)
+    ag = TD3Agent(env.observation_space.shape[0], 3, dict(cfg["train"], actor_zero_init=True), seed=0)
+    obs, _ = env.reset(seed=2)
+    a = ag.act(obs)
+    assert np.allclose(a, 0.0)
+    if env.action_mode == "residual":
+        assert np.allclose(env.action_to_params(a), env.action_to_params(np.zeros(3)))

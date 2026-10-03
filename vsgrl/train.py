@@ -49,9 +49,16 @@ def train_one(cfg: dict, algo: str, seed: int, out_dir: Path, df: pd.DataFrame |
     agent = TD3Agent(env.observation_space.shape[0], env.action_space.shape[0], t, algo=algo, seed=seed)
 
     rng = np.random.default_rng(seed)
+    # Episode-0 validation: the untrained (zero-initialised residual) policy = base controller,
+    # so model selection never returns a policy worse than where training started.
+    v0 = evaluate_policy(val_env, agent, val_set)
+    best = v0["val_return"]
+    agent.save(out_dir / "best.pt")
+    vrows = [dict(v0, episode=0, steps=0)]
+    log.info("[%s seed %d] ep 0 (untrained)  val R=%.2f", algo, seed, best)
     obs, _ = env.reset(seed=seed)
-    total_steps, best, upd_credit = 0, -np.inf, 0.0
-    rows, vrows = [], []
+    total_steps, upd_credit = 0, 0.0
+    rows = []
     t0 = time.time()
     n_ep = t["episodes"]
     for ep in range(1, n_ep + 1):

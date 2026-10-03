@@ -132,13 +132,24 @@ class Microgrid:
         dis_max, _ = self.bess_limits(soc)
 
         # --- economic dispatch at the operating point ---------------------
+        # Optional rule-based EMS (system.ems.enabled): the BESS shifts energy — it charges
+        # from RES surplus instead of curtailing, and discharges to keep the diesel at its
+        # economic loading. This occupies BESS power headroom, which is what makes the
+        # feasibility of synthetic inertia state-dependent.
+        ems = self.cfg["system"].get("ems", {}) or {}
+        ems_on = bool(ems.get("enabled", False))
+        _, ch_max = self.bess_limits(soc)
         wind_cap = p_w_av
         pb0 = 0.0
         self.load_clipped = 0.0
         residual = load - p_w_av - pv_base
-        if residual < self.Pd_min:                      # RES surplus: curtail wind, then PV
+        if residual < self.Pd_min:                      # RES surplus
             cut = self.Pd_min - residual
-            wcut = min(cut, p_w_av)
+            if ems_on:                                  # EMS: charge the BESS first
+                chg = min(cut, ems.get("max_dispatch_frac", 0.8) * ch_max)
+                pb0 = -chg
+                cut -= chg
+            wcut = min(cut, p_w_av)                     # then curtail wind, then PV
             wind_cap = p_w_av - wcut
             cut -= wcut
             if cut > 0:
@@ -149,14 +160,17 @@ class Microgrid:
             if cut > 0:                                 # still surplus: raise load to diesel min (document)
                 load += cut
                 self.load_clipped = -cut
-            residual = self.Pd_min
-        if residual > self.Pd_disp_max:                 # deficit: BESS base discharge, then clip load
-            deficit = residual - self.Pd_disp_max
-            pb0 = min(deficit, 0.6 * dis_max)
+            residual = self.Pd_min + pb0                # diesel at minimum; pb0 < 0 is the BESS charging
+        target = (ems.get("diesel_target_frac", 0.6) * self.Pd_rat) if ems_on else self.Pd_disp_max
+        if residual > target:                           # deficit above the diesel target
+            deficit = residual - target
+            pb0 = min(deficit, (ems.get("max_dispatch_frac", 0.8) if ems_on else 0.6) * dis_max)
             rest = deficit - pb0
+            extra_d = min(rest, self.Pd_disp_max - target)   # diesel above its target, up to max dispatch
+            rest -= extra_d
             load -= rest
             self.load_clipped = rest
-            residual = self.Pd_disp_max + pb0
+            residual = target + extra_d + pb0
         pd0 = residual - pb0
 
         self.p_w_av0, self.wind_cap, self.pv_base, self.h_pv = p_w_av, wind_cap, pv_base, headroom
@@ -337,7 +351,8 @@ class Microgrid:
             if trace is not None and k % trace["every"] == 0:
                 trace["rows"].append((self.t, fm * self.f0, rm * self.f0, self.dw_v * self.f0,
                                       pv * Sb, self.p_pv_s * Sb, p_b_mw, self.p_d * Sb,
-                                      self.p_w * Sb, load * Sb, self.soc, sat * Sb, H_v, D_v, alpha))
+                                      self.p_w * Sb, load * Sb, self.soc, sat * Sb, H_v, D_v, alpha,
+                                      self.p_set * Sb))
         n = float(n_steps)
         return {
             "msf_hz2": sum_f2 / n * self.f0 ** 2,
@@ -351,4 +366,5 @@ class Microgrid:
         }
 
     TRACE_COLUMNS = ["t", "df_hz", "rocof_hz_s", "dfv_hz", "p_vsg_mw", "p_pv_support_mw", "p_bess_mw",
-                     "p_diesel_mw", "p_wind_mw", "p_load_mw", "soc", "sat_mw", "H_v", "D_v", "alpha"]
+                     "p_diesel_mw", "p_wind_mw", "p_load_mw", "soc", "sat_mw", "H_v", "D_v", "alpha",
+                     "p_set_mw"]
