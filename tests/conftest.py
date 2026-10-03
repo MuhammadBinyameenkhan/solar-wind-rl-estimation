@@ -17,6 +17,7 @@ def cfg(tmp_path_factory):
     return load_config("configs/default.yaml", [
         f"data.era5_csv={era5}", f"data.nasa_power_csv={nasa}",
         f"data.processed_csv={d / 'processed.csv'}",
+        "data.split.method=chronological", "site.utc_offset_hours=null",
         "train.warmup_steps=50", "train.batch_size=32", "train.hidden=[32,32]",
     ])
 

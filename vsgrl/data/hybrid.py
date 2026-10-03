@@ -10,7 +10,7 @@ import pandas as pd
 
 from ..components.resources import WindPowerCurve, pv_power_mw, synthetic_load_mw
 from ..config import resolve_path
-from .era5 import load_era5_csv
+from .era5 import load_era5
 from .nasa_power import load_nasa_power_csv
 
 log = logging.getLogger(__name__)
@@ -27,7 +27,14 @@ def wind_curve_from_cfg(cfg) -> WindPowerCurve:
 def assign_split(index: pd.DatetimeIndex, split_cfg: dict) -> np.ndarray:
     n = len(index)
     lab = np.empty(n, dtype=object)
-    if split_cfg.get("method", "chronological") == "by_year":
+    method = split_cfg.get("method", "chronological")
+    if method == "weekly_blocks":
+        # Whole ISO-style weeks assigned cyclically (5 train, 1 val, 1 test of every 7 weeks):
+        # every season appears in every split, and one-week blocks limit autocorrelation leakage.
+        pattern = split_cfg.get("pattern", ["train"] * 5 + ["val", "test"])
+        week = ((index - index[0].normalize()).days // 7).to_numpy()
+        return np.array([pattern[w % len(pattern)] for w in week], dtype=object)
+    if method == "by_year":
         years = index.year
         lab[:] = "train"
         lab[np.isin(years, split_cfg.get("val_years", []))] = "val"
@@ -47,13 +54,21 @@ def assign_split(index: pd.DatetimeIndex, split_cfg: dict) -> np.ndarray:
 
 def build_hybrid_dataset(cfg) -> pd.DataFrame:
     d, s = cfg["data"], cfg["system"]
-    era5 = load_era5_csv(resolve_path(d["era5_csv"]), d.get("era5_columns") or {},
-                         cfg["site"].get("latitude"), cfg["site"].get("longitude"),
-                         s["wind"]["hub_height_m"], s["wind"]["shear_exponent"])
     nasa = load_nasa_power_csv(resolve_path(d["nasa_power_csv"]), d.get("nasa_columns") or {},
                                d.get("nasa_time_standard", "auto"), d.get("nasa_utc_offset_hours"))
+    lat = cfg["site"].get("latitude") or nasa.attrs.get("latitude")
+    lon = cfg["site"].get("longitude") or nasa.attrs.get("longitude")
+    era5 = load_era5(resolve_path(d["era5_csv"]), d.get("era5_columns") or {}, lat, lon,
+                     s["wind"]["hub_height_m"], s["wind"]["shear_exponent"])
 
     df = era5[["ws_hub_ms", "rho_kgm3"]].join(nasa[["ghi_wm2", "t2m_c"]], how="inner")
+    if df["rho_kgm3"].isna().all():
+        # ERA5 file without t2m/sp: air density from NASA POWER T2M and barometric pressure
+        # at the site elevation (header of the POWER file, or site.elevation_m).
+        elev = cfg["site"].get("elevation_m") or nasa.attrs.get("elevation_m") or 0.0
+        p_pa = 101325.0 * (1.0 - 2.25577e-5 * elev) ** 5.25588
+        df["rho_kgm3"] = p_pa / (287.05 * (df["t2m_c"] + 273.15))
+        log.info("Air density from NASA T2M + standard-atmosphere pressure at %.0f m (%.0f Pa)", elev, p_pa)
     log.info("ERA5 %s → %s (%d h); NASA POWER %s → %s (%d h); overlap %d h",
              era5.index.min(), era5.index.max(), len(era5),
              nasa.index.min(), nasa.index.max(), len(nasa), len(df))
@@ -75,9 +90,11 @@ def build_hybrid_dataset(cfg) -> pd.DataFrame:
         df["load_mw"] = ld["load_mw"].resample("1h").mean().reindex(df.index).interpolate(limit=6)
         df = df.dropna()
     else:
-        lon = nasa.attrs.get("longitude", cfg["site"].get("longitude")) or 0.0
+        off = cfg["site"].get("utc_offset_hours")
+        if off is None:
+            off = (lon or 0.0) / 15.0
         df["load_mw"] = synthetic_load_mw(df.index, s["load"]["peak_mw"], s["load"]["min_mw"],
-                                          utc_offset_h=lon / 15.0, seed=0)
+                                          utc_offset_h=off, seed=0)
     df["split"] = assign_split(df.index, d["split"])
     return df[COLUMNS]
 

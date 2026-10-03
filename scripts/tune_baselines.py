@@ -13,7 +13,7 @@ from vsgrl.rollout import run_episode
 
 GRIDS = {
     "bang_bang": {"h_big": [4.0, 6.0, 8.0], "h_small": [0.5, 1.5, 3.0]},
-    "adaptive_rocof": {"k_h": [0.0, 2.0, 4.0, 8.0], "k_d": [0.0, 30.0, 60.0, 120.0]},
+    "adaptive_rocof": {"k_h": [0.0, 2.0, 4.0, 8.0], "k_d": [0.0, 30.0, 60.0, 120.0, 240.0, 480.0]},
 }
 
 if __name__ == "__main__":

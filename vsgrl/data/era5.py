@@ -1,4 +1,8 @@
-"""Reader for ERA5 (single levels) wind/thermo data exported to CSV.
+"""Reader for ERA5 (single levels) wind/thermo data — NetCDF (.nc, as downloaded
+from the CDS) or CSV.
+
+NetCDF: variables u100/v100 (and optionally u10/v10, t2m, sp) on a lat/lon grid;
+components are bilinearly interpolated to the site (nearest point if outside the grid).
 
 Handles the common CSV layouts:
   * CDS "timeseries" download:      valid_time,u100,v100,u10,v10,t2m,sp,...
@@ -51,11 +55,45 @@ def detect_columns(df: pd.DataFrame, overrides: dict | None = None) -> dict:
     return {k: _find(df, k, overrides) for k in ALIASES}
 
 
-def load_era5_csv(path, overrides: dict | None = None, site_lat=None, site_lon=None,
-                  hub_height_m: float = 80.0, shear_exponent: float = 0.143) -> pd.DataFrame:
+def _read_netcdf(path, site_lat, site_lon) -> pd.DataFrame:
+    try:
+        import xarray as xr
+    except ImportError as e:  # pragma: no cover
+        raise ImportError("Reading ERA5 NetCDF needs xarray + netCDF4: pip install xarray netCDF4") from e
+    ds = xr.open_dataset(path)
+    tdim = "valid_time" if "valid_time" in ds.dims else "time"
+    keep = [v for v in ("u100", "v100", "u10", "v10", "si10", "t2m", "sp") if v in ds.data_vars]
+    if not keep:
+        raise KeyError(f"No ERA5 wind variables in {path}: {list(ds.data_vars)}")
+    ds = ds[keep]
+    if "latitude" in ds.dims and ds.sizes["latitude"] * ds.sizes.get("longitude", 1) > 1:
+        lats, lons = ds.latitude.values, ds.longitude.values
+        if site_lat is None or site_lon is None:
+            raise ValueError("ERA5 NetCDF has several grid points: set site.latitude/longitude "
+                             "(or they are taken from the NASA POWER header via the hybrid builder).")
+        inside = lats.min() <= site_lat <= lats.max() and lons.min() <= site_lon <= lons.max()
+        if inside:
+            ds = ds.interp(latitude=site_lat, longitude=site_lon)        # bilinear on components
+            log.info("ERA5: bilinear interpolation of %d grid points to (%.4f, %.4f)",
+                     len(lats) * len(lons), site_lat, site_lon)
+        else:
+            ds = ds.sel(latitude=site_lat, longitude=site_lon, method="nearest")
+            log.info("ERA5: site outside grid; nearest point used")
+    elif "latitude" in ds.dims:
+        ds = ds.isel(latitude=0, longitude=0)
+    df = ds.to_dataframe().reset_index()
+    return df[[tdim] + keep].rename(columns={tdim: "valid_time"})
+
+
+def load_era5(path, overrides: dict | None = None, site_lat=None, site_lon=None,
+              hub_height_m: float = 80.0, shear_exponent: float = 0.143) -> pd.DataFrame:
     """Return an hourly UTC-indexed frame with columns
-    ws_ref_ms, ref_height_m, ws_hub_ms, t2m_k, sp_pa, rho_kgm3."""
-    df = pd.read_csv(path, comment="#")
+    ws_ref_ms, ref_height_m, ws_hub_ms, t2m_k, sp_pa, rho_kgm3.
+    t2m/sp/rho are NaN when the file has no temperature/pressure (filled by the hybrid builder)."""
+    if str(path).lower().endswith((".nc", ".nc4", ".netcdf")):
+        df = _read_netcdf(path, site_lat, site_lon)
+    else:
+        df = pd.read_csv(path, comment="#")
     cols = detect_columns(df, overrides)
     if cols["time"] is None:
         raise KeyError(f"No time column found in {path}. Columns: {list(df.columns)}. "
@@ -103,7 +141,7 @@ def load_era5_csv(path, overrides: dict | None = None, site_lat=None, site_lon=N
             t2m = t2m + 273.15
         out["t2m_k"] = t2m
     else:
-        out["t2m_k"] = 288.15
+        out["t2m_k"] = np.nan
     if cols["sp"]:
         sp = arr("sp")
         if np.nanmax(sp) < 2000.0:
@@ -111,12 +149,17 @@ def load_era5_csv(path, overrides: dict | None = None, site_lat=None, site_lon=N
             sp = sp * 100.0
         out["sp_pa"] = sp
     else:
-        out["sp_pa"] = 101325.0
+        out["sp_pa"] = np.nan
     out["rho_kgm3"] = out["sp_pa"] / (287.05 * out["t2m_k"])
 
     out = out[~out.index.duplicated(keep="first")].sort_index()
     n_bad = int(out["ws_hub_ms"].isna().sum())
     if n_bad:
         log.warning("ERA5: %d missing wind values interpolated (limit 6 h).", n_bad)
-    out = out.resample("1h").mean().interpolate(limit=6)
+    out = out.resample("1h").mean()
+    out["ws_hub_ms"] = out["ws_hub_ms"].interpolate(limit=6)
+    out["ws_ref_ms"] = out["ws_ref_ms"].interpolate(limit=6)
     return out
+
+
+load_era5_csv = load_era5  # backwards-compatible name

@@ -40,6 +40,9 @@ def parse_header(head: str) -> dict:
     m = re.search(r"Latitude\s+(-?\d+\.?\d*)\s+Longitude\s+(-?\d+\.?\d*)", head)
     if m:
         meta["latitude"], meta["longitude"] = float(m.group(1)), float(m.group(2))
+    m = re.search(r"Elevation.*?=\s*(-?\d+\.?\d*)\s*meters", head)
+    if m:
+        meta["elevation_m"] = float(m.group(1))
     return meta
 
 

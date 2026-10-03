@@ -8,16 +8,18 @@
 # =============================================================================
 
 site:
-  name: "study_site"
-  # Used only to pick the nearest grid point when the ERA5 CSV contains more
-  # than one (latitude, longitude) pair. Leave null if your CSV is a single point.
-  latitude: null
-  longitude: null
+  name: "Nakhon Ratchasima, Thailand"
+  # ERA5 grid points are bilinearly interpolated to this location.
+  # null → taken from the NASA POWER header.
+  latitude: 14.9799
+  longitude: 102.0977
+  elevation_m: null                 # null → NASA POWER header (226 m); used for air density
+  utc_offset_hours: 7.0             # local clock time (ICT) for the load profile
 
 data:
   # --- your real data (put the CSV files here, or edit the paths) ----------
-  era5_csv: data/raw/era5_wind.csv          # ERA5 / ERA5-Land single-levels export
-  nasa_power_csv: data/raw/nasa_power_solar.csv   # NASA POWER hourly CSV
+  era5_csv: data/raw/era5_wind_2024.nc       # ERA5 single levels, u100/v100, 2×2 grid, 2024 (NetCDF or CSV)
+  nasa_power_csv: data/raw/nasa_power_solar_2024.csv   # NASA POWER hourly, LST, 2024
   load_csv: null                            # optional: columns time,load_mw
   processed_csv: data/processed/hourly_resource.csv
 
@@ -33,9 +35,11 @@ data:
   nasa_time_standard: auto        # auto | UTC | LST
   nasa_utc_offset_hours: null
 
-  # Chronological split keeps the test period unseen (no temporal leakage).
+  # One year of data: weekly blocks (5 train / 1 val / 1 test of every 7 weeks) so all
+  # seasons (dry, hot, monsoon) appear in every split. Use chronological / by_year with
+  # multi-year data.
   split:
-    method: chronological         # chronological | by_year
+    method: weekly_blocks         # weekly_blocks | chronological | by_year
     train: 0.70
     val: 0.15
     test: 0.15
@@ -48,9 +52,12 @@ system:
 
   wind:
     rated_mw: 1.0
-    hub_height_m: 80.0
-    cut_in_ms: 3.0
-    rated_speed_ms: 12.0
+    # Low-wind site (ERA5 100 m mean 4.2 m/s in 2024): IEC class III turbine with a 100 m hub,
+    # i.e. at ERA5's own reference height (no shear extrapolation). CF ≈ 9 % vs 4 % for a
+    # generic 12 m/s-rated machine at 80 m.
+    hub_height_m: 100.0
+    cut_in_ms: 2.5
+    rated_speed_ms: 10.0
     cut_out_ms: 25.0
     shear_exponent: 0.143           # power-law (1/7) extrapolation from 100 m / 10 m
     power_curve_csv: null           # optional: columns wind_speed_ms,power_mw
@@ -90,8 +97,9 @@ system:
     secondary_ki: 0.30              # AGC integral gain [pu_sb / (pu_f · s)]
 
   load:
-    peak_mw: 1.2                    # firm capacity = diesel 0.5 + BESS 0.5 MW (+ RES)
-    min_mw: 0.45
+    peak_mw: 0.8                    # sized so evening peak (no PV, weak wind) fits firm capacity:
+                                    # adequacy-screen rejection 7 % (51 % at 1.2 MW) on the 2024 site data
+    min_mw: 0.30
     damping_pu: 1.0                 # load-frequency sensitivity, pu power / pu freq
     noise_frac: 0.005
 
@@ -171,9 +179,11 @@ eval:
   n_scenarios: 200
   scenario_seed: 20260
   controllers: [none, droop, fixed, fixed_feasible, bang_bang, adaptive_rocof, ddpg, td3]
-  # Gains of the adaptive baselines. Defaults are literature-style values; run
-  # scripts/tune_baselines.py to tune them on the validation split and paste the result here.
+  # Gains of the adaptive baselines, tuned on the VALIDATION weeks of the 2024 site data
+  # with scripts/tune_baselines.py (re-run it whenever the reward or system changes).
+  # k_d keeps improving up to the grid edge: with w_bess = 0.05, damping is almost free,
+  # so the strongest simple rule is "maximum damping as soon as the frequency moves".
   baseline_params:
-    bang_bang: {h_big: 6.0, h_small: 1.5}
-    adaptive_rocof: {k_h: 4.0, k_d: 60.0}
+    bang_bang: {h_big: 4.0, h_small: 3.0}
+    adaptive_rocof: {k_h: 2.0, k_d: 480.0}
   out_dir: results

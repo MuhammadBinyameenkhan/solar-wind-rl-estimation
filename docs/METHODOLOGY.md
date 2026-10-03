@@ -7,10 +7,10 @@ Everything here matches the code. Parameter values are the defaults in `configs/
 | Unit | Rating | Role / model | Inertia |
 |---|---|---|---|
 | Diesel SG | 0.5 MW | Voltage source behind K_d; droop R = 5 % (own base), governor T_g = 0.2 s, engine T_e = 0.5 s, ramp 1 pu/s, AGC K_i = 0.3 | H_d = 2 s (own base) → **0.5 s on 2 MVA** |
-| Wind | 1.0 MW | Grid-following MPPT; ERA5 hourly mean + OU turbulence (TI 10 %, τ = 2 s); rotor/converter lag 0.5 s | none |
+| Wind | 1.0 MW, IEC III (cut-in 2.5, rated 10 m/s, 100 m hub) | Grid-following MPPT; ERA5 hourly mean + OU turbulence (TI 10 %, τ = 2 s); rotor/converter lag 0.5 s | none |
 | PV | 0.8 MW (sweep 0.5–0.8) | Grid-following, **de-loaded MPPT**: base output (1−d)P_mpp, headroom h_pv = d·P_mpp (d = 0.15); headroom release lag T_pv = 80 ms | none |
 | BESS | 0.5 MW / 2 MWh | DC source of the grid-forming VSG; η_c = η_d = 0.95; SoC limits 0.10–0.95 with a 5 % linear power taper | **virtual: H_v ∈ [0.2, 8] s, D_v ∈ [0, 50] pu** |
-| Load | 0.45–1.2 MW | Daily profile (or measured CSV); damping D_L = 1 pu; 0.5 % OU noise | – |
+| Load | 0.3–0.8 MW | Daily profile in local time UTC+7 (or measured CSV); damping D_L = 1 pu; 0.5 % OU noise | – |
 
 Base: S_b = 2 MVA, f_0 = 50 Hz. All powers below are per-unit of S_b and frequencies are per-unit of f_0.
 
@@ -140,7 +140,7 @@ DDPG is the same code with twin critics, target smoothing and policy delay all s
 
 ## 5. Evaluation protocol
 
-* **Data split:** chronological, on whole days: 70 % train, 15 % validation, 15 % test. Test hours are never seen during training or model selection. With multi-year data, `split.method: by_year` is available.
+* **Data split:** weekly blocks (5 train / 1 val / 1 test of every 7 weeks) over 2024, so every season is in every split and whole weeks limit leakage. Test weeks are never seen during training or model selection. With multi-year data, use `split.method: chronological` or `by_year`.
 * **Test set:** 200 scenarios with a fixed seed. Every controller and every seed sees exactly the same scenarios, which allows paired tests. They are saved to `results/scenarios_test.csv` and reused in Simulink.
 * **Metrics** (`vsgrl/metrics.py`): frequency nadir (max |Δf| in the event direction), max RoCoF over a 100 ms sliding window (as relays measure it), quasi-steady deviation (mean of the last 1 s), settling time (±0.1 Hz band around the final value), BESS energy throughput, peak BESS power, PV-headroom energy, saturation time, and frequency/RoCoF violation flags.
 * **Statistics** (`scripts/analyze.py`):

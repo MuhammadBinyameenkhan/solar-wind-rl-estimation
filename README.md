@@ -7,8 +7,10 @@ Code for the thesis and paper. A TD3 (and DDPG) agent schedules the **virtual in
 | | |
 |---|---|
 | System base | 2.0 MVA, 50 Hz |
-| Wind | 1.0 MW, grid-following MPPT, no inertia (ERA5 100 m wind → hub height, air-density-corrected power curve) |
-| PV | 0.5–0.8 MW, **de-loaded MPPT** (default d = 15 % headroom) (NASA POWER GHI + T2M) |
+| Site | Nakhon Ratchasima, Thailand (14.98° N, 102.10° E, 226 m), year 2024 |
+| Wind | 1.0 MW IEC class III (rated 10 m/s, 100 m hub), grid-following, no inertia: ERA5 100 m wind (mean 4.2 m/s → CF 9.5 %) |
+| PV | 0.5–0.8 MW, **de-loaded MPPT** (default d = 15 % headroom): NASA POWER GHI + T2M (CF 17.3 %) |
+| Load | 0.3–0.8 MW synthetic daily/weekly/seasonal profile (sized to firm capacity; replace with measured data if available) |
 | BESS | 0.5 MW / 2 MWh, SoC-dependent power limits, grid-forming VSG |
 | Diesel | 0.5 MW synchronous generator (the only physical inertia, H = 2 s on its own base), droop + AGC |
 | Disturbances | 0.2–0.4 MW load steps (75 % increases, 25 % rejections) |
@@ -25,13 +27,13 @@ pip install -r requirements.txt        # numpy pandas scipy matplotlib gymnasium
 python -m pytest -q                    # 17 tests, ~10 s
 ```
 
-## 2. Put your real data in place
+## 2. Data (already in the repo)
 
 ```
-data/raw/era5_wind.csv           ERA5 hourly: time + u100, v100 (+ t2m, sp)      → wind
-data/raw/nasa_power_solar.csv    NASA POWER hourly: ALLSKY_SFC_SW_DWN, T2M       → solar
+data/raw/era5_wind_2024.nc           ERA5 hourly u100/v100, 2×2 grid around the site, 2024 (NetCDF)
+data/raw/nasa_power_solar_2024.csv   NASA POWER hourly ALLSKY_SFC_SW_DWN, T2M, WS10M, WS50M, 2024 (LST)
 ```
-Different paths? Edit `data.era5_csv` and `data.nasa_power_csv` in `configs/default.yaml`. Then check that both files parse correctly:
+The ERA5 grid is bilinearly interpolated to the site. Air density uses NASA T2M plus barometric pressure at 226 m, because the ERA5 file has no t2m or sp. For other data, edit `data.*` and `site.*` in `configs/default.yaml`; CSV or NetCDF both work. Check the files with:
 
 ```bash
 python scripts/inspect_data.py        # shows detected columns, units, time span, ERA5/NASA overlap
