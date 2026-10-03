@@ -19,6 +19,13 @@ Code for the thesis and paper. A TD3 (and DDPG) agent schedules the **virtual in
 
 ---
 
+> **New here? Start with [docs/VSCODE.md](docs/VSCODE.md)** (set-up in VS Code), then run `scripts/walkthrough.py` cell by cell. It explains the whole study step by step with plots.
+>
+> **Main findings so far** (details in [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)):
+> * The headroom feasibility projection is essentially free (return −105.9 → −106.0).
+> * The oracle bound shows adaptive (H, D) scheduling can gain at most about 2 % here.
+> * TD3/DDPG residual policies do not beat the tuned VSG. TD3 trades lower nadir and RoCoF for more BESS energy (non-dominated); DDPG is dominated.
+
 ## 1. Install
 
 ```bash
@@ -86,4 +93,5 @@ tests/                      unit + integration tests
 * **[docs/DATA.md](docs/DATA.md)**: real-data pipeline (ERA5 + NASA POWER hybrid)
 * **[docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)**: experiment matrix with exact commands and expected runtimes
 * **[docs/SIMULINK_VALIDATION.md](docs/SIMULINK_VALIDATION.md)**: how to build the Simscape model and validate the exported policy
-* **[docs/PAPER_OUTLINE.md](docs/PAPER_OUTLINE.md)**: section-by-section paper plan, contribution statement, threats to validity
+* **[docs/PAPER_OUTLINE.md](docs/PAPER_OUTLINE.md)**: recommended framing, title options, contributions, section plan, threats to validity
+* **[docs/VSCODE.md](docs/VSCODE.md)**: running, debugging and learning the code in VS Code
