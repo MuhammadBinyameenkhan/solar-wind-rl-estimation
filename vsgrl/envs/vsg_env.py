@@ -199,6 +199,7 @@ class VSGEnv(gym.Env):
                 + rw.get("w_freq_inband", 0.0) * st["msf_hz2"] / gc["f_target_hz"] ** 2
                 + rw["w_rocof"] * st["msr_excess_hz2s2"] / gc["rocof_limit_hz_s"] ** 2
                 + rw["w_bess"] * st["ms_pbess"] / self.mg.Pb_max ** 2
+                + rw.get("w_fast", 0.0) * st["ms_pfast"] / self.mg.Pb_max ** 2
                 + rw["w_sat"] * st["mean_sat"] / 0.05
                 + rw["w_violation"] * st["viol_frac"]
                 + rw["w_action_rate"] * float(np.dot(da, da)))

@@ -233,7 +233,7 @@ class Microgrid:
         f_lim, r_lim = gc["f_dev_limit_hz"] / self.f0, gc["rocof_limit_hz_s"] / self.f0
         f_band = self.cfg["env"]["reward"].get("f_band_hz", 0.0) / self.f0
         r_band = self.cfg["env"]["reward"].get("rocof_band_hz_s", 0.0) / self.f0
-        sum_f2 = sum_r2 = sum_pb2 = sum_sat = sum_ef2 = sum_er2 = 0.0
+        sum_f2 = sum_r2 = sum_pb2 = sum_sat = sum_ef2 = sum_er2 = sum_fast2 = 0.0
         n_viol = 0
         for _ in range(n_steps):
             k = self._k
@@ -326,6 +326,8 @@ class Microgrid:
                 sum_er2 += er * er
             dpb = p_b - self.pb0
             sum_pb2 += dpb * dpb
+            fast = pv - self.p_set              # VSG power above its secondary set-point (inertia + damping)
+            sum_fast2 += fast * fast
             sum_sat += sat
             if abs(fm) > f_lim or abs(rm) > r_lim:
                 n_viol += 1
@@ -343,6 +345,7 @@ class Microgrid:
             "msf_excess_hz2": sum_ef2 / n * self.f0 ** 2,       # beyond the reward band
             "msr_excess_hz2s2": sum_er2 / n * self.f0 ** 2,
             "ms_pbess": sum_pb2 / n,
+            "ms_pfast": sum_fast2 / n,
             "mean_sat": sum_sat / n,
             "viol_frac": n_viol / n,
         }

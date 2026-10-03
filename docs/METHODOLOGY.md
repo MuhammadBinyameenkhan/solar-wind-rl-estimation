@@ -97,6 +97,17 @@ PV headroom is "free" energy that is already reserved, but it is slower (T_pv) a
 
 ### 3.1 Headroom feasibility projection
 
+**Current (`env.projection: band_power`):** with h the direction-aware headroom,
+
+```
+D_ub = min(D_max, h / Δf_band)            damping power at the band edge must fit in h
+H_ub = min(H_max, h / (2 · RoCoF_lim))     inertial power at the RoCoF limit must fit in h
+```
+
+On the validation set this caps H below 5 s in 40 % of operating points, never caps D below 25, and costs the tuned fixed VSG nothing (−56.86 vs −56.80). Applied parameters also pass a first-order rate limit (τ = 0.25 s) for every controller, as real adaptive VSGs rate-limit parameter changes.
+
+**Earlier (`steady_share`, single-event formulation):**
+
 Before mapping, the action's upper bounds are made to depend on the headroom in the direction of the event. While Δf ≤ 0 (pre-event or under-frequency), that is the upward headroom h = h_up = max(P_dis,max(SoC) − P_b0, 0) + h_pv. During an over-frequency event (Δf > 0), it is the downward headroom h = h_dn = max(P_ch,max(SoC) + P_b0, 0) + P_pv,base.
 
 *Why direction-aware:* an earlier version used h_up only. At high SoC the BESS charge limit tapers, so in load-rejection events high damping saturated the charge side, and the agent learned to drop D to about 8. That was the dominant failure mode in the pilot. The formulas below use h for whichever headroom applies:
@@ -117,14 +128,16 @@ The agent therefore cannot promise synthetic inertia or damping that the BESS an
 
 ```
 r = −[ w_f ⟨(|Δf| − 0.2)₊²⟩/0.5² + w_in ⟨Δf²⟩/0.5² + w_r ⟨(|RoCoF| − 1)₊²⟩/1²
-       + w_b ⟨ΔP_bess²⟩/P_b,max² + w_s ⟨sat⟩/0.05
+       + w_fast ⟨(P_vsg − P_set)²⟩/P_b,max² + w_b ⟨ΔP_bess²⟩/P_b,max² + w_s ⟨sat⟩/0.05
        + w_v · frac(|Δf| > 1 Hz or |RoCoF| > 1 Hz/s) + w_a ‖a_t − a_{t−1}‖² ]
-w = (w_f 1.0, w_in 0.02, w_r 0.5, w_b 1.0, w_s 2.0, w_v 1.0, w_a 0.3)
+w = (w_f 1.0, w_in 0.02, w_r 0.5, w_fast 2.0, w_b 0.1, w_s 2.0, w_v 1.0, w_a 0.3)
 ```
+
+**Fast-power cost.** w_fast charges the VSG's power above its secondary-control set-point, which is the inertial, damping and synchronising response that H and D actually control. The small w_b term charges total BESS power (including secondary dispatch, which the agent cannot influence), so PV headroom stays the cheaper source. With w_b alone at 1.0, the uncontrollable secondary-dispatch power made up about 94 % of the reward and buried the learning signal.
 
 **Grid-code band.** Frequency is penalised only outside ±0.2 Hz (the ENTSO-E Continental Europe maximum steady-state deviation) and RoCoF only above 1 Hz/s; a small in-band term keeps a pull towards nominal. Inside the band, BESS power is the only significant cost, so the agent should support frequency *just enough*. Lower damping lets the diesel droop and AGC take more of the deficit and saves BESS power, but too little damping breaks the band.
 
-**Why this formulation.** With a plain quadratic frequency penalty on single 10 s events, tuning showed that *maximum damping* was optimal for fixed and adaptive VSGs alike, even with a 10× BESS cost. The problem had a trivial optimum, and a fixed max-damping VSG matched RL. With the band, multi-event episodes and BESS secondary control, the best fixed damping is *interior* (D ≈ 20), so there is a real trade-off. The BESS weight w_b = 1.0 was calibrated so that this is the case (`docs/EXPERIMENTS.md`).
+**Why this formulation.** With a plain quadratic frequency penalty on single 10 s events, tuning showed that *maximum damping* was optimal for fixed and adaptive VSGs alike, even with a 10× BESS cost. The problem had a trivial optimum, and a fixed max-damping VSG matched RL. With the band, multi-event episodes, BESS secondary control and the fast-power cost, the best fixed VSG is *interior* (H 3 s, D 15), so there is a real trade-off. The weights were calibrated so that this is the case. The headroom for *adaptive* scheduling is nevertheless small (`docs/EXPERIMENTS.md`, formulation study).
 
 The action-rate term (w_a = 0.3) matters. With a small weight (0.02), both TD3 and DDPG learned bang-bang switching of H between its bounds, and the switching transients caused RoCoF spikes above 1 Hz/s. Parameter changes in a real VSG are not free, so smooth schedules are a requirement, not a cosmetic choice.
 

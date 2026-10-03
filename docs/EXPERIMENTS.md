@@ -132,3 +132,31 @@ What the pilot showed:
 | Diesel only | 3.04 (91 % collapse) | 7.16 | 0.84 | 0 | −491.9 |
 
 **Key finding: the single-event problem has a trivial optimum.** Tuning shows that *maximum damping* is optimal for both fixed and adaptive VSGs, even with a 10× BESS-usage cost (`w_bess` 0.5). After a 0.2–0.4 MW step the diesel has only 0.1–0.2 MW spare, so the BESS must deliver the energy anyway; damping only sets how much frequency error is tolerated meanwhile. Within one 10 s event, nothing makes a lower damping worthwhile, so a fixed max-damping VSG is a near-optimal benchmark that RL cannot clearly beat. To show the value of learned, headroom-aware scheduling, the formulation needs a real trade-off (see the options in PAPER_OUTLINE / the session notes).
+
+---
+
+## Formulation study on the 2024 site data: how much can adaptive H/D scheduling gain?
+
+This is the central methodological result so far. Across every formulation tried, **a single well-tuned fixed VSG is within 1–3 % of an oracle that picks the best fixed (H, D) for each scenario in advance**, so adaptive scheduling (RL or rule-based) has very little room to add value in this plant.
+
+| # | Formulation | Best fixed VSG (val) | Per-scenario oracle gain | Best adaptive rule | TD3 result |
+|---|---|---|---|---|---|
+| 1 | Single 10 s event, quadratic Δf penalty, w_bess 0.05 | D = 50 (= d_max), H 5 | – | adaptive-RoCoF k_d → ∞ (= max damping) | 4 seeds × 1000 ep: −27.2 vs −17.4 for tuned fixed (test) |
+| 1b | as 1 with w_bess 0.5 (10×) | D = 50 still | – | same | – |
+| 2 | 30 s, 2–3 events, ±0.2 Hz band, w_bess 1.0, diesel AGC only | D 30 interior | +2.5 (3 %) | band-switching rules worse (−91…−435 vs −82) | – |
+| 3 | as 2 + BESS secondary control (K_i 2.0) | H 5, D 25 | – | adaptive k_d = 0 | 4 seeds: drifts below its starting point (−65…−77 vs −56.8), stopped at ep 350 |
+| 4 | as 3 + band-power projection + 0.25 s rate limit | unchanged (projection costs 0.06) | – | – | 4 seeds: −63…−66 vs −56.8, stopped at ep 150 |
+| 5 | as 4 + fast-power cost (w_fast 2, w_bess 0.1) | H 3, D 15 | +1.3 (1 %) | adaptive k_h = k_d = 0 | pilot 2 seeds × 150 ep: −106…−124 vs −88 |
+
+Why:
+
+* **Strong grid-forming coupling.** At t = 0⁺ the VSG takes K_s/(K_s+K_d) ≈ 71 % of any step through its synchronising coefficient, whatever H and D are. RoCoF stays well inside 1 Hz/s for every reasonable H, so inertia scheduling has little to improve.
+* **Secondary control** (diesel + BESS) restores frequency within about 10–20 s. After that, H and D only shape a short transient.
+* **Operating points differ mainly in headroom and diesel spare.** Under the projection these change the *feasible* parameter range, but hardly the *optimal* one.
+* **Low signal-to-noise.** The 1–3 % available gain is smaller than the variation in return between scenarios, so TD3's critic cannot resolve it, and the residual policy drifts away from its (already near-optimal) starting point.
+
+Implications for the paper (decision for the author):
+
+1. **Report it as the finding.** Under realistic grid-forming VSG + secondary control, a well-tuned fixed VSG is near-optimal, and the value of RL lies elsewhere. The feasibility projection is nearly free and removes saturation, which supports "feasible synthetic inertia". This is a credible, reviewer-proof negative result with the full evidence above.
+2. **Pareto framing.** Sweep the reward weights and plot band violation against BESS fast-power energy for the fixed-VSG family vs RL. RL is a contribution only where its points lie beyond the fixed-VSG front.
+3. **Change the plant to where adaptation matters.** Candidates: weak grid-forming coupling (lower K_s, or a grid-following BESS with virtual inertia), no or slow secondary control (islanded diesel without AGC), larger events relative to headroom (BESS sized smaller than the event), or communication delays. Check with the oracle test (`per-scenario best fixed` vs `best single fixed`) **before** training: if the oracle gain is under about 5 %, RL will not show a clear win.

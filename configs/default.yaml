@@ -160,7 +160,9 @@ env:
     w_freq_inband: 0.02
     w_freq: 1.0
     w_rocof: 0.5
-    w_bess: 1.0                     # BESS power (degradation proxy); calibrated so the best fixed D is interior (≈30)
+    w_bess: 0.1                     # total BESS power incl. secondary dispatch (throughput proxy; makes PV headroom cheaper)
+    w_fast: 2.0                     # VSG fast power above its secondary set-point = what H and D control;
+                                    # calibrated so the best fixed VSG is interior (H 3 s, D 15)
     w_sat: 2.0                      # headroom saturation (requested > available)
     w_violation: 1.0                # per-step indicator of grid-code violation
     w_action_rate: 0.3               # discourages bang-bang switching of H, D (parameter-switching transients)
@@ -194,12 +196,12 @@ eval:
   scenario_seed: 20260
   controllers: [none, droop, fixed, fixed_tuned, fixed_feasible, bang_bang, adaptive_rocof, ddpg, td3]
   # Baseline gains tuned on the VALIDATION weeks of the 2024 site data with
-  # scripts/tune_baselines.py under the final formulation (multi-event, band reward,
-  # BESS secondary control). Re-run it whenever the reward or the system changes.
-  # The tuned fixed VSG has an interior damping (D = 25): the band reward creates a real
-  # nadir-vs-BESS trade-off. (Under the earlier plain quadratic reward it was D = d_max.)
+  # scripts/tune_baselines.py under the current formulation (multi-event, band reward,
+  # BESS secondary control, fast-power cost). Re-run whenever the reward or system changes.
+  # Note: the best adaptive-RoCoF gains are k_h = k_d = 0, i.e. adapting H/D to the
+  # measured frequency does not pay; the best rule is a fixed VSG (see docs/EXPERIMENTS.md).
   baseline_params:
-    fixed_tuned: {h: 5.0, d: 25.0, alpha: 1.0}
+    fixed_tuned: {h: 3.0, d: 15.0, alpha: 0.7}
     bang_bang: {h_big: 4.0, h_small: 3.0}
-    adaptive_rocof: {k_h: 2.0, k_d: 0.0}
+    adaptive_rocof: {k_h: 0.0, k_d: 0.0}
   out_dir: results
