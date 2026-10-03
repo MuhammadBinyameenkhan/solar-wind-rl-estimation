@@ -17,6 +17,17 @@ if ~p.env_headroom_constraint
     bounds = [p.system_vsg_h_max_s, p.system_vsg_d_max_pu];
     return
 end
+% band_power projection (default): damping power at the band edge and inertial power
+% at the RoCoF limit must both fit within the headroom
+if p.env_reward_f_band_hz > 0
+    f_band = p.env_reward_f_band_hz / p.system_f_nominal_hz;
+    rocof_lim = p.system_grid_code_rocof_limit_hz_s / p.system_f_nominal_hz;
+    d_ub = min(p.system_vsg_d_max_pu, max(p.system_vsg_d_min_pu, h_up_pu / f_band));
+    h_ub = min(p.system_vsg_h_max_s, max(p.system_vsg_h_min_s, h_up_pu / (2 * rocof_lim)));
+    bounds = [h_ub, d_ub];
+    return
+end
+% steady_share projection (earlier single-event formulation)
 s = min(h_up_pu / dP, 0.95);
 d_ub = min(p.system_vsg_d_max_pu, max(p.system_vsg_d_min_pu, beta * s / (1 - s)));
 rho = min(1, h_up_pu / (share0 * dP));

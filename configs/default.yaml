@@ -145,6 +145,8 @@ env:
   agent_dt_s: 0.05                  # RL decision interval (20 Hz)
   sim_dt_s: 0.002                   # plant integration step
   headroom_constraint: true         # feasibility projection of (H, D) onto available headroom
+  projection: band_power            # band_power: D·Δf_band ≤ h and 2H·RoCoF_lim ≤ h | steady_share (old)
+  param_filter_s: 0.25              # rate limit on applied H, D, alpha (all controllers): first-order, τ = 0.25 s
   action_dims: 3                    # (H_v, D_v, alpha); 2 → alpha fixed at nominal
   action_mode: residual             # residual (a = 0 → base VSG, policy learns corrections) | absolute
   residual_base: tuned              # tuned (eval.baseline_params.fixed_tuned) | nominal (vsg.nominal_*)

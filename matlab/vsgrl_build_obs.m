@@ -1,4 +1,4 @@
-function obs = vsgrl_build_obs(m, prev_a, p)
+function obs = vsgrl_build_obs(m, applied, p)
 %VSGRL_BUILD_OBS  Normalised observation vector, identical to VSGEnv._obs().
 %   m : struct of measurements (all in pu of S_base / f0 unless stated)
 %       df, rocof        bus-frequency deviation and RoCoF (pu, pu/s), PLL-filtered
@@ -7,7 +7,7 @@ function obs = vsgrl_build_obs(m, prev_a, p)
 %       h_up, h_dn, h_pv upward headroom, downward headroom (BESS charge + PV curtailment), PV part
 %       soc              BESS state of charge (0..1)
 %       p_wind, pv_mpp, p_diesel, load0
-%   prev_a : previous raw action (3x1)
+%   applied: [H; D; alpha] currently applied (after the 0.25 s rate limit)
 f0 = p.system_f_nominal_hz;  Sb = p.system_s_base_mva;
 Pd = p.system_diesel_rated_mw / Sb;
 obs = [ m.df * f0 / p.system_grid_code_f_target_hz;
@@ -23,6 +23,8 @@ obs = [ m.df * f0 / p.system_grid_code_f_target_hz;
         m.p_diesel / Pd;
         (Pd - m.p_diesel) / Pd;
         m.load0 * Sb / 1.2;
-        prev_a(:) ];
+        2 * applied(1) / p.system_vsg_h_max_s - 1;
+        2 * applied(2) / p.system_vsg_d_max_pu - 1;
+        2 * applied(3) - 1 ];
 obs = min(max(obs, -10), 10);
 end

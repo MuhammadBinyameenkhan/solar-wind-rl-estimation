@@ -4,7 +4,7 @@ none            no fast frequency support (diesel only) — reference, usually c
 droop           grid-following BESS/PV droop, P = −D Δf (fast frequency response, no inertia)
 fixed           VSG with constant (H, D, alpha) — the standard VSG
 fixed_tuned     constant VSG parameters grid-searched on the validation split
-fixed_feasible  constant VSG parameters passed through the same headroom projection as RL
+fixed_feasible  the tuned fixed VSG passed through the same headroom projection as RL
 bang_bang       adaptive-inertia VSG (Alipoor, Miura & Ise, IEEE JESTPE 2015):
                 H = H_big while the frequency is moving away from nominal, H_small otherwise
 adaptive_rocof  self-adaptive VSG: H and D grow with |RoCoF| and |Δf| (common in the
@@ -77,7 +77,13 @@ class FixedTunedVSG(BaseController):
 
 
 class FixedFeasibleVSG(BaseController):
+    """The tuned fixed VSG passed through the same headroom projection as the RL agent."""
     name = "fixed_feasible"
+
+    def __init__(self, cfg, env, **_):
+        super().__init__(cfg, env)
+        t = (cfg.get("eval", {}).get("baseline_params") or {}).get("fixed_tuned") or {}
+        self.H0, self.D0, self.a0 = t.get("h", self.H0), t.get("d", self.D0), t.get("alpha", self.a0)
 
     def params(self, obs):
         h_ub, d_ub = self.env.param_bounds()

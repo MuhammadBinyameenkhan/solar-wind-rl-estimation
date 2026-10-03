@@ -16,7 +16,7 @@ from ..scenarios import ScenarioSampler
 
 OBS_NAMES = ["df", "rocof", "p_vsg", "dfv_minus_df", "headroom_up", "headroom_down", "headroom_pv", "soc",
              "p_wind", "p_pv_mpp", "p_diesel", "diesel_spare", "load",
-             "prev_a_H", "prev_a_D", "prev_a_alpha"]
+             "H_applied", "D_applied", "alpha_applied"]
 
 
 class VSGEnv(gym.Env):
@@ -39,6 +39,9 @@ class VSGEnv(gym.Env):
         self.vsg = s["vsg"]
         self.rw = e["reward"]
         self.headroom_constraint = e["headroom_constraint"]
+        self.projection = e.get("projection", "steady_share")
+        # First-order rate limit on the applied VSG parameters (0 → none)
+        self.param_tau = e.get("param_filter_s", 0.0)
         self.act_dims = e.get("action_dims", 3)
         self.action_mode = e.get("action_mode", "absolute")
         # Centre of the residual mapping: the nominal VSG, or the validation-tuned fixed VSG.
@@ -65,23 +68,31 @@ class VSGEnv(gym.Env):
     def param_bounds(self):
         """Upper bounds of (H_v, D_v) after the headroom feasibility projection.
 
-        The relevant headroom is direction-aware: upward (BESS discharge + PV headroom)
-        while the frequency is at or below nominal, downward (BESS charge + PV curtailment)
-        during an over-frequency event.
-        * D: the VSG's quasi-steady share of the design step, D/(D + β), must fit the
-          headroom h (β = diesel droop gain + load damping).
-        * H: inertia commitment is scaled by h relative to the VSG's instantaneous
-          share of the design step, K_s/(K_s+K_d)·ΔP_design.
+        The headroom h is direction-aware: upward (BESS discharge + PV headroom) while the
+        frequency is at or below nominal, downward (BESS charge + PV curtailment) during an
+        over-frequency event.
+
+        projection = "band_power" (default):
+          * D·Δf_band ≤ h: the damping power at the edge of the allowed band must be deliverable.
+          * 2H·RoCoF_lim ≤ h: the inertial power at the RoCoF limit must be deliverable.
+        projection = "steady_share" (earlier single-event formulation):
+          * D/(D + β)·ΔP_design ≤ h and H scaled by h / (K_s/(K_s+K_d)·ΔP_design).
         Without the constraint the bounds are the static ranges."""
         v = self.vsg
         if not self.headroom_constraint:
             return v["h_max_s"], v["d_max_pu"]
         mg = self.mg
-        h_up = mg.headroom_up() if mg.f_meas <= 0.0 else mg.headroom_down()
-        s = min(h_up / self.dP_design, 0.95)
+        h = mg.headroom_up() if mg.f_meas <= 0.0 else mg.headroom_down()
+        if self.projection == "band_power":
+            f_band = (self.rw.get("f_band_hz") or self.gc["f_target_hz"]) / self.f0
+            rocof_lim = self.gc["rocof_limit_hz_s"] / self.f0
+            d_ub = min(v["d_max_pu"], max(v["d_min_pu"], h / f_band))
+            h_ub = min(v["h_max_s"], max(v["h_min_s"], h / (2.0 * rocof_lim)))
+            return h_ub, d_ub
+        s = min(h / self.dP_design, 0.95)
         beta = mg.inv_R + mg.DL * mg.load0
         d_ub = min(v["d_max_pu"], max(v["d_min_pu"], beta * s / (1.0 - s)))
-        rho = min(1.0, h_up / (self.share0 * self.dP_design))
+        rho = min(1.0, h / (self.share0 * self.dP_design))
         h_ub = v["h_min_s"] + rho * (v["h_max_s"] - v["h_min_s"])
         return h_ub, d_ub
 
@@ -126,7 +137,8 @@ class VSGEnv(gym.Env):
     def _obs(self):
         mg = self.mg
         Sb = mg.Sb
-        pa = self._prev_a if self.act_dims >= 3 else np.r_[self._prev_a, 0.0]
+        v = self.vsg
+        Hp, Dp, Ap = self._applied if self._applied is not None else (v["nominal_h_s"], v["nominal_d_pu"], v["nominal_alpha"])
         o = np.array([
             mg.f_meas * self.f0 / self.gc["f_target_hz"],
             mg.rocof_meas * self.f0 / self.gc["rocof_limit_hz_s"],
@@ -141,7 +153,9 @@ class VSGEnv(gym.Env):
             mg.p_d / mg.Pd_rat,
             (mg.Pd_rat - mg.p_d) / mg.Pd_rat,
             mg.load0 * Sb / 1.2,
-            *pa[:3],
+            2.0 * Hp / v["h_max_s"] - 1.0,
+            2.0 * Dp / v["d_max_pu"] - 1.0,
+            2.0 * Ap - 1.0,
         ], dtype=np.float32)
         return np.clip(o, -10.0, 10.0)
 
@@ -155,6 +169,7 @@ class VSGEnv(gym.Env):
         self.mode = options.get("mode", "vsg")
         self._k = 0
         self._prev_a = np.zeros(self.act_dims, dtype=np.float32)
+        self._applied = None
         self._trace = {"every": self.trace_every, "rows": []} if self.record_trace else None
         self._ep = {"max_df_hz": 0.0, "max_rocof_hz_s": 0.0, "sat_s": 0.0, "return": 0.0, "collapsed": False}
         return self._obs(), {"scenario": self.scenario.to_dict()}
@@ -168,6 +183,11 @@ class VSGEnv(gym.Env):
         mode = mode or self.mode
         if action is None:
             action = self.params_to_action(H, D, alpha)
+        if self.param_tau > 0.0 and self._applied is not None:
+            k = min(self.cfg["env"]["agent_dt_s"] / self.param_tau, 1.0)
+            H0, D0, A0 = self._applied
+            H, D, alpha = H0 + k * (H - H0), D0 + k * (D - D0), A0 + k * (alpha - A0)
+        self._applied = (H, D, alpha)
         st = self.mg.advance(H, D, alpha, self.n_sub, mode=mode, trace=self._trace)
         self._k += 1
 
