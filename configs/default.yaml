@@ -82,6 +82,7 @@ system:
     soc_taper: 0.05                 # power limit tapers linearly within this SoC band of the limits
     eta_charge: 0.95
     eta_discharge: 0.95
+    secondary_ki: 2.0               # BESS participation in secondary control (integral on Δf → VSG set-point)
 
   diesel:
     rated_mw: 0.5
@@ -94,7 +95,7 @@ system:
     min_load_frac: 0.30
     max_dispatch_frac: 0.85         # leave 15 % spinning reserve at dispatch
     ramp_pu_per_s: 1.0              # on its own base
-    secondary_ki: 0.30              # AGC integral gain [pu_sb / (pu_f · s)]
+    secondary_ki: 2.0               # AGC integral gain [pu_sb / (pu_f · s)]; restores f within ~10–20 s
 
   load:
     peak_mw: 0.8                    # sized so evening peak (no PV, weak wind) fits firm capacity:
@@ -121,7 +122,11 @@ system:
 
   disturbance:
     step_mw_range: [0.2, 0.4]
-    time_s_range: [0.5, 1.5]
+    n_events_range: [2, 3]          # load steps per episode (multi-event: headroom carries over)
+    time_s_range: [0.5, 1.5]        # first event
+    min_separation_s: 7.0           # between events
+    settle_tail_s: 5.0              # no event in the last 5 s
+    max_cumulative_mw: 0.4          # net load change stays within ±0.4 MW
     prob_load_increase: 0.75        # else a load rejection (over-frequency event)
     design_step_mw: 0.4             # design-basis event for the headroom feasibility projection
     # Adequacy screen: keep only operating points whose upward reserve
@@ -136,7 +141,7 @@ system:
     settling_band_hz: 0.10
 
 env:
-  episode_s: 10.0
+  episode_s: 30.0                   # 2–3 events; SoC, AGC state and BESS commitment carry over
   agent_dt_s: 0.05                  # RL decision interval (20 Hz)
   sim_dt_s: 0.002                   # plant integration step
   headroom_constraint: true         # feasibility projection of (H, D) onto available headroom
@@ -145,9 +150,15 @@ env:
   residual_base: tuned              # tuned (eval.baseline_params.fixed_tuned) | nominal (vsg.nominal_*)
   terminate_dev_hz: 3.0             # treat as collapse → terminate with penalty
   reward:
+    # Grid-code band: frequency penalised only outside ±0.2 Hz (ENTSO-E CE maximum steady-state
+    # deviation), RoCoF only above 1 Hz/s. Inside the band only BESS usage costs → the agent
+    # should support frequency just enough. Set both bands to 0 for the plain quadratic reward.
+    f_band_hz: 0.2
+    rocof_band_hz_s: 1.0
+    w_freq_inband: 0.02
     w_freq: 1.0
     w_rocof: 0.5
-    w_bess: 0.05                    # BESS power / throughput (degradation proxy)
+    w_bess: 1.0                     # BESS power (degradation proxy); calibrated so the best fixed D is interior (≈30)
     w_sat: 2.0                      # headroom saturation (requested > available)
     w_violation: 1.0                # per-step indicator of grid-code violation
     w_action_rate: 0.3               # discourages bang-bang switching of H, D (parameter-switching transients)
@@ -160,12 +171,12 @@ train:
   hidden: [256, 256]
   actor_lr: 3.0e-4
   critic_lr: 3.0e-4
-  gamma: 0.98
+  gamma: 0.99                       # ~5 s horizon at 50 ms steps (band effects last seconds)
   tau: 0.005
   batch_size: 256
   buffer_size: 1000000
-  warmup_steps: 5000
-  updates_per_step: 1
+  warmup_steps: 10000
+  updates_per_step: 0.5             # one update every 2 env steps (600 decisions per 30 s episode)
   expl_noise: 0.15
   expl_noise_final: 0.05            # linearly annealed over training
   policy_noise: 0.2                 # TD3 target smoothing
@@ -180,13 +191,13 @@ eval:
   n_scenarios: 200
   scenario_seed: 20260
   controllers: [none, droop, fixed, fixed_tuned, fixed_feasible, bang_bang, adaptive_rocof, ddpg, td3]
-  # Gains of the adaptive baselines, tuned on the VALIDATION weeks of the 2024 site data
-  # with scripts/tune_baselines.py (re-run it whenever the reward or system changes).
-  # k_d keeps improving up to the grid edge: with w_bess = 0.05, damping is almost free,
-  # so the strongest simple rule is "maximum damping as soon as the frequency moves".
-  # fixed_tuned lands on D = d_max: under this reward, maximum damping is optimal.
+  # Baseline gains tuned on the VALIDATION weeks of the 2024 site data with
+  # scripts/tune_baselines.py under the final formulation (multi-event, band reward,
+  # BESS secondary control). Re-run it whenever the reward or the system changes.
+  # The tuned fixed VSG has an interior damping (D = 25): the band reward creates a real
+  # nadir-vs-BESS trade-off. (Under the earlier plain quadratic reward it was D = d_max.)
   baseline_params:
-    fixed_tuned: {h: 5.0, d: 50.0, alpha: 0.7}
+    fixed_tuned: {h: 5.0, d: 25.0, alpha: 1.0}
     bang_bang: {h_big: 4.0, h_small: 3.0}
-    adaptive_rocof: {k_h: 2.0, k_d: 480.0}
+    adaptive_rocof: {k_h: 2.0, k_d: 0.0}
   out_dir: results

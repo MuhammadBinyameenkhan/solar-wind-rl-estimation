@@ -12,10 +12,11 @@ grid-following constant-power injections. All powers in per-unit of S_base
       P_v  = K_s (K_d δ + ΔP_net) / (K_d + K_s)        δ = θ_v − θ_d
       ΔP_e,d = ΔP_net − P_v
       Δω_b = (K_d Δω_d + K_s Δω_v) / (K_d + K_s)       bus frequency
+  BESS secondary: dP_set/dt = −K_i,b Δf_meas (clipped to headroom); VSG uses P_set − P_v
   Diesel SG:   2 H_d dΔω_d/dt = ΔP_m − ΔP_e,d − D_d (Δω_d − Δω_b)
                P_ref = P_d0 − Δω_b/R + x_agc,  dx_agc/dt = −K_i Δω_b
                T_g dP_gov/dt = P_ref − P_gov,  T_e dP_m/dt = P_gov − P_m (ramp-limited)
-  VSG:         2 H_v dΔω_v/dt = − P_v − D_v Δω_v
+  VSG:         2 H_v dΔω_v/dt = P_set − P_v − D_v Δω_v
                dδ/dt = ω_0 (Δω_v − Δω_d)
   Headroom:    P_v ∈ [−(P_ch,max(SoC) + P_b0) + P_pv,s ,  P_dis,max(SoC) − P_b0 + P_pv,s]
                (current-limited: VSG becomes a current source, angle anti-windup)
@@ -48,9 +49,21 @@ class Scenario:
     dist_time_s: float
     noise_seed: int
     split: str = "train"
+    events: str = ""        # multi-event episodes: "t1:mw1;t2:mw2;..." (empty → single dist event)
 
     def to_dict(self):
         return asdict(self)
+
+    def event_list(self) -> list[tuple[float, float]]:
+        """[(time_s, load_step_mw), ...] sorted by time."""
+        if isinstance(self.events, str) and self.events.strip():
+            ev = [tuple(float(x) for x in e.split(":")) for e in self.events.split(";") if e]
+            return sorted(ev)
+        return [(float(self.dist_time_s), float(self.dist_mw))]
+
+
+def format_events(ev: list[tuple[float, float]]) -> str:
+    return ";".join(f"{t:.3f}:{mw:+.4f}" for t, mw in ev)
 
 
 class Microgrid:
@@ -71,6 +84,7 @@ class Microgrid:
         self.Pd_disp_max = d["max_dispatch_frac"] * self.Pd_rat
         self.ramp = d["ramp_pu_per_s"] * self.Pd_rat
         self.Ki = d["secondary_ki"]
+        self.Ki_b = s["bess"].get("secondary_ki", 0.0)    # BESS participation in secondary control
         self.H_d = d["inertia_h_s"] * d["rated_mw"] / self.Sb
         self.D_d = d["damping_pu"] * self.Pd_rat
         self.Kd = d["sync_coeff_pu"]
@@ -150,8 +164,9 @@ class Microgrid:
         self.load0 = load
         self.pb0 = pb0
         self.pd0 = pd0
-        self.dist = sc.dist_mw / Sb
-        self.dist_t = sc.dist_time_s
+        self.events = [(t, mw / Sb) for t, mw in sc.event_list()]
+        self._ev_i = 0
+        self.load_step = 0.0
 
         # --- states --------------------------------------------------------
         self.dw_d = 0.0
@@ -164,6 +179,7 @@ class Microgrid:
         self.p_gov = pd0
         self.p_d = pd0
         self.x_agc = 0.0
+        self.p_set = 0.0                                  # VSG power set-point (BESS secondary control)
         self.soc = soc
         self.p_w0 = min(p_w_av, wind_cap)
         self.p_w = self.p_w0
@@ -215,7 +231,9 @@ class Microgrid:
         DLP = self.DL * self.load0
         gc = self.cfg["system"]["grid_code"]
         f_lim, r_lim = gc["f_dev_limit_hz"] / self.f0, gc["rocof_limit_hz_s"] / self.f0
-        sum_f2 = sum_r2 = sum_pb2 = sum_sat = 0.0
+        f_band = self.cfg["env"]["reward"].get("f_band_hz", 0.0) / self.f0
+        r_band = self.cfg["env"]["reward"].get("rocof_band_hz_s", 0.0) / self.f0
+        sum_f2 = sum_r2 = sum_pb2 = sum_sat = sum_ef2 = sum_er2 = 0.0
         n_viol = 0
         for _ in range(n_steps):
             k = self._k
@@ -224,8 +242,10 @@ class Microgrid:
             v = self.sc.ws_hub_ms * (1.0 + self.TI * self._turb[k])
             pw_t = min(self.curve.scalar(max(v, 0.0), self.sc.rho_kgm3) / Sb, self.wind_cap)
             load = self.load0 * (1.0 + self.load_noise * self._lnoise[k])
-            if t >= self.dist_t:
-                load += self.dist
+            while self._ev_i < len(self.events) and t >= self.events[self._ev_i][0]:
+                self.load_step += self.events[self._ev_i][1]
+                self._ev_i += 1
+            load += self.load_step
 
             # --- network solution and headroom-limited VSG power
             dP = (load - self.load0) - (self.p_w - self.p_w0) + DLP * self.f_meas
@@ -237,7 +257,7 @@ class Microgrid:
                 pv = min(max(pv_req, lo), hi)
                 sat = abs(pv_req - pv)
             elif droop_on:
-                pv_req = -D_v * self.f_meas
+                pv_req = self.p_set - D_v * self.f_meas
                 self.p_gfl += dt * (pv_req - self.p_gfl) / self.T_gfl
                 pv = min(max(self.p_gfl, lo), hi)
                 sat = abs(self.p_gfl - pv)
@@ -249,7 +269,7 @@ class Microgrid:
             acc_d = (self.p_d - self.pd0 - pd_e - self.D_d * (self.dw_d - self.dw_b)) / H2d
             self.dw_d += dt * acc_d
             if vsg_on:
-                self.dw_v += dt * (-pv - D_v * self.dw_v) / H2v
+                self.dw_v += dt * (self.p_set - pv - D_v * self.dw_v) / H2v
                 self.delta += dt * w0 * (self.dw_v - self.dw_d)
                 if sat > 0.0:                            # current limit: angle anti-windup
                     self.delta = (pv * Ksum / Ks - dP) / Kd
@@ -271,6 +291,9 @@ class Microgrid:
             # --- diesel governor (droop) + AGC
             p_ref = self.pd0 - self.inv_R * self.f_meas + self.x_agc
             self.x_agc -= dt * self.Ki * self.f_meas
+            if self.Ki_b > 0.0 and (vsg_on or droop_on):
+                # secondary control on the VSG set-point, kept inside the current headroom (anti-windup)
+                self.p_set = min(max(self.p_set - dt * self.Ki_b * self.f_meas, lo), hi)
             self.p_gov += dt * (p_ref - self.p_gov) / self.Tg
             self.p_gov = min(max(self.p_gov, 0.0), self.Pd_rat)
             dpd = min(max((self.p_gov - self.p_d) / self.Te, -self.ramp), self.ramp)
@@ -295,6 +318,12 @@ class Microgrid:
             fm, rm = self.f_meas, self.rocof_meas
             sum_f2 += fm * fm
             sum_r2 += rm * rm
+            ef = abs(fm) - f_band
+            if ef > 0.0:
+                sum_ef2 += ef * ef
+            er = abs(rm) - r_band
+            if er > 0.0:
+                sum_er2 += er * er
             dpb = p_b - self.pb0
             sum_pb2 += dpb * dpb
             sum_sat += sat
@@ -311,6 +340,8 @@ class Microgrid:
         return {
             "msf_hz2": sum_f2 / n * self.f0 ** 2,
             "msr_hz2s2": sum_r2 / n * self.f0 ** 2,
+            "msf_excess_hz2": sum_ef2 / n * self.f0 ** 2,       # beyond the reward band
+            "msr_excess_hz2s2": sum_er2 / n * self.f0 ** 2,
             "ms_pbess": sum_pb2 / n,
             "mean_sat": sum_sat / n,
             "viol_frac": n_viol / n,

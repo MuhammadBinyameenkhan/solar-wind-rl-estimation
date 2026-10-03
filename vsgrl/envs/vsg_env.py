@@ -1,6 +1,7 @@
 """Gymnasium environment: an RL agent schedules the VSG parameters
 (virtual inertia H_v, damping D_v, PV-headroom share alpha) every 50 ms
-during a disturbance episode drawn from real ERA5 / NASA POWER operating points.
+during a multi-event disturbance episode drawn from real ERA5 / NASA POWER
+operating points.
 """
 from __future__ import annotations
 
@@ -172,8 +173,11 @@ class VSGEnv(gym.Env):
 
         rw, gc = self.rw, self.gc
         da = np.asarray(action, dtype=np.float32) - self._prev_a
-        cost = (rw["w_freq"] * st["msf_hz2"] / gc["f_target_hz"] ** 2
-                + rw["w_rocof"] * st["msr_hz2s2"] / gc["rocof_limit_hz_s"] ** 2
+        # Frequency/RoCoF are penalised only beyond the grid-code band (band = 0 → plain
+        # quadratic); a small in-band term keeps a gentle pull towards nominal.
+        cost = (rw["w_freq"] * st["msf_excess_hz2"] / gc["f_target_hz"] ** 2
+                + rw.get("w_freq_inband", 0.0) * st["msf_hz2"] / gc["f_target_hz"] ** 2
+                + rw["w_rocof"] * st["msr_excess_hz2s2"] / gc["rocof_limit_hz_s"] ** 2
                 + rw["w_bess"] * st["ms_pbess"] / self.mg.Pb_max ** 2
                 + rw["w_sat"] * st["mean_sat"] / 0.05
                 + rw["w_violation"] * st["viol_frac"]

@@ -50,7 +50,7 @@ def train_one(cfg: dict, algo: str, seed: int, out_dir: Path, df: pd.DataFrame |
 
     rng = np.random.default_rng(seed)
     obs, _ = env.reset(seed=seed)
-    total_steps, best = 0, -np.inf
+    total_steps, best, upd_credit = 0, -np.inf, 0.0
     rows, vrows = [], []
     t0 = time.time()
     n_ep = t["episodes"]
@@ -70,8 +70,10 @@ def train_one(cfg: dict, algo: str, seed: int, out_dir: Path, df: pd.DataFrame |
             total_steps += 1
             Hs.append(info["H"]); Ds.append(info["D"]); As.append(info["alpha"])
             if total_steps >= t["warmup_steps"]:
-                for _ in range(t["updates_per_step"]):
+                upd_credit += t["updates_per_step"]          # may be fractional (0.5 = every 2nd step)
+                while upd_credit >= 1.0:
                     closs.append(agent.update()["critic_loss"])
+                    upd_credit -= 1.0
         e = info["episode"]
         sc = env.scenario
         rows.append({"episode": ep, "steps": total_steps, "return": e["return"], "max_df_hz": e["max_df_hz"],

@@ -46,16 +46,19 @@ At t = 0⁺ of a step, the VSG instantly takes K_s/(K_s+K_d) ≈ 71 % of it, whi
 
 ```
 2H_d dΔω_d/dt = ΔP_m − ΔP_e,d − D_d(Δω_d − Δω_b)
-P_ref = P_d0 − Δf_meas/R + x_agc,      dx_agc/dt = −K_i Δf_meas
+P_ref = P_d0 − Δf_meas/R + x_agc,      dx_agc/dt = −K_i Δf_meas            (K_i = 2.0)
 T_g dP_gov/dt = P_ref − P_gov,         T_e dP_m/dt = P_gov − P_m   (ramp- and rating-limited)
 ```
 
-**VSG (virtual rotor):**
+**VSG (virtual rotor) with BESS secondary control:**
 
 ```
-2H_v dΔω_v/dt = −P_v − D_v Δω_v
+2H_v dΔω_v/dt = P_set − P_v − D_v Δω_v
 dδ/dt = ω_0 (Δω_v − Δω_d)
+dP_set/dt = −K_i,b Δf_meas,   P_set clipped to the current headroom     (K_i,b = 2.0)
 ```
+
+The BESS takes part in secondary control. Without this, the diesel saturates after a large step and the frequency stays 0.2–0.4 Hz off-nominal for tens of seconds, which no choice of H or D can fix. With the integral gains at 2.0, frequency is restored within about 10–20 s. H and D then shape the *transient*, which is what synthetic inertia is for.
 
 **Headroom limits (the feasibility constraint in the physics):**
 
@@ -85,7 +88,7 @@ PV headroom is "free" energy that is already reserved, but it is slower (T_pv) a
 
 ## 3. MDP formulation (`vsgrl/envs/vsg_env.py`)
 
-* **Episode:** 10 s, disturbance at t ∈ U[0.5, 1.5] s, step magnitude U[0.2, 0.4] MW. The step is a load increase with probability 0.75 and a load rejection otherwise.
+* **Episode:** 30 s with **2–3 load events**. The first comes at t ∈ U[0.5, 1.5] s; the rest are at least 7 s apart, and none falls in the last 5 s. Each step is U[0.2, 0.4] MW; it is a load increase with probability 0.75, and the sign flips if needed to keep the net change within ±0.4 MW. SoC, AGC state, the BESS set-point and the committed headroom all carry over from one event to the next. The adequacy screen uses the largest cumulative load increase.
 * **Decision interval:** 50 ms (200 decisions per episode), with 25 plant sub-steps per decision.
 * **Observation (16 values, normalised):** Δf, RoCoF, P_vsg, Δω_v − Δω_d, upward headroom h_up, downward headroom h_dn, PV headroom h_pv, SoC, P_wind, P_pv,mpp, P_diesel, diesel spare, pre-event load, previous action (3).
 * **Action:** a ∈ [−1, 1]³ → (H_v, D_v, α). There are two mappings (`env.action_mode`):
@@ -113,10 +116,15 @@ The agent therefore cannot promise synthetic inertia or damping that the BESS an
 ### 3.2 Reward (per decision, averaged over the 25 sub-steps)
 
 ```
-r = −[ w_f ⟨Δf²⟩/0.5² + w_r ⟨RoCoF²⟩/1² + w_b ⟨ΔP_bess²⟩/P_b,max² + w_s ⟨sat⟩/0.05
+r = −[ w_f ⟨(|Δf| − 0.2)₊²⟩/0.5² + w_in ⟨Δf²⟩/0.5² + w_r ⟨(|RoCoF| − 1)₊²⟩/1²
+       + w_b ⟨ΔP_bess²⟩/P_b,max² + w_s ⟨sat⟩/0.05
        + w_v · frac(|Δf| > 1 Hz or |RoCoF| > 1 Hz/s) + w_a ‖a_t − a_{t−1}‖² ]
-w = (1.0, 0.5, 0.05, 2.0, 1.0, 0.3)
+w = (w_f 1.0, w_in 0.02, w_r 0.5, w_b 1.0, w_s 2.0, w_v 1.0, w_a 0.3)
 ```
+
+**Grid-code band.** Frequency is penalised only outside ±0.2 Hz (the ENTSO-E Continental Europe maximum steady-state deviation) and RoCoF only above 1 Hz/s; a small in-band term keeps a pull towards nominal. Inside the band, BESS power is the only significant cost, so the agent should support frequency *just enough*. Lower damping lets the diesel droop and AGC take more of the deficit and saves BESS power, but too little damping breaks the band.
+
+**Why this formulation.** With a plain quadratic frequency penalty on single 10 s events, tuning showed that *maximum damping* was optimal for fixed and adaptive VSGs alike, even with a 10× BESS cost. The problem had a trivial optimum, and a fixed max-damping VSG matched RL. With the band, multi-event episodes and BESS secondary control, the best fixed damping is *interior* (D ≈ 20), so there is a real trade-off. The BESS weight w_b = 1.0 was calibrated so that this is the case (`docs/EXPERIMENTS.md`).
 
 The action-rate term (w_a = 0.3) matters. With a small weight (0.02), both TD3 and DDPG learned bang-bang switching of H between its bounds, and the switching transients caused RoCoF spikes above 1 Hz/s. Parameter changes in a real VSG are not free, so smooth schedules are a requirement, not a cosmetic choice.
 
