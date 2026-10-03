@@ -74,12 +74,14 @@ def learning_curves(cfg, out):
 
 
 def responses(cfg, out):
-    tdir = resolve_path(cfg["eval"]["out_dir"]) / "traces"
+    ev = resolve_path(cfg["eval"]["out_dir"])
+    tdir = ev / "traces"
     files = list(tdir.glob("*.csv"))
+    current = set(pd.read_csv(ev / "per_scenario.csv").controller) if (ev / "per_scenario.csv").exists() else None
     by_sc = {}
     for f in files:
         m = re.match(r"(.+)_s(\d+)_sc(\d+)\.csv", f.name)
-        if m:
+        if m and (current is None or m.group(1) in current):   # skip traces of runs no longer evaluated
             by_sc.setdefault(int(m.group(3)), {}).setdefault(m.group(1), []).append(f)
     show = ["none", "droop", "fixed", "bang_bang", "adaptive_rocof", "ddpg", "td3"]
     for k, ctrls in by_sc.items():
@@ -105,7 +107,7 @@ def responses(cfg, out):
             axs[0].set_ylim(-1.3 * dev, 1.3 * dev)
             axs[1].set_ylim(-3 * lim["rocof_limit_hz_s"], 3 * lim["rocof_limit_hz_s"])
         h, l = axs[0].get_legend_handles_labels()
-        fig.tight_layout(rect=(0, 0, 1, 0.93))
+        fig.tight_layout(rect=(0, 0, 1, 0.88))
         fig.legend(h, l, ncol=3, loc="upper center", bbox_to_anchor=(0.5, 1.0), fontsize=7)
         axs[0].set_title(f"Test scenario {k}", loc="left")
         save(fig, out, f"fig_response_sc{k}")

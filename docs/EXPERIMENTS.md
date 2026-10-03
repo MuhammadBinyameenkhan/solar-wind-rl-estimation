@@ -91,3 +91,26 @@ python scripts/evaluate.py --set env.reward.w_bess=0.5 eval.out_dir=results_wb05
 - [ ] Wall-clock training time per seed (`runs/<algo>/seed*/summary.json`)
 - [ ] Policy behaviour: `fig_headroom_policy` (H and D vs available headroom)
 - [ ] Simulink validation table (docs/SIMULINK_VALIDATION.md)
+
+---
+
+## Pilot results (SYNTHETIC sample data — pipeline check only, not reportable)
+
+Setup: `configs/smoke.yaml` data; TD3 with residual mapping and the direction-aware projection; 4 seeds × 600 episodes (≈21 min per seed, 4 in parallel); 60 held-out test scenarios; adaptive baselines tuned on the validation split.
+
+| Controller | Max \|Δf\| (Hz) | Max RoCoF (Hz/s) | QSS \|Δf\| (Hz) | Settling (s) | Saturation (s) | Return |
+|---|---|---|---|---|---|---|
+| Adaptive-RoCoF VSG (tuned) | 0.275 | 0.954 | 0.186 | 0.70 | 0.133 | −48.4 |
+| **TD3-VSG (4 seeds)** | **0.299** | **0.958** | **0.219** | **0.76** | **0.062** | **−68.7** |
+| Bang-bang VSG (tuned) | 0.402 | 1.009 | 0.310 | 1.40 | 0.056 | −90.6 |
+| Fixed VSG | 0.404 | 1.077 | 0.310 | 1.31 | 0.058 | −91.1 |
+| Fixed VSG + projection | 0.414 | 1.078 | 0.329 | 1.31 | 0.037 | −102.3 |
+| BESS droop (no inertia) | 0.591 | 4.801 | 0.307 | 1.78 | 0.319 | −177.8 |
+| Diesel only | 3.03 (90 % collapse) | 7.04 | 0.90 | – | 0 | −490.1 |
+
+What the pilot showed:
+
+1. **TD3 vs fixed, bang-bang and droop:** TD3 is significantly better on nadir, RoCoF, QSS deviation and settling time (Wilcoxon + Holm, p < 0.01).
+2. **TD3 vs the tuned adaptive VSG:** no significant difference on any frequency metric. TD3 wins in 60 % of scenarios (median return +1.9). Its *mean* is worse because of a few high-load scenarios: there all seeds choose low damping to avoid headroom saturation, which the reward penalises with `w_sat`. TD3 saturates the headroom **about half as often** (0.062 s vs 0.133 s). This is the feasibility trade-off the paper is about. How much it is worth depends on `w_sat` and `w_bess`, so run the reward-weight sensitivity study.
+3. **Design fixes found by the pilot (already in the code):** (a) residual action mapping gives consistent seeds; (b) action-rate weight 0.3 removes bang-bang inertia switching; (c) the direction-aware projection removed the over-frequency failure mode (validation return −43 → −32).
+4. **Training budget:** seeds agree closely (best validation −30 to −34). Going from 300 to 1000 episodes did not change test performance in an earlier variant, so 1000 episodes is enough.
