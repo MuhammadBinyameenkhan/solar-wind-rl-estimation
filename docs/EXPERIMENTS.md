@@ -5,6 +5,8 @@ All runs use the same test scenarios (`results/scenarios_test.csv`, fixed seed),
 ## E1 — Main comparison (RQ1: does RL-scheduled VSG beat fixed/adaptive VSG?)
 
 ```bash
+python scripts/tune_baselines.py                     # tune adaptive-baseline gains on the VALIDATION split
+#   → paste the printed block into configs/default.yaml under eval.baseline_params
 python scripts/train.py --algo td3  --workers 5      # 5 seeds × 1000 episodes
 python scripts/train.py --algo ddpg --workers 5
 python scripts/evaluate.py
@@ -60,9 +62,26 @@ python scripts/evaluate.py --set eval.out_dir=results_rob_h system.diesel.inerti
 # also: system.vsg.sync_coeff_pu=1.5 ; system.pv.response_time_s=0.15 ; system.disturbance.step_mw_range=[0.4,0.5]
 ```
 
+## E6b — Action-mapping ablation (residual vs absolute)
+
+```bash
+python scripts/train.py --algo td3 --tag td3_absolute --workers 5 --set env.action_mode=absolute
+python scripts/evaluate.py --controllers td3 td3_absolute
+```
+In the pilot (synthetic data, 300 episodes, 2 seeds), residual mapping gave consistent seeds (return −76 / −77 vs −102 / −75) and fewer RoCoF violations (27.5 % vs 38 %).
+
 ## E6 — Training budget / sample efficiency
 
 The learning curves from E1 already cover this: `val_log.csv` holds 20 validation evaluations per seed. Report the episode at which each algorithm first beats the best baseline's validation return.
+
+## Reward-weight sensitivity (recommended)
+
+The BESS-usage weight `env.reward.w_bess` sets how expensive damping is. With a small value, the best policy is close to "maximum damping during every event". A simple adaptive rule can approximate that, which makes the advantage of RL small. Report results for 2–3 values (e.g. 0.05, 0.5, 2.0), each with its own run and results folder:
+```bash
+python scripts/train.py --algo td3 --tag td3_wb05 --workers 5 --set env.reward.w_bess=0.5 eval.out_dir=results_wb05
+python scripts/tune_baselines.py --set env.reward.w_bess=0.5
+python scripts/evaluate.py --set env.reward.w_bess=0.5 eval.out_dir=results_wb05 --controllers fixed bang_bang adaptive_rocof td3_wb05
+```
 
 ## Reporting checklist
 

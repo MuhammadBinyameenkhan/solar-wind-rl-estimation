@@ -12,7 +12,7 @@ Code for the thesis and paper. A TD3 (and DDPG) agent schedules the **virtual in
 | BESS | 0.5 MW / 2 MWh, SoC-dependent power limits, grid-forming VSG |
 | Diesel | 0.5 MW synchronous generator (the only physical inertia, H = 2 s on its own base), droop + AGC |
 | Disturbances | 0.2–0.4 MW load steps (75 % increases, 25 % rejections) |
-| Training | 1000 episodes × 5 seeds, TD3 and DDPG |
+| Training | 1000 episodes × 5 seeds, TD3 and DDPG; residual action mapping (agent learns corrections to a nominal VSG) |
 | Baselines | diesel-only, BESS droop (no inertia), fixed VSG, fixed VSG + projection, bang-bang adaptive inertia, RoCoF-adaptive VSG |
 
 ---
@@ -42,6 +42,7 @@ See **[docs/DATA.md](docs/DATA.md)** for the accepted CSV layouts, how to downlo
 ## 3. Run the experiments
 
 ```bash
+python scripts/tune_baselines.py      # tune adaptive-baseline gains on the validation split → paste into config
 # main study (≈35 min per seed per algorithm on one CPU core; use --workers N)
 python scripts/train.py --algo td3  --workers 5
 python scripts/train.py --algo ddpg --workers 5
@@ -71,7 +72,7 @@ vsgrl/envs/vsg_env.py       Gymnasium env: observation, action → (H, D, α) wi
 vsgrl/agents/td3.py         TD3 / DDPG (PyTorch)
 vsgrl/controllers.py        baseline controllers
 vsgrl/metrics.py            nadir, RoCoF (100 ms window), settling, BESS energy, saturation, violations
-scripts/                    inspect / prepare / train / evaluate / analyze / plot / export_matlab
+scripts/                    inspect / prepare / tune_baselines / train / evaluate / analyze / plot / export_matlab
 matlab/                     policy forward pass, headroom projection, observation builder, Python↔Simscape comparison
 docs/                       METHODOLOGY, DATA, EXPERIMENTS, SIMULINK_VALIDATION, PAPER_OUTLINE
 tests/                      unit + integration tests

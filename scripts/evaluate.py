@@ -18,7 +18,7 @@ from _common import base_parser, setup
 
 from vsgrl.agents.td3 import TD3Agent
 from vsgrl.config import resolve_path
-from vsgrl.controllers import BASELINES, PolicyController
+from vsgrl.controllers import BASELINES, PolicyController, make_baseline
 from vsgrl.data.hybrid import load_processed
 from vsgrl.envs import VSGEnv
 from vsgrl.rollout import run_episode
@@ -44,7 +44,7 @@ def controllers_for(names, cfg, df, split):
     base_env = VSGEnv(cfg, df, split=split, record_trace=True)
     for n in names:
         if n in BASELINES:
-            yield n, 0, BASELINES[n](cfg, base_env), base_env
+            yield n, 0, make_baseline(n, cfg, base_env), base_env
             continue
         ckpts = sorted((runs / n).glob("seed*/best.pt"))
         if not ckpts:

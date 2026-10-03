@@ -19,7 +19,7 @@ class BaseController:
     name = "base"
     mode = "vsg"
 
-    def __init__(self, cfg, env):
+    def __init__(self, cfg, env, **_):
         self.cfg, self.env = cfg, env
         v = cfg["system"]["vsg"]
         self.H0, self.D0, self.a0 = v["nominal_h_s"], v["nominal_d_pu"], v["nominal_alpha"]
@@ -114,3 +114,10 @@ class PolicyController:
 
 
 BASELINES = {c.name: c for c in [NoSupport, Droop, FixedVSG, FixedFeasibleVSG, BangBangVSG, AdaptiveRocofVSG]}
+
+
+def make_baseline(name, cfg, env):
+    """Instantiate a baseline with gains from cfg['eval']['baseline_params'][name] if present
+    (written by scripts/tune_baselines.py)."""
+    kw = (cfg.get("eval", {}).get("baseline_params") or {}).get(name, {}) or {}
+    return BASELINES[name](cfg, env, **kw)

@@ -133,7 +133,7 @@ env:
   sim_dt_s: 0.002                   # plant integration step
   headroom_constraint: true         # feasibility projection of (H, D) onto available headroom
   action_dims: 3                    # (H_v, D_v, alpha); 2 → alpha fixed at nominal
-  action_mode: absolute             # absolute | residual (a = 0 → nominal VSG, policy learns corrections)
+  action_mode: residual             # residual (a = 0 → nominal VSG, policy learns corrections) | absolute
   terminate_dev_hz: 3.0             # treat as collapse → terminate with penalty
   reward:
     w_freq: 1.0
@@ -171,4 +171,9 @@ eval:
   n_scenarios: 200
   scenario_seed: 20260
   controllers: [none, droop, fixed, fixed_feasible, bang_bang, adaptive_rocof, ddpg, td3]
+  # Gains of the adaptive baselines. Defaults are literature-style values; run
+  # scripts/tune_baselines.py to tune them on the validation split and paste the result here.
+  baseline_params:
+    bang_bang: {h_big: 6.0, h_small: 1.5}
+    adaptive_rocof: {k_h: 4.0, k_d: 60.0}
   out_dir: results
