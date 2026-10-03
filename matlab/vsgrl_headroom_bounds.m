@@ -1,7 +1,9 @@
 function bounds = vsgrl_headroom_bounds(h_up_pu, load0_pu, p)
 %VSGRL_HEADROOM_BOUNDS  Feasibility projection of (H, D) onto available headroom.
 %   Mirrors VSGEnv.param_bounds() in vsgrl/envs/vsg_env.py exactly.
-%   h_up_pu  : upward headroom = BESS discharge limit(SoC) - P_bess0 + d*P_pv,mpp  [pu S_base]
+%   h_up_pu  : direction-aware headroom [pu S_base]:
+%              if df <= 0 (under-frequency / pre-event): BESS discharge limit(SoC) - P_bess0 + d*P_pv,mpp
+%              if df >  0 (over-frequency):              BESS charge limit(SoC) + P_bess0 + P_pv,base
 %   load0_pu : pre-event load [pu S_base]
 %   p        : struct from vsgrl_params.mat
 Sb   = p.system_s_base_mva;

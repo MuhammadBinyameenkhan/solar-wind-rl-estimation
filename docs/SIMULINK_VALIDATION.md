@@ -32,7 +32,8 @@ python scripts/export_matlab.py  # → matlab/export/{vsgrl_params.mat, vsgrl_po
 **RL block:** a MATLAB Function block running at a 50 ms sample time:
 ```matlab
 obs    = vsgrl_build_obs(m, prev_a, p);                 % measurements from the model
-bounds = vsgrl_headroom_bounds(h_up, load0, p);          % feasibility projection
+h = h_up; if df > 0, h = h_dn; end                     % direction-aware headroom
+bounds = vsgrl_headroom_bounds(h, load0, p);            % feasibility projection
 [H, D, alpha, a] = vsgrl_policy(obs, pol, bounds);      % actor forward pass
 ```
 Load the policy struct with `pol = load('export/vsgrl_policy_td3_seed0.mat')`. Pass it as a parameter, or use `coder.load` for code generation. Measurements: bus frequency from a PLL with a 20 ms low-pass filter, RoCoF as the derivative of the filtered value, SoC from the battery block, and headroom from SoC (taper) plus d·P_mpp.

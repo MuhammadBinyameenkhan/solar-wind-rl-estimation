@@ -13,7 +13,7 @@ from ..data.hybrid import load_processed, wind_curve_from_cfg
 from ..microgrid import Microgrid, Scenario
 from ..scenarios import ScenarioSampler
 
-OBS_NAMES = ["df", "rocof", "p_vsg", "dfv_minus_df", "headroom_up", "headroom_pv", "soc",
+OBS_NAMES = ["df", "rocof", "p_vsg", "dfv_minus_df", "headroom_up", "headroom_down", "headroom_pv", "soc",
              "p_wind", "p_pv_mpp", "p_diesel", "diesel_spare", "load",
              "prev_a_H", "prev_a_D", "prev_a_alpha"]
 
@@ -57,16 +57,19 @@ class VSGEnv(gym.Env):
     def param_bounds(self):
         """Upper bounds of (H_v, D_v) after the headroom feasibility projection.
 
+        The relevant headroom is direction-aware: upward (BESS discharge + PV headroom)
+        while the frequency is at or below nominal, downward (BESS charge + PV curtailment)
+        during an over-frequency event.
         * D: the VSG's quasi-steady share of the design step, D/(D + β), must fit the
-          available upward headroom h_up (β = diesel droop gain + load damping).
-        * H: inertia commitment is scaled by h_up relative to the VSG's instantaneous
+          headroom h (β = diesel droop gain + load damping).
+        * H: inertia commitment is scaled by h relative to the VSG's instantaneous
           share of the design step, K_s/(K_s+K_d)·ΔP_design.
         Without the constraint the bounds are the static ranges."""
         v = self.vsg
         if not self.headroom_constraint:
             return v["h_max_s"], v["d_max_pu"]
         mg = self.mg
-        h_up = mg.headroom_up()
+        h_up = mg.headroom_up() if mg.f_meas <= 0.0 else mg.headroom_down()
         s = min(h_up / self.dP_design, 0.95)
         beta = mg.inv_R + mg.DL * mg.load0
         d_ub = min(v["d_max_pu"], max(v["d_min_pu"], beta * s / (1.0 - s)))
@@ -122,6 +125,7 @@ class VSGEnv(gym.Env):
             mg.p_vsg / 0.25,
             (mg.dw_v - mg.dw_d) * self.f0 / 0.1,
             mg.headroom_up() / 0.3,
+            mg.headroom_down() / 0.3,
             mg.h_pv / 0.1,
             (mg.soc - 0.5) / 0.4,
             mg.p_w * Sb / 1.0,

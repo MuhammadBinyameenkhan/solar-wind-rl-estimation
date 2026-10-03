@@ -87,20 +87,22 @@ PV headroom is "free" energy that is already reserved, but it is slower (T_pv) a
 
 * **Episode:** 10 s, disturbance at t ∈ U[0.5, 1.5] s, step magnitude U[0.2, 0.4] MW. The step is a load increase with probability 0.75 and a load rejection otherwise.
 * **Decision interval:** 50 ms (200 decisions per episode), with 25 plant sub-steps per decision.
-* **Observation (15 values, normalised):** Δf, RoCoF, P_vsg, Δω_v − Δω_d, upward headroom h_up, PV headroom h_pv, SoC, P_wind, P_pv,mpp, P_diesel, diesel spare, pre-event load, previous action (3).
+* **Observation (16 values, normalised):** Δf, RoCoF, P_vsg, Δω_v − Δω_d, upward headroom h_up, downward headroom h_dn, PV headroom h_pv, SoC, P_wind, P_pv,mpp, P_diesel, diesel spare, pre-event load, previous action (3).
 * **Action:** a ∈ [−1, 1]³ → (H_v, D_v, α). There are two mappings (`env.action_mode`):
   * `absolute`: a spans [min, projected upper bound] linearly.
   * `residual`: a = 0 is the nominal VSG (H = 3 s, D = 20, α = 0.3). a = ±1 moves to the projected bounds, so the policy learns *corrections* to a working VSG. This is residual policy learning: early exploration is safe, and the agent never starts from an arbitrary point in parameter space.
 
 ### 3.1 Headroom feasibility projection
 
-Before mapping, the action's upper bounds are made to depend on the current upward headroom h_up = max(P_dis,max(SoC) − P_b0, 0) + h_pv:
+Before mapping, the action's upper bounds are made to depend on the headroom in the direction of the event. While Δf ≤ 0 (pre-event or under-frequency), that is the upward headroom h = h_up = max(P_dis,max(SoC) − P_b0, 0) + h_pv. During an over-frequency event (Δf > 0), it is the downward headroom h = h_dn = max(P_ch,max(SoC) + P_b0, 0) + P_pv,base.
+
+*Why direction-aware:* an earlier version used h_up only. At high SoC the BESS charge limit tapers, so in load-rejection events high damping saturated the charge side, and the agent learned to drop D to about 8. That was the dominant failure mode in the pilot. The formulas below use h for whichever headroom applies:
 
 ```
-s     = min(h_up / ΔP_design, 0.95)                    ΔP_design = 0.4 MW = 0.2 pu
+s     = min(h / ΔP_design, 0.95)                    ΔP_design = 0.4 MW = 0.2 pu
 D_ub  = min(D_max, β s/(1−s)),     β = 1/R_sb + D_L P_L0
-        (the VSG's quasi-steady share D/(D+β) of the design step must fit in h_up)
-ρ     = min(1, h_up / (K_s/(K_s+K_d) · ΔP_design))
+        (the VSG's quasi-steady share D/(D+β) of the design step must fit in h)
+ρ     = min(1, h / (K_s/(K_s+K_d) · ΔP_design))
 H_ub  = H_min + ρ (H_max − H_min)
         (the inertia commitment is scaled by headroom relative to the VSG's instantaneous share of the design step)
 H = H_min + (a_1+1)/2 · (H_ub − H_min),   D = D_min + (a_2+1)/2 · (D_ub − D_min)

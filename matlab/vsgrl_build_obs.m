@@ -4,7 +4,7 @@ function obs = vsgrl_build_obs(m, prev_a, p)
 %       df, rocof        bus-frequency deviation and RoCoF (pu, pu/s), PLL-filtered
 %       p_vsg            VSG incremental power
 %       dfv_minus_df     VSG virtual-rotor minus diesel speed deviation (pu)
-%       h_up, h_pv       upward headroom total / PV part
+%       h_up, h_dn, h_pv upward headroom, downward headroom (BESS charge + PV curtailment), PV part
 %       soc              BESS state of charge (0..1)
 %       p_wind, pv_mpp, p_diesel, load0
 %   prev_a : previous raw action (3x1)
@@ -15,6 +15,7 @@ obs = [ m.df * f0 / p.system_grid_code_f_target_hz;
         m.p_vsg / 0.25;
         m.dfv_minus_df * f0 / 0.1;
         m.h_up / 0.3;
+        m.h_dn / 0.3;
         m.h_pv / 0.1;
         (m.soc - 0.5) / 0.4;
         m.p_wind * Sb / 1.0;

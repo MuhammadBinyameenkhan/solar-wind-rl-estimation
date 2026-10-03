@@ -1,6 +1,6 @@
 function [H, D, alpha, a] = vsgrl_policy(obs, pol, bounds)
 %VSGRL_POLICY  Forward pass of the exported RL actor (TD3/DDPG) + action mapping.
-%   obs    : 15x1 normalised observation, same order as pol.obs_names
+%   obs    : 16x1 normalised observation, same order as pol.obs_names
 %            (build it with vsgrl_build_obs.m)
 %   pol    : struct loaded from vsgrl_policy_<algo>_seed<k>.mat
 %   bounds : [H_ub, D_ub] from vsgrl_headroom_bounds.m (feasibility projection);
