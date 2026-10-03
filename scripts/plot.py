@@ -23,10 +23,10 @@ from vsgrl.data.hybrid import load_processed  # noqa: E402
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
 ORDER = ["td3", "ddpg", "fixed", "bang_bang", "adaptive_rocof", "fixed_tuned", "td3_final", "ddpg_final"]
 REFERENCE = {"droop": "#8a8985", "none": "#b5b4ae", "fixed_feasible": "#6f6e69"}   # neutral references
-LABEL = {"td3": "TD3-VSG (proposed)", "ddpg": "DDPG-VSG", "fixed": "Fixed VSG", "bang_bang": "Bang-bang VSG",
+LABEL = {"td3": "TD3 (validation-selected)", "ddpg": "DDPG (validation-selected)", "fixed": "Fixed VSG", "bang_bang": "Bang-bang VSG",
          "adaptive_rocof": "Adaptive VSG", "fixed_feasible": "Fixed VSG (projected)", "fixed_tuned": "Fixed VSG (tuned)",
          "droop": "BESS droop (no inertia)", "none": "No support",
-         "td3_final": "TD3-VSG (final ckpt)", "ddpg_final": "DDPG-VSG (final ckpt)"}
+         "td3_final": "TD3 (final policy)", "ddpg_final": "DDPG (final policy)"}
 INK, MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 
 
@@ -56,20 +56,26 @@ def save(fig, out, name):
 
 
 def learning_curves(cfg, out):
+    """Validation return (training objective, incl. RL regularisers) vs episode, mean ± std over
+    seeds, for the RL runs in eval.controllers. Episode 0 = untrained residual policy = base VSG."""
     runs = resolve_path(cfg["train"]["out_dir"])
-    fig, ax = plt.subplots(figsize=(4.2, 2.8))
-    any_ = False
-    for algo_dir in sorted(p for p in runs.glob("*") if p.is_dir()):
-        logs = [pd.read_csv(f) for f in algo_dir.glob("seed*/val_log.csv")]
+    names = [c for c in cfg["eval"]["controllers"] if (runs / c).is_dir()]
+    fig, ax = plt.subplots(figsize=(4.6, 2.9))
+    base = None
+    for name in names:
+        logs = [pd.read_csv(f) for f in sorted((runs / name).glob("seed*/val_log.csv"))]
         if not logs:
             continue
-        any_ = True
         m = pd.concat(logs).groupby("episode")["val_return"]
         mu, sd = m.mean(), m.std().fillna(0)
-        c = color(algo_dir.name)
-        ax.plot(mu.index, mu.values, color=c, label=f"{LABEL.get(algo_dir.name, algo_dir.name)} (n={len(logs)})")
+        c = color(name)
+        ax.plot(mu.index, mu.values, color=c, label=f"{name.upper()} (n={len(logs)} seeds)")
         ax.fill_between(mu.index, mu - sd, mu + sd, color=c, alpha=0.18, linewidth=0)
-    if any_:
+        if 0 in mu.index:
+            base = mu.loc[0]
+    if base is not None:
+        ax.axhline(base, color=MUTED, lw=1.0, ls="--", label="Base controller (episode 0)")
+    if names:
         ax.set_xlabel("Training episode")
         ax.set_ylabel("Validation return")
         ax.set_title("Learning curves (mean ± std over seeds)", loc="left")

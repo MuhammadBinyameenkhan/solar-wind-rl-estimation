@@ -212,7 +212,7 @@ eval:
   # Note: the best adaptive-RoCoF gains are k_h = k_d = 0, i.e. adapting H/D to the
   # measured frequency does not pay; the best rule is a fixed VSG (see docs/EXPERIMENTS.md).
   baseline_params:
-    fixed_tuned: {h: 3.0, d: 15.0, alpha: 0.7}
+    fixed_tuned: {h: 3.0, d: 15.0, alpha: 1.0}
     bang_bang: {h_big: 4.0, h_small: 3.0}
     adaptive_rocof: {k_h: 0.0, k_d: 0.0}
   out_dir: results

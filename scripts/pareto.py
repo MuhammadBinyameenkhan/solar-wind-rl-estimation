@@ -4,7 +4,8 @@
 2. Reads RL and baseline results from <eval.out_dir>/per_scenario.csv (run evaluate.py first).
 3. Plots two trade-offs, each against the VSG fast energy (BESS/PV effort that H and D control):
      * time outside the ±0.2 Hz band     * worst-event frequency nadir
-   A controller is a contribution only if it lies BELOW-LEFT of the fixed-VSG front.
+   A controller is a contribution only if no fixed VSG is at least as good on every objective
+   (fast energy, band time, nadir, RoCoF) — checked numerically below the plot.
 
 Outputs: <eval.out_dir>/pareto_fixed.csv, pareto_summary.csv, figures/fig_pareto.{pdf,png}
 
@@ -33,7 +34,8 @@ H_GRID = [1.0, 3.0, 5.0, 8.0]
 D_GRID = [5.0, 10.0, 15.0, 20.0, 30.0, 50.0]
 X = "vsg_fast_energy_kwh"
 YS = [("time_outside_band_s", "Time outside ±0.2 Hz band (s / episode)"),
-      ("nadir_hz", "Worst-event frequency deviation (Hz)")]
+      ("nadir_hz", "Worst-event frequency deviation (Hz)"),
+      ("rocof_max_hz_s", "Max RoCoF, 100 ms window (Hz/s)")]
 
 
 def front(df, x, y):
@@ -85,21 +87,30 @@ if __name__ == "__main__":
     summ = per_seed.groupby("controller")[cols].agg(["mean", "std"])
     summ.to_csv(out / "pareto_summary.csv")
 
-    # dominance check against the fixed-VSG front (on the band-time trade-off)
-    fr = front(fixed, X, "time_outside_band_s")
-    print("\nController vs fixed-VSG Pareto front (band time vs fast energy):")
+    # Multi-objective dominance: a controller is beaten only if some fixed VSG is at least as
+    # good on ALL of (fast energy, band time, nadir, RoCoF) and strictly better on one.
+    OBJ = [X, "time_outside_band_s", "nadir_hz", "rocof_max_hz_s"]
+    print("\nDominance vs the fixed-VSG family (objectives: " + ", ".join(OBJ) + "):")
     for c, g in per_seed.groupby("controller"):
-        mx, my = g[X].mean(), g["time_outside_band_s"].mean()
-        y_front = np.interp(mx, fr[X], fr["time_outside_band_s"], left=np.inf, right=fr["time_outside_band_s"].min())
-        tag = "BEYOND the front (better than every fixed VSG at this effort)" if my < y_front - 1e-9 else "on/behind the front"
-        print(f"  {c:16s} fast {mx:.3f} kWh, out-of-band {my:.2f} s  (front at this effort: {y_front:.2f} s) → {tag}")
+        if c in ("none", "droop"):        # references: collapse ends episodes early / RoCoF far over limit
+            continue
+        m = g[OBJ].mean()
+        dom = fixed[(fixed[OBJ] <= m.values + 1e-9).all(axis=1) & (fixed[OBJ] < m.values - 1e-9).any(axis=1)]
+        if len(dom):
+            best = dom.sort_values(X).iloc[0]
+            tag = f"dominated by fixed H={best.H:.0f} s, D={best.D:.0f} ({len(dom)} fixed settings)"
+        else:
+            tag = "NON-dominated — no fixed VSG is at least as good on every objective"
+        print(f"  {c:16s} fast {m[X]:.3f} kWh, band {m['time_outside_band_s']:.2f} s, nadir {m['nadir_hz']:.3f} Hz,"
+              f" RoCoF {m['rocof_max_hz_s']:.3f} Hz/s → {tag}")
 
     style()
-    fig, axs = plt.subplots(1, 2, figsize=(7.2, 3.0))
+    fig, axs = plt.subplots(1, 3, figsize=(10.0, 3.1))
     for ax, (y, ylab) in zip(axs, YS):
         ax.scatter(fixed[X], fixed[y], s=14, color=MUTED, alpha=0.5, linewidths=0, label="Fixed VSG family")
         f = front(fixed, X, y)
-        ax.plot(f[X], f[y], color=MUTED, lw=1.2, ls="--", label="Fixed-VSG Pareto front")
+        ax.plot(f[X], f[y], color=MUTED, lw=1.2, ls="--", drawstyle="steps-post",
+                label="Fixed-VSG front (attainable)")
         for c, g in per_seed.groupby("controller"):
             if c in ("none", "droop", "fixed_feasible"):     # references; fixed_feasible ≈ fixed_tuned
                 continue

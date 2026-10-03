@@ -33,12 +33,12 @@ def flatten(d, prefix=""):
     return out
 
 
-def _residual_base(cfg, run_env):
+def _residual_base(run_cfg, run_env):
     """Centre of the residual action mapping the policy was trained with (mirrors VSGEnv)."""
-    v = cfg["system"]["vsg"]
+    v = run_cfg["system"]["vsg"]
     base = (v["nominal_h_s"], v["nominal_d_pu"], v["nominal_alpha"])
     if run_env.get("residual_base", "nominal") == "tuned":
-        t = (cfg.get("eval", {}).get("baseline_params") or {}).get("fixed_tuned") or {}
+        t = (run_cfg.get("eval", {}).get("baseline_params") or {}).get("fixed_tuned") or {}
         base = (t.get("h", base[0]), t.get("d", base[1]), t.get("alpha", base[2]))
     return tuple(float(x) for x in base)
 
@@ -61,9 +61,10 @@ if __name__ == "__main__":
     for algo in a.algos:
         for ck in sorted((runs / algo).glob("seed*/best.pt")):
             sd = torch.load(ck, map_location="cpu", weights_only=False)
-            run_env = cfg["env"]
-            if (ck.parent / "config.yaml").exists():   # the env settings this policy was trained with
-                run_env = yaml.safe_load((ck.parent / "config.yaml").read_text())["env"]
+            run_env, run_cfg = cfg["env"], cfg
+            if (ck.parent / "config.yaml").exists():   # the settings this policy was trained with
+                run_cfg = yaml.safe_load((ck.parent / "config.yaml").read_text())
+                run_env = run_cfg["env"]
             layers = [(k, t.numpy().astype(np.float64)) for k, t in sd["actor"].items()]
             m = {}
             for i in range(0, len(layers), 2):
@@ -76,7 +77,7 @@ if __name__ == "__main__":
                 "alpha_min": v["alpha_min"], "alpha_max": v["alpha_max"],
                 "headroom_constraint": float(run_env["headroom_constraint"]),
                 "residual": float(run_env.get("action_mode", "absolute") == "residual"),
-                **dict(zip(("nominal_h", "nominal_d", "nominal_alpha"), _residual_base(cfg, run_env))),
+                **dict(zip(("nominal_h", "nominal_d", "nominal_alpha"), _residual_base(run_cfg, run_env))),
                 "design_step_pu": cfg["system"]["disturbance"]["design_step_mw"] / cfg["system"]["s_base_mva"],
                 "agent_dt_s": run_env["agent_dt_s"],
             })

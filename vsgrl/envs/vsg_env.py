@@ -181,6 +181,7 @@ class VSGEnv(gym.Env):
     def step_params(self, H, D, alpha, action=None, mode=None):
         """Advance one decision interval with explicit physical parameters (used by baselines)."""
         mode = mode or self.mode
+        is_policy = action is not None          # RL agent (residual action) vs explicit-parameter controller
         if action is None:
             action = self.params_to_action(H, D, alpha)
         if self.param_tau > 0.0 and self._applied is not None:
@@ -201,11 +202,15 @@ class VSGEnv(gym.Env):
                 + rw["w_bess"] * st["ms_pbess"] / self.mg.Pb_max ** 2
                 + rw.get("w_fast", 0.0) * st["ms_pfast"] / self.mg.Pb_max ** 2
                 + rw["w_sat"] * st["mean_sat"] / 0.05
-                + rw["w_violation"] * st["viol_frac"]
-                + rw["w_action_rate"] * float(np.dot(da, da))
-                # residual trust region: deviating from the tuned base VSG must earn its keep
-                + rw.get("w_action_mag", 0.0) * float(np.dot(action, action)))
-        reward = -cost
+                + rw["w_violation"] * st["viol_frac"])
+        # Training regularisers of the RL agent (not part of the control objective, so they are
+        # excluded from the reported return that compares controllers):
+        #   action rate   — smooth schedules;  action magnitude — residual trust region.
+        reg = 0.0
+        if is_policy:
+            reg = (rw["w_action_rate"] * float(np.dot(da, da))
+                   + rw.get("w_action_mag", 0.0) * float(np.dot(action, action)))
+        reward = -cost - reg
         self._prev_a = np.asarray(action, dtype=np.float32)
 
         mg = self.mg
@@ -216,12 +221,15 @@ class VSGEnv(gym.Env):
         if st["mean_sat"] > 1e-6:
             ep["sat_s"] += self.cfg["env"]["agent_dt_s"]
         terminated = dfz > self.cfg["env"]["terminate_dev_hz"] or not np.isfinite(dfz)
+        phys = -cost
         if terminated:
             reward -= rw["collapse_penalty"]
+            phys -= rw["collapse_penalty"]
             ep["collapsed"] = True
         truncated = self._k >= self.max_steps and not terminated
-        ep["return"] += reward
-        info = {"H": H, "D": D, "alpha": alpha, **st}
+        ep["return"] += phys                     # objective return: same definition for every controller
+        ep["train_return"] = ep.get("train_return", 0.0) + reward
+        info = {"H": H, "D": D, "alpha": alpha, "reg": reg, **st}
         if terminated or truncated:
             info["episode"] = dict(ep)
         return self._obs(), float(reward), bool(terminated), bool(truncated), info

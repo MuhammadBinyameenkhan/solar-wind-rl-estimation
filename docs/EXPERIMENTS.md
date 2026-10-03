@@ -160,3 +160,46 @@ Implications for the paper (decision for the author):
 1. **Report it as the finding.** Under realistic grid-forming VSG + secondary control, a well-tuned fixed VSG is near-optimal, and the value of RL lies elsewhere. The feasibility projection is nearly free and removes saturation, which supports "feasible synthetic inertia". This is a credible, reviewer-proof negative result with the full evidence above.
 2. **Pareto framing.** Sweep the reward weights and plot band violation against BESS fast-power energy for the fixed-VSG family vs RL. RL is a contribution only where its points lie beyond the fixed-VSG front.
 3. **Change the plant to where adaptation matters.** Candidates: weak grid-forming coupling (lower K_s, or a grid-following BESS with virtual inertia), no or slow secondary control (islanded diesel without AGC), larger events relative to headroom (BESS sized smaller than the event), or communication delays. Check with the oracle test (`per-scenario best fixed` vs `best single fixed`) **before** training: if the oracle gain is under about 5 %, RL will not show a clear win.
+
+---
+
+## Final results: 2024 site data, EMS on, multi-event band formulation
+
+Setup: `configs/default.yaml` as committed. EMS enabled; 30 s episodes with 2–3 events; ±0.2 Hz band; BESS secondary control; reward with fast-power cost. TD3 and DDPG are zero-initialised residual policies on the tuned VSG, **3 seeds × 600 episodes** each (≈35 min per seed). The 200 held-out test scenarios are drawn from the weekly-block test weeks (7.4 % adequacy rejection). Baselines are tuned on validation under the same objective. "Return" is the **objective** return, without the RL training regularisers.
+
+**RQ1 — oracle bound** (`scripts/oracle_test.py`, 40 validation scenarios): the best single fixed VSG (H 3 s, D 15) scores −94.78 and the per-scenario oracle −92.83. **Gain 2.1 % → NO-GO**: adaptive scheduling has very little room to help, and the oracle's choice of D hardly varies with headroom (12–15).
+
+**RQ2 — test-set results** (`results/summary.csv`; RL = seed-averaged):
+
+| Controller | Nadir (Hz) | RoCoF (Hz/s) | Band time (s) | BESS energy (kWh) | Return |
+|---|---|---|---|---|---|
+| Fixed VSG, tuned (H 3, D 15, α 1.0) | 0.573 | 1.474 | 7.40 | 0.775 | **−105.9** |
+| Fixed VSG, tuned + projection | 0.573 | 1.478 | 7.41 | 0.775 | −106.0 |
+| TD3 / DDPG, validation-selected (= base; 6 of 6 runs) | 0.573 | 1.476 | 7.42 | 0.801 | −106.1 |
+| Fixed VSG, standard (H 3, D 20) | 0.508 | 1.452 | 5.68 | 0.934 | −115.8 |
+| Bang-bang VSG | 0.505 | 1.423 | 5.66 | 0.936 | −116.4 |
+| **TD3, final policy** | 0.539 | 1.464 | 7.60 | 0.875 | −120.0 |
+| DDPG, final policy | 0.604 | 1.533 | 7.84 | 0.878 | −131.6 |
+| BESS droop (no inertia) | 0.732 | 5.520 | 5.18 | 0.927 | −286.8 |
+| Diesel only | 3.06 (97.5 % collapse) | 7.38 | – | 0 | −557.7 |
+
+Adaptive-RoCoF tuned to k_h = k_d = 0, so it is identical to the standard fixed VSG.
+
+Paired Wilcoxon, Holm-corrected, TD3 final vs tuned fixed VSG:
+* **Better frequency:** nadir −0.037 Hz (better in 74 % of scenarios, p ≈ 4·10⁻¹⁰) and RoCoF −0.022 Hz/s (p ≈ 0.004).
+* **More BESS energy:** +0.076 kWh (more in 93 % of scenarios, p ≈ 2·10⁻²⁸).
+* **Worse objective return:** −10.7 (p ≈ 9·10⁻³²).
+
+TD3 beats DDPG on nadir, RoCoF and return (all p < 10⁻⁵).
+
+**Pareto / dominance** (`scripts/pareto.py`, objectives: fast energy, band time, nadir, RoCoF):
+* **TD3 final is non-dominated.** It sits between the fixed D = 15 and D = 20 settings, with a nadir close to what a fixed D ≈ 17 would give and a slightly worse band time. It is a different point on the same trade-off, not a better one.
+* **DDPG final is dominated** by the tuned fixed VSG.
+
+**RQ3 — cost of feasibility:** the projection changes the tuned VSG's return by −0.1 (−105.9 → −106.0) and its metrics by < 1 %. Synthetic-inertia commitments can be made deliverable at essentially no cost.
+
+**Learning dynamics** (`fig_learning_curves`): in all 6 runs the best validation checkpoint is episode 0 (the base controller). Training moves both algorithms below it; TD3 degrades less and with smaller seed spread. Diagnosis: the attainable improvement (≈2 %, RQ1) is below the noise in the critic's value estimates across operating points and events, so policy gradients follow noise.
+
+Training-curve values include the RL regularisers (action rate, trust region), so they sit below the test-set objective returns.
+
+To reproduce at the paper's full budget: `bash run_all.sh` (5 seeds × 1000 episodes; ≈4 h on 4 cores).

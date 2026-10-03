@@ -66,3 +66,19 @@ def test_zero_init_residual_policy_is_base_controller(cfg, df):
     assert np.allclose(a, 0.0)
     if env.action_mode == "residual":
         assert np.allclose(env.action_to_params(a), env.action_to_params(np.zeros(3)))
+
+
+def test_trust_region_penalty_not_charged_to_baselines(cfg, df):
+    """The same physical parameters must earn the same reward whether set by a baseline
+    or by the residual policy at a = 0 (the base controller)."""
+    import copy
+    c = copy.deepcopy(cfg)
+    c["env"]["action_mode"], c["env"]["residual_base"] = "residual", "tuned"
+    env = VSGEnv(c, df)
+    sc = env.sampler.fixed_set("train", 1, 5)[0]
+    env.reset(options={"scenario": sc})
+    H, D, al = env.action_to_params(np.zeros(3))
+    r_base = sum(env.step_params(H, D, al)[1] for _ in range(20))
+    env.reset(options={"scenario": sc})
+    r_pol = sum(env.step(np.zeros(3, dtype=np.float32))[1] for _ in range(20))
+    assert abs(r_base - r_pol) < 1e-3 * max(1.0, abs(r_base)) + 0.05

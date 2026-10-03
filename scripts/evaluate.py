@@ -13,6 +13,7 @@ Examples
 import copy
 
 import pandas as pd
+import torch
 import yaml
 from _common import base_parser, setup
 
@@ -55,8 +56,13 @@ def controllers_for(names, cfg, df, split, checkpoint="best"):
             run_cfg_file = ck.parent / "config.yaml"
             c = cfg
             if run_cfg_file.exists():
+                run_cfg = yaml.safe_load(run_cfg_file.read_text())
                 c = copy.deepcopy(cfg)
-                c["env"] = yaml.safe_load(run_cfg_file.read_text())["env"]
+                c["env"] = run_cfg["env"]
+                # the residual base (tuned fixed VSG) the policy was trained around
+                base = (run_cfg.get("eval", {}).get("baseline_params") or {}).get("fixed_tuned")
+                if base:
+                    c.setdefault("eval", {}).setdefault("baseline_params", {})["fixed_tuned"] = base
             env = VSGEnv(c, df, split=split, record_trace=True)
             label = n if checkpoint == "best" else f"{n}_{checkpoint}"
             yield label, seed, PolicyController(label, TD3Agent.load(ck, cfg["train"])), env
@@ -72,6 +78,7 @@ if __name__ == "__main__":
                         "(reported as <algo>_final)")
     a = p.parse_args()
     cfg = setup(a)
+    torch.set_num_threads(1)   # tiny MLP: one thread per process avoids oversubscription
     out = resolve_path(cfg["eval"]["out_dir"])
     (out / "traces").mkdir(parents=True, exist_ok=True)
     df = load_processed(cfg)
