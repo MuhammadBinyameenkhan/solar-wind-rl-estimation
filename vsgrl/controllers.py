@@ -3,6 +3,7 @@
 none            no fast frequency support (diesel only) — reference, usually collapses
 droop           grid-following BESS/PV droop, P = −D Δf (fast frequency response, no inertia)
 fixed           VSG with constant (H, D, alpha) — the standard VSG
+fixed_tuned     constant VSG parameters grid-searched on the validation split
 fixed_feasible  constant VSG parameters passed through the same headroom projection as RL
 bang_bang       adaptive-inertia VSG (Alipoor, Miura & Ise, IEEE JESTPE 2015):
                 H = H_big while the frequency is moving away from nominal, H_small otherwise
@@ -60,6 +61,21 @@ class FixedVSG(BaseController):
         return self.H0, self.D0, self.a0
 
 
+class FixedTunedVSG(BaseController):
+    """Fixed VSG whose (H, D, alpha) are grid-searched on the validation split
+    (scripts/tune_baselines.py) — the strongest non-adaptive benchmark."""
+    name = "fixed_tuned"
+
+    def __init__(self, cfg, env, h=None, d=None, alpha=None, **_):
+        super().__init__(cfg, env)
+        self.h = self.H0 if h is None else h
+        self.d = self.D0 if d is None else d
+        self.al = self.a0 if alpha is None else alpha
+
+    def params(self, obs):
+        return self.h, self.d, self.al
+
+
 class FixedFeasibleVSG(BaseController):
     name = "fixed_feasible"
 
@@ -71,7 +87,7 @@ class FixedFeasibleVSG(BaseController):
 class BangBangVSG(BaseController):
     name = "bang_bang"
 
-    def __init__(self, cfg, env, h_big=None, h_small=None, thr_hz=0.01):
+    def __init__(self, cfg, env, h_big=None, h_small=None, thr_hz=0.01, **_):
         super().__init__(cfg, env)
         self.h_big = h_big or 2.0 * self.H0
         self.h_small = h_small or 0.5 * self.H0
@@ -87,7 +103,7 @@ class BangBangVSG(BaseController):
 class AdaptiveRocofVSG(BaseController):
     name = "adaptive_rocof"
 
-    def __init__(self, cfg, env, k_h=4.0, k_d=60.0):
+    def __init__(self, cfg, env, k_h=4.0, k_d=60.0, **_):
         super().__init__(cfg, env)
         gc = cfg["system"]["grid_code"]
         self.k_h, self.k_d = k_h, k_d          # s per (Hz/s), pu per Hz
@@ -113,7 +129,7 @@ class PolicyController:
         return env.step(self.agent.act(obs, noise=0.0))
 
 
-BASELINES = {c.name: c for c in [NoSupport, Droop, FixedVSG, FixedFeasibleVSG, BangBangVSG, AdaptiveRocofVSG]}
+BASELINES = {c.name: c for c in [NoSupport, Droop, FixedVSG, FixedTunedVSG, FixedFeasibleVSG, BangBangVSG, AdaptiveRocofVSG]}
 
 
 def make_baseline(name, cfg, env):

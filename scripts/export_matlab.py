@@ -33,6 +33,16 @@ def flatten(d, prefix=""):
     return out
 
 
+def _residual_base(cfg, run_env):
+    """Centre of the residual action mapping the policy was trained with (mirrors VSGEnv)."""
+    v = cfg["system"]["vsg"]
+    base = (v["nominal_h_s"], v["nominal_d_pu"], v["nominal_alpha"])
+    if run_env.get("residual_base", "nominal") == "tuned":
+        t = (cfg.get("eval", {}).get("baseline_params") or {}).get("fixed_tuned") or {}
+        base = (t.get("h", base[0]), t.get("d", base[1]), t.get("alpha", base[2]))
+    return tuple(float(x) for x in base)
+
+
 if __name__ == "__main__":
     p = base_parser(__doc__)
     p.add_argument("--algos", nargs="*", default=["td3", "ddpg"])
@@ -66,7 +76,7 @@ if __name__ == "__main__":
                 "alpha_min": v["alpha_min"], "alpha_max": v["alpha_max"],
                 "headroom_constraint": float(run_env["headroom_constraint"]),
                 "residual": float(run_env.get("action_mode", "absolute") == "residual"),
-                "nominal_h": v["nominal_h_s"], "nominal_d": v["nominal_d_pu"], "nominal_alpha": v["nominal_alpha"],
+                **dict(zip(("nominal_h", "nominal_d", "nominal_alpha"), _residual_base(cfg, run_env))),
                 "design_step_pu": cfg["system"]["disturbance"]["design_step_mw"] / cfg["system"]["s_base_mva"],
                 "agent_dt_s": run_env["agent_dt_s"],
             })

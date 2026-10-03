@@ -21,9 +21,9 @@ from vsgrl.data.hybrid import load_processed  # noqa: E402
 
 # Categorical palette (validated reference order) — colour follows the controller, never its rank.
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
-ORDER = ["td3", "ddpg", "fixed", "bang_bang", "adaptive_rocof", "fixed_feasible", "droop", "none"]
+ORDER = ["td3", "ddpg", "fixed", "bang_bang", "adaptive_rocof", "fixed_tuned", "droop", "none"]
 LABEL = {"td3": "TD3-VSG (proposed)", "ddpg": "DDPG-VSG", "fixed": "Fixed VSG", "bang_bang": "Bang-bang VSG",
-         "adaptive_rocof": "Adaptive VSG", "fixed_feasible": "Fixed VSG (projected)",
+         "adaptive_rocof": "Adaptive VSG", "fixed_feasible": "Fixed VSG (projected)", "fixed_tuned": "Fixed VSG (tuned)",
          "droop": "BESS droop (no inertia)", "none": "No support"}
 INK, MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 
@@ -83,7 +83,7 @@ def responses(cfg, out):
         m = re.match(r"(.+)_s(\d+)_sc(\d+)\.csv", f.name)
         if m and (current is None or m.group(1) in current):   # skip traces of runs no longer evaluated
             by_sc.setdefault(int(m.group(3)), {}).setdefault(m.group(1), []).append(f)
-    show = ["none", "droop", "fixed", "bang_bang", "adaptive_rocof", "ddpg", "td3"]
+    show = ["none", "droop", "fixed", "fixed_tuned", "bang_bang", "adaptive_rocof", "ddpg", "td3"]
     for k, ctrls in by_sc.items():
         fig, axs = plt.subplots(4, 1, figsize=(4.6, 6.4), sharex=True)
         for c in [c for c in ORDER if c in ctrls and c in show][::-1] + [c for c in ctrls if c not in ORDER]:
@@ -118,7 +118,7 @@ def boxes(cfg, out):
     if not f.exists():
         return
     df = pd.read_csv(f)
-    df = df[df.controller != "none"]
+    df = df[~df.controller.isin(["none", "fixed_feasible"])]   # ≤ 8 series: one palette slot each
     per = df.groupby(["controller", "scenario"]).mean(numeric_only=True).reset_index()
     ctrls = [c for c in ORDER if c in per.controller.unique()] + \
             [c for c in per.controller.unique() if c not in ORDER]

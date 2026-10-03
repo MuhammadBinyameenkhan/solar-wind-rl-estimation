@@ -40,6 +40,13 @@ class VSGEnv(gym.Env):
         self.headroom_constraint = e["headroom_constraint"]
         self.act_dims = e.get("action_dims", 3)
         self.action_mode = e.get("action_mode", "absolute")
+        # Centre of the residual mapping: the nominal VSG, or the validation-tuned fixed VSG.
+        v = s["vsg"]
+        base = (v["nominal_h_s"], v["nominal_d_pu"], v["nominal_alpha"])
+        if e.get("residual_base", "nominal") == "tuned":
+            t = (cfg.get("eval", {}).get("baseline_params") or {}).get("fixed_tuned") or {}
+            base = (t.get("h", base[0]), t.get("d", base[1]), t.get("alpha", base[2]))
+        self.res_base = base
         self.record_trace = record_trace
         self.trace_every = trace_every
 
@@ -88,10 +95,10 @@ class VSGEnv(gym.Env):
         a = np.clip(np.asarray(a, dtype=float), -1.0, 1.0)
         h_ub, d_ub = self.param_bounds()
         if self.action_mode == "residual":
-            H = self._residual(a[0], v["nominal_h_s"], v["h_min_s"], h_ub)
-            D = self._residual(a[1], v["nominal_d_pu"], v["d_min_pu"], d_ub)
-            alpha = (self._residual(a[2], v["nominal_alpha"], v["alpha_min"], v["alpha_max"])
-                     if self.act_dims >= 3 else v["nominal_alpha"])
+            h0, d0, a0 = self.res_base
+            H = self._residual(a[0], h0, v["h_min_s"], h_ub)
+            D = self._residual(a[1], d0, v["d_min_pu"], d_ub)
+            alpha = self._residual(a[2], a0, v["alpha_min"], v["alpha_max"]) if self.act_dims >= 3 else a0
             return float(H), float(D), float(alpha)
         H = v["h_min_s"] + 0.5 * (a[0] + 1.0) * (h_ub - v["h_min_s"])
         D = v["d_min_pu"] + 0.5 * (a[1] + 1.0) * (d_ub - v["d_min_pu"])
