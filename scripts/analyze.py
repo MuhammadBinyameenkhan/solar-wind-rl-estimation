@@ -16,6 +16,7 @@ from vsgrl.controllers import BASELINES
 METRICS = [("nadir_hz", "Max |Δf| (Hz)", "min"), ("rocof_max_hz_s", "Max RoCoF (Hz/s)", "min"),
            ("qss_dev_hz", "QSS |Δf| (Hz)", "min"), ("settling_time_s", "Settling (s)", "min"),
            ("bess_energy_kwh", "BESS energy (kWh)", "min"), ("saturation_s", "Saturation (s)", "min"),
+           ("infeasible_commit_s", "Infeasible commit. (s)", "min"),
            ("return", "Return", "max")]
 
 
