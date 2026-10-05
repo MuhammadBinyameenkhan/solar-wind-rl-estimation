@@ -31,7 +31,7 @@ Code for the thesis and paper. A TD3 (and DDPG) agent schedules the **virtual in
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt        # numpy pandas scipy matplotlib gymnasium torch pyyaml pytest
-python -m pytest -q                    # 17 tests, ~10 s
+python -m pytest -q                    # 22 tests, ~15 s
 ```
 
 ## 2. Data (already in the repo)

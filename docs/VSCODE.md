@@ -30,7 +30,7 @@ pip install -r requirements.txt
 ```
 Or use **Terminal → Run Task → "Setup: create .venv and install requirements"**.
 
-Then **Ctrl+Shift+P → "Python: Select Interpreter" → `.venv`**. Check the install: **Terminal → Run Task → Run tests** should report `19 passed`.
+Then **Ctrl+Shift+P → "Python: Select Interpreter" → `.venv`**. Check the install: **Terminal → Run Task → Run tests** should report `22 passed`.
 
 > PyTorch on Windows: if `pip install torch` fails, install it first with the command from pytorch.org (CPU build), then re-run `pip install -r requirements.txt`.
 
