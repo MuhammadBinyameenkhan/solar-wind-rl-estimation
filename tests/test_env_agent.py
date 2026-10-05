@@ -82,3 +82,16 @@ def test_trust_region_penalty_not_charged_to_baselines(cfg, df):
     env.reset(options={"scenario": sc})
     r_pol = sum(env.step(np.zeros(3, dtype=np.float32))[1] for _ in range(20))
     assert abs(r_base - r_pol) < 1e-3 * max(1.0, abs(r_base)) + 0.05
+
+
+def test_infeasible_commitment_metric(cfg, df):
+    """Aggressive fixed parameters commit more than the headroom; the projected version never does."""
+    from vsgrl.controllers import FixedTunedVSG
+    env = VSGEnv(cfg, df, split="test", record_trace=True)
+    sc = env.sampler.fixed_set("test", 1, 3)[0]
+    m_aggr, _ = run_episode(env, FixedTunedVSG(cfg, env, h=8.0, d=50.0, alpha=1.0), sc)
+    assert m_aggr["infeasible_commit_s"] > 0.0
+    proj = BASELINES["fixed_feasible"](cfg, env)
+    proj.H0, proj.D0 = 8.0, 50.0
+    m_proj, _ = run_episode(env, proj, sc)
+    assert m_proj["infeasible_commit_s"] < 0.5          # only the 0.25 s rate-limit lag remains

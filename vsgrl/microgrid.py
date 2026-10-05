@@ -352,7 +352,8 @@ class Microgrid:
                 trace["rows"].append((self.t, fm * self.f0, rm * self.f0, self.dw_v * self.f0,
                                       pv * Sb, self.p_pv_s * Sb, p_b_mw, self.p_d * Sb,
                                       self.p_w * Sb, load * Sb, self.soc, sat * Sb, H_v, D_v, alpha,
-                                      self.p_set * Sb))
+                                      self.p_set * Sb,
+                                      (self.headroom_up() if fm <= 0.0 else self.headroom_down()) * Sb))
         n = float(n_steps)
         return {
             "msf_hz2": sum_f2 / n * self.f0 ** 2,
@@ -367,4 +368,4 @@ class Microgrid:
 
     TRACE_COLUMNS = ["t", "df_hz", "rocof_hz_s", "dfv_hz", "p_vsg_mw", "p_pv_support_mw", "p_bess_mw",
                      "p_diesel_mw", "p_wind_mw", "p_load_mw", "soc", "sat_mw", "H_v", "D_v", "alpha",
-                     "p_set_mw"]
+                     "p_set_mw", "headroom_mw"]

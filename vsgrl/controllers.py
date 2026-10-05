@@ -19,6 +19,7 @@ import numpy as np
 class BaseController:
     name = "base"
     mode = "vsg"
+    projected = False          # True → applied parameters are clipped to the feasible bounds
 
     def __init__(self, cfg, env, **_):
         self.cfg, self.env = cfg, env
@@ -37,7 +38,7 @@ class BaseController:
         H, D, a = self.params(obs)
         H = float(np.clip(H, self.hmin, self.hmax))
         D = float(np.clip(D, self.dmin, self.dmax))
-        return env.step_params(H, D, a, mode=self.mode)
+        return env.step_params(H, D, a, mode=self.mode, enforce_bounds=self.projected and env.headroom_constraint)
 
 
 class NoSupport(BaseController):
@@ -79,6 +80,7 @@ class FixedTunedVSG(BaseController):
 class FixedFeasibleVSG(BaseController):
     """The tuned fixed VSG passed through the same headroom projection as the RL agent."""
     name = "fixed_feasible"
+    projected = True
 
     def __init__(self, cfg, env, **_):
         super().__init__(cfg, env)

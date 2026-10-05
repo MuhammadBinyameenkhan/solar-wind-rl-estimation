@@ -176,10 +176,15 @@ class VSGEnv(gym.Env):
 
     def step(self, action):
         H, D, alpha = self.action_to_params(action)
-        return self.step_params(H, D, alpha, action=np.asarray(action, dtype=np.float32))
+        return self.step_params(H, D, alpha, action=np.asarray(action, dtype=np.float32),
+                                enforce_bounds=self.headroom_constraint)
 
-    def step_params(self, H, D, alpha, action=None, mode=None):
-        """Advance one decision interval with explicit physical parameters (used by baselines)."""
+    def step_params(self, H, D, alpha, action=None, mode=None, enforce_bounds=False):
+        """Advance one decision interval with explicit physical parameters (used by baselines).
+
+        Parameters pass the rate limit first; with enforce_bounds they are then clipped to the
+        current feasible bounds, so feasibility takes priority over smoothness (a decrease
+        required by shrinking headroom is applied at once, not 0.25 s later)."""
         mode = mode or self.mode
         is_policy = action is not None          # RL agent (residual action) vs explicit-parameter controller
         if action is None:
@@ -188,6 +193,9 @@ class VSGEnv(gym.Env):
             k = min(self.cfg["env"]["agent_dt_s"] / self.param_tau, 1.0)
             H0, D0, A0 = self._applied
             H, D, alpha = H0 + k * (H - H0), D0 + k * (D - D0), A0 + k * (alpha - A0)
+        if enforce_bounds:
+            h_ub, d_ub = self.param_bounds()
+            H, D = min(H, h_ub), min(D, d_ub)
         self._applied = (H, D, alpha)
         st = self.mg.advance(H, D, alpha, self.n_sub, mode=mode, trace=self._trace)
         self._k += 1

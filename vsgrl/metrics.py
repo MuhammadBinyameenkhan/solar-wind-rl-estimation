@@ -5,6 +5,18 @@ import numpy as np
 import pandas as pd
 
 
+def _infeasible_s(tr: pd.DataFrame, cfg: dict, dt: float) -> float:
+    if "headroom_mw" not in tr:
+        return float("nan")
+    s = cfg["system"]
+    f0, sb = s["f_nominal_hz"], s["s_base_mva"]
+    band = (cfg["env"]["reward"].get("f_band_hz") or s["grid_code"]["f_target_hz"]) / f0
+    rocof = s["grid_code"]["rocof_limit_hz_s"] / f0
+    h = tr["headroom_mw"].to_numpy() / sb
+    need = np.maximum(tr["D_v"].to_numpy() * band, 2.0 * tr["H_v"].to_numpy() * rocof)
+    return float(np.sum(need > h + 1e-6) * dt)
+
+
 def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
     """Metrics over all events of the episode. Per event (window = event time → next event):
     nadir in the event's direction and settling time; aggregated as worst / mean."""
@@ -54,6 +66,9 @@ def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
         "vsg_fast_energy_kwh": float(np.sum(np.abs(tr["p_vsg_mw"].to_numpy() - tr["p_set_mw"].to_numpy()))
                                      * dt * 1000 / 3600) if "p_set_mw" in tr else float("nan"),
         "saturation_s": float(np.sum(tr["sat_mw"].to_numpy() > 1e-4) * dt),
+        # Infeasible commitment: the scheduled D (damping power at the band edge) or H (inertial
+        # power at the RoCoF limit) needs more power than the direction-aware headroom.
+        "infeasible_commit_s": _infeasible_s(tr, cfg, dt),
         "soc_drop": float(tr["soc"].iloc[0] - tr["soc"].iloc[-1]),
         "f_violation": bool(np.max(np.abs(df)) > gc["f_dev_limit_hz"]),
         "rocof_violation": bool(np.max(np.abs(rocof_w)) > gc["rocof_limit_hz_s"]),
@@ -64,5 +79,5 @@ def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
 
 METRIC_COLUMNS = ["nadir_hz", "rocof_max_hz_s", "qss_dev_hz", "settling_time_s", "time_outside_band_s",
                   "bess_energy_kwh", "bess_rms_mw",
-                  "bess_peak_mw", "pv_headroom_energy_kwh", "saturation_s", "f_violation",
+                  "bess_peak_mw", "pv_headroom_energy_kwh", "saturation_s", "infeasible_commit_s", "f_violation",
                   "rocof_violation", "return", "collapsed"]
