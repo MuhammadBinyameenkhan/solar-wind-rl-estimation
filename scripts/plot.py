@@ -184,21 +184,26 @@ def headroom_policy(cfg, out):
 
 
 def data_overview(cfg, out):
+    """Daily-mean operating points; each validation / test block is shaded (any split method)."""
     df = load_processed(cfg)
-    fig, axs = plt.subplots(3, 1, figsize=(6.4, 4.8), sharex=True)
     daily = df.drop(columns="split").resample("1D").mean()
     split = df["split"].resample("1D").agg(lambda s: s.mode().iat[0] if len(s) else None)
-    for ax, col, lab in zip(axs, ["p_wind_mw", "p_pv_mpp_mw", "load_mw"],
-                            ["Wind (ERA5) MW", "PV MPP (NASA POWER) MW", "Load MW"]):
+    fig, axs = plt.subplots(3, 1, figsize=(6.6, 4.6), sharex=True)
+    for ax, col, lab in zip(axs, ["p_wind_mw", "p_pv_mpp_mw", "load_mw"], ["Wind (MW)", "PV MPP (MW)", "Load (MW)"]):
         ax.plot(daily.index, daily[col], color=PALETTE[0], lw=1.0)
         ax.set_ylabel(lab)
-    for sp, c in (("val", PALETTE[3]), ("test", PALETTE[1])):
-        d = split[split == sp].index
-        if len(d):
+    shade = {"val": (PALETTE[3], "Validation weeks"), "test": (PALETTE[1], "Test weeks")}
+    runs = (split != split.shift()).cumsum()
+    for _, block in split.groupby(runs):
+        sp = block.iloc[0]
+        if sp in shade:
             for ax in axs:
-                ax.axvspan(d.min(), d.max(), color=c, alpha=0.12, lw=0)
-            axs[0].text(d.min(), axs[0].get_ylim()[1] * 0.92, f" {sp}", color=INK, fontsize=8)
-    axs[0].set_title("Daily-mean operating points from the hybrid real-data set", loc="left")
+                ax.axvspan(block.index.min(), block.index.max() + pd.Timedelta(days=1), color=shade[sp][0],
+                           alpha=0.18, lw=0)
+    from matplotlib.patches import Patch
+    axs[0].legend(handles=[Patch(color=c, alpha=0.35, label=l) for c, l in shade.values()],
+                  ncol=2, loc="upper left", fontsize=7)
+    axs[0].set_title("Daily means of the 2024 hourly operating points (wind: ERA5; PV: NASA POWER)", loc="left")
     save(fig, out, "fig_data_overview")
 
 
