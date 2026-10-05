@@ -1,0 +1,218 @@
+# =============================================================================
+# Default configuration — RL-driven VSG control for a low-inertia
+# PV-Wind-BESS-Diesel microgrid (2.0 MVA base).
+#
+# Every number here is referenced in docs/METHODOLOGY.md (parameter table).
+# Override any key from a smaller YAML via `base: default.yaml` (see smoke.yaml)
+# or from the command line with  --set section.key=value
+# =============================================================================
+
+site:
+  name: "Nakhon Ratchasima, Thailand"
+  # ERA5 grid points are bilinearly interpolated to this location.
+  # null → taken from the NASA POWER header.
+  latitude: 14.9799
+  longitude: 102.0977
+  elevation_m: null                 # null → NASA POWER header (226 m); used for air density
+  utc_offset_hours: 7.0             # local clock time (ICT) for the load profile
+
+data:
+  # --- your real data (put the CSV files here, or edit the paths) ----------
+  era5_csv: data/raw/era5_wind_2024.nc       # ERA5 single levels, u100/v100, 2×2 grid, 2024 (NetCDF or CSV)
+  nasa_power_csv: data/raw/nasa_power_solar_2024.csv   # NASA POWER hourly, LST, 2024
+  load_csv: null                            # optional: columns time,load_mw
+  processed_csv: data/processed/hourly_resource.csv
+
+  # Column-name overrides if auto-detection fails (see `python scripts/inspect_data.py`).
+  # Keys: time, u100, v100, u10, v10, ws100, ws10, t2m, sp, lat, lon
+  era5_columns: {}
+  # Keys: ghi, t2m, ws10m (NASA POWER parameter names are detected automatically)
+  nasa_columns: {}
+
+  # NASA POWER hourly files are UTC or LST (local solar time). "auto" reads the
+  # header. If LST, the offset is taken from nasa_utc_offset_hours, else from
+  # longitude/15.
+  nasa_time_standard: auto        # auto | UTC | LST
+  nasa_utc_offset_hours: null
+
+  # One year of data: weekly blocks (5 train / 1 val / 1 test of every 7 weeks) so all
+  # seasons (dry, hot, monsoon) appear in every split. Use chronological / by_year with
+  # multi-year data.
+  split:
+    method: weekly_blocks         # weekly_blocks | chronological | by_year
+    train: 0.70
+    val: 0.15
+    test: 0.15
+    test_years: []                # used when method == by_year
+    val_years: []
+
+system:
+  f_nominal_hz: 50.0
+  s_base_mva: 2.0
+
+  wind:
+    rated_mw: 1.0
+    # Low-wind site (ERA5 100 m mean 4.2 m/s in 2024): IEC class III turbine with a 100 m hub,
+    # i.e. at ERA5's own reference height (no shear extrapolation). CF ≈ 9 % vs 4 % for a
+    # generic 12 m/s-rated machine at 80 m.
+    hub_height_m: 100.0
+    cut_in_ms: 2.5
+    rated_speed_ms: 10.0
+    cut_out_ms: 25.0
+    shear_exponent: 0.143           # power-law (1/7) extrapolation from 100 m / 10 m
+    power_curve_csv: null           # optional: columns wind_speed_ms,power_mw
+    turbulence_intensity: 0.10      # intra-episode fluctuation around the ERA5 hourly mean
+    turbulence_time_constant_s: 2.0
+    rotor_smoothing_s: 0.5          # first-order lag of electrical power (rotor + converter)
+
+  pv:
+    rated_mw: 0.8                   # sweep 0.5 – 0.8 MW in experiments
+    deload_fraction: 0.15           # de-loaded MPPT: operate at (1-d)·P_mpp, d·P_mpp = headroom
+    temp_coeff_per_c: -0.004
+    noct_c: 45.0
+    derate: 0.90                    # soiling, wiring, inverter
+    response_time_s: 0.08           # DC-link / MPPT-shift response of PV headroom release
+
+  bess:
+    power_mw: 0.5
+    energy_mwh: 2.0
+    soc_init_range: [0.30, 0.90]
+    soc_min: 0.10
+    soc_max: 0.95
+    soc_taper: 0.05                 # power limit tapers linearly within this SoC band of the limits
+    eta_charge: 0.95
+    eta_discharge: 0.95
+    secondary_ki: 2.0               # BESS participation in secondary control (integral on Δf → VSG set-point)
+
+  diesel:
+    rated_mw: 0.5
+    inertia_h_s: 2.0                # on its own MVA base
+    damping_pu: 2.0                 # damper-winding damping, own base
+    sync_coeff_pu: 0.8              # K_d = E·V/(X'd + X_line) on S_base
+    droop: 0.05                     # on its own base
+    governor_time_s: 0.20
+    engine_time_s: 0.50
+    min_load_frac: 0.30
+    max_dispatch_frac: 0.85         # leave 15 % spinning reserve at dispatch
+    ramp_pu_per_s: 1.0              # on its own base
+    secondary_ki: 2.0               # AGC integral gain [pu_sb / (pu_f · s)]; restores f within ~10–20 s
+
+  load:
+    peak_mw: 0.8                    # sized so evening peak (no PV, weak wind) fits firm capacity:
+                                    # adequacy-screen rejection 7 % (51 % at 1.2 MW) on the 2024 site data
+    min_mw: 0.30
+    damping_pu: 1.0                 # load-frequency sensitivity, pu power / pu freq
+    noise_frac: 0.005
+
+  vsg:
+    # Ranges of the parameters the RL agent schedules (S_base pu).
+    h_min_s: 0.2
+    h_max_s: 8.0
+    d_min_pu: 0.0
+    d_max_pu: 50.0
+    alpha_min: 0.0                  # PV-headroom share of VSG power
+    alpha_max: 1.0
+    sync_coeff_pu: 2.0              # K_s = E·V/X of the VSG interface filter (S_base pu)
+    measurement_filter_s: 0.02      # PLL / measurement low-pass
+    gfl_response_s: 0.05            # grid-following droop baseline: PLL + current-loop lag
+    # Fixed-parameter VSG baseline
+    nominal_h_s: 3.0
+    nominal_d_pu: 20.0
+    nominal_alpha: 0.3
+
+  ems:
+    # Rule-based energy management of the BESS (hourly operating point). When enabled, the
+    # BESS charges from RES surplus (midday PV) instead of curtailing and discharges to keep
+    # the diesel at its economic loading (evening peak). Its committed base power then
+    # consumes the headroom that synthetic inertia needs.
+    enabled: true
+    diesel_target_frac: 0.6         # economic diesel loading; BESS covers the deficit above it
+    max_dispatch_frac: 0.8          # max share of the SoC-dependent BESS power limit used by the EMS
+
+  disturbance:
+    step_mw_range: [0.2, 0.4]
+    n_events_range: [2, 3]          # load steps per episode (multi-event: headroom carries over)
+    time_s_range: [0.5, 1.5]        # first event
+    min_separation_s: 7.0           # between events
+    settle_tail_s: 5.0              # no event in the last 5 s
+    max_cumulative_mw: 0.4          # net load change stays within ±0.4 MW
+    prob_load_increase: 0.75        # else a load rejection (over-frequency event)
+    design_step_mw: 0.4             # design-basis event for the headroom feasibility projection
+    # Adequacy screen: keep only operating points whose upward reserve
+    # (diesel spare + VSG headroom) covers the step. Excluded share is reported.
+    adequacy_margin: 1.0
+
+  grid_code:
+    f_dev_limit_hz: 1.0             # UFLS / OF protection threshold used for violation counts
+    f_target_hz: 0.5                # normalisation scale for the reward
+    rocof_limit_hz_s: 1.0
+    rocof_window_s: 0.10            # RoCoF measurement window (metric)
+    settling_band_hz: 0.10
+
+env:
+  episode_s: 30.0                   # 2–3 events; SoC, AGC state and BESS commitment carry over
+  agent_dt_s: 0.05                  # RL decision interval (20 Hz)
+  sim_dt_s: 0.002                   # plant integration step
+  headroom_constraint: true         # feasibility projection of (H, D) onto available headroom
+  projection: band_power            # band_power: D·Δf_band ≤ h and 2H·RoCoF_lim ≤ h | steady_share (old)
+  param_filter_s: 0.25              # rate limit on applied H, D, alpha (all controllers): first-order, τ = 0.25 s
+  action_dims: 3                    # (H_v, D_v, alpha); 2 → alpha fixed at nominal
+  action_mode: residual             # residual (a = 0 → base VSG, policy learns corrections) | absolute
+  residual_base: tuned              # tuned (eval.baseline_params.fixed_tuned) | nominal (vsg.nominal_*)
+  terminate_dev_hz: 3.0             # treat as collapse → terminate with penalty
+  reward:
+    # Grid-code band: frequency penalised only outside ±0.2 Hz (ENTSO-E CE maximum steady-state
+    # deviation), RoCoF only above 1 Hz/s. Inside the band only BESS usage costs → the agent
+    # should support frequency just enough. Set both bands to 0 for the plain quadratic reward.
+    f_band_hz: 0.2
+    rocof_band_hz_s: 1.0
+    w_freq_inband: 0.02
+    w_freq: 1.0
+    w_rocof: 0.5
+    w_bess: 0.1                     # total BESS power incl. secondary dispatch (throughput proxy; makes PV headroom cheaper)
+    w_fast: 2.0                     # VSG fast power above its secondary set-point = what H and D control;
+                                    # calibrated so the best fixed VSG is interior (H 3 s, D 15)
+    w_sat: 2.0                      # headroom saturation (requested > available)
+    w_violation: 1.0                # per-step indicator of grid-code violation
+    w_action_mag: 0.05              # residual trust region: penalty on ‖a‖² (a = 0 is the tuned base VSG)
+    w_action_rate: 0.3               # discourages bang-bang switching of H, D (parameter-switching transients)
+    collapse_penalty: 50.0
+
+train:
+  algo: td3                         # td3 | ddpg
+  episodes: 1000
+  seeds: [0, 1, 2, 3, 4]
+  hidden: [256, 256]
+  actor_lr: 1.0e-4                  # gentle: the residual policy starts at the tuned base VSG
+  actor_zero_init: true             # zero output layer → untrained policy = base controller
+  critic_lr: 3.0e-4
+  gamma: 0.99                       # ~5 s horizon at 50 ms steps (band effects last seconds)
+  tau: 0.005
+  batch_size: 256
+  buffer_size: 1000000
+  warmup_steps: 10000
+  updates_per_step: 0.5             # one update every 2 env steps (600 decisions per 30 s episode)
+  expl_noise: 0.10
+  expl_noise_final: 0.03            # linearly annealed over training
+  policy_noise: 0.2                 # TD3 target smoothing
+  noise_clip: 0.5
+  policy_delay: 2
+  eval_every: 50                    # episodes
+  eval_episodes: 20                 # fixed validation scenarios
+  device: cpu
+  out_dir: runs
+
+eval:
+  n_scenarios: 200
+  scenario_seed: 20260
+  controllers: [none, droop, fixed, fixed_tuned, fixed_feasible, bang_bang, adaptive_rocof, ddpg, td3]
+  # Baseline gains tuned on the VALIDATION weeks of the 2024 site data with
+  # scripts/tune_baselines.py under the current formulation (multi-event, band reward,
+  # BESS secondary control, fast-power cost). Re-run whenever the reward or system changes.
+  # Note: the best adaptive-RoCoF gains are k_h = k_d = 0, i.e. adapting H/D to the
+  # measured frequency does not pay; the best rule is a fixed VSG (see docs/EXPERIMENTS.md).
+  baseline_params:
+    fixed_tuned: {h: 3.0, d: 15.0, alpha: 1.0}
+    bang_bang: {h_big: 4.0, h_small: 3.0}
+    adaptive_rocof: {k_h: 0.0, k_d: 0.0}
+  out_dir: results
