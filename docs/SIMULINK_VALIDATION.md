@@ -1,5 +1,28 @@
 # Validation in MATLAB / Simulink / Simscape Electrical
 
+## 0. MATLAB implementation of the study (done, cross-validated)
+
+`matlab/sim/` is an independent MATLAB implementation of the whole simulation: the two-machine RMS model, the EMS dispatch, BESS SoC and secondary control, the band-power projection, the 0.25 s rate limit with feasibility clipping, the exported TD3 policy, and the metrics. It runs in MATLAB (no toolboxes needed) and in GNU Octave.
+
+```bash
+python scripts/export_matlab_validation.py          # scenarios, exact noise, TD3 policy, Python reference
+```
+```matlab
+cd matlab
+run_matlab_validation                                % about 3 min in Octave, faster in MATLAB
+```
+```bash
+python scripts/plot_matlab_validation.py            # paper figure: results/figures/fig_matlab_validation.pdf
+```
+
+**Result (12 test scenarios × 3 controllers, run with GNU Octave 8.4):**
+* The operating-point dispatch is identical.
+* Fixed and projected VSG traces are bit-identical (max |Δ| = 0).
+* TD3-policy traces differ by at most 1.1·10⁻⁷ Hz and 6·10⁻⁸ MW. The only source is float32 arithmetic in the PyTorch actor.
+* All metrics (nadir, RoCoF, BESS energy, infeasible commitments, saturation, return) agree to 0.00 %.
+
+See `matlab/results/validation_summary.txt`. This verifies the implementation across tools (code-to-code); it is not yet a circuit-level validation. Sections 1–4 below describe that next step in Simscape.
+
 Goal: show that a policy trained on the fast RMS model keeps its advantage in a circuit-level (average-value converter) model. The scenarios, parameters and policy are identical; only the plant fidelity changes.
 
 > The MATLAB files in `matlab/` could not be executed in the environment where they were written. The numerical logic is mirrored and tested in Python: the forward-pass parity test is in `tests/test_env_agent.py`. Run `vsgrl_policy.m` once against a Python trace before relying on it.

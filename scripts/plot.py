@@ -100,16 +100,16 @@ def responses(cfg, out):
         m = re.match(r"(.+)_s(\d+)_sc(\d+)\.csv", f.name)
         if m and (current is None or m.group(1) in current):   # skip traces of runs no longer evaluated
             by_sc.setdefault(int(m.group(3)), {}).setdefault(m.group(1), []).append(f)
-    show = ["none", "droop", "fixed", "fixed_tuned", "bang_bang", "adaptive_rocof", "ddpg", "td3"]
+    show = ["droop", "fixed_tuned", "bang_bang", "ddpg_final", "td3_noproj_final", "td3_final"]
     for k, ctrls in by_sc.items():
         fig, axs = plt.subplots(4, 1, figsize=(4.6, 6.4), sharex=True)
-        for c in [c for c in ORDER if c in ctrls and c in show][::-1] + [c for c in ctrls if c not in ORDER]:
+        for c in [c for c in show if c in ctrls]:
             tr = pd.read_csv(sorted(ctrls[c])[0])         # first seed
-            kw = dict(color=color(c), label=LABEL.get(c, c), lw=2.0 if c == "td3" else 1.2)
+            kw = dict(color=color(c), label=LABEL.get(c, c), lw=2.0 if c == "td3_final" else 1.2)
             axs[0].plot(tr.t, tr.df_hz, **kw)
             axs[1].plot(tr.t, tr.rocof_hz_s, **kw)
             axs[2].plot(tr.t, tr.p_vsg_mw, **kw)
-            if c not in ("none", "droop"):
+            if c != "droop":
                 axs[3].plot(tr.t, tr.H_v, **kw)
         lim = cfg["system"]["grid_code"]
         axs[0].set_ylabel("Δf (Hz)")
@@ -119,8 +119,8 @@ def responses(cfg, out):
         axs[2].set_ylabel("VSG power (MW)")
         axs[3].set_ylabel("Virtual inertia H (s)")
         axs[3].set_xlabel("Time (s)")
-        if "none" in ctrls:   # diesel-only usually collapses: zoom on the supported responses
-            dev = max(pd.read_csv(sorted(ctrls[c])[0]).df_hz.abs().max() for c in ctrls if c != "none")
+        if True:   # zoom on the shown responses
+            dev = max(pd.read_csv(sorted(ctrls[c])[0]).df_hz.abs().max() for c in show if c in ctrls)
             axs[0].set_ylim(-1.3 * dev, 1.3 * dev)
             axs[1].set_ylim(-3 * lim["rocof_limit_hz_s"], 3 * lim["rocof_limit_hz_s"])
         h, l = axs[0].get_legend_handles_labels()
