@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from _common import base_parser, setup  # noqa: E402
-from plot import LABEL, MUTED, color, save, style  # noqa: E402
+from plot import LABEL, MUTED, RESULT_SET, color, save, style  # noqa: E402
 
 from vsgrl.config import resolve_path  # noqa: E402
 from vsgrl.controllers import FixedTunedVSG  # noqa: E402
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         ax.plot(f[X], f[y], color=MUTED, lw=1.2, ls="--", drawstyle="steps-post",
                 label="Fixed-VSG front (attainable)")
         for c, g in per_seed.groupby("controller"):
-            if c in ("none", "droop", "fixed_feasible"):     # references; fixed_feasible ≈ fixed_tuned
+            if c not in RESULT_SET:   # validation-selected RL = base controller; references omitted
                 continue
             ax.errorbar(g[X].mean(), g[y].mean(), xerr=g[X].std() if len(g) > 1 else None,
                         yerr=g[y].std() if len(g) > 1 else None, fmt="o", ms=6, color=color(c),

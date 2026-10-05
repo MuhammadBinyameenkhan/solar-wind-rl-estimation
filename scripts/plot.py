@@ -23,16 +23,23 @@ from vsgrl.data.hybrid import load_processed  # noqa: E402
 PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
 ORDER = ["td3", "ddpg", "fixed", "bang_bang", "adaptive_rocof", "fixed_tuned", "td3_final", "ddpg_final"]
 REFERENCE = {"droop": "#8a8985", "none": "#b5b4ae", "fixed_feasible": "#6f6e69"}   # neutral references
+# Ablation runs reuse a slot of an entity never drawn in the same figure:
+#   learning curves show td3 / ddpg / td3_noproj; result figures show the *final* policies.
+EXTRA = {"td3_noproj": PALETTE[6], "td3_noproj_final": PALETTE[0]}
+RESULT_SET = ["fixed", "fixed_tuned", "bang_bang", "adaptive_rocof", "td3_final", "ddpg_final", "td3_noproj_final"]
 LABEL = {"td3": "TD3 (validation-selected)", "ddpg": "DDPG (validation-selected)", "fixed": "Fixed VSG", "bang_bang": "Bang-bang VSG",
          "adaptive_rocof": "Adaptive VSG", "fixed_feasible": "Fixed VSG (projected)", "fixed_tuned": "Fixed VSG (tuned)",
          "droop": "BESS droop (no inertia)", "none": "No support",
-         "td3_final": "TD3 (final policy)", "ddpg_final": "DDPG (final policy)"}
+         "td3_final": "TD3 (final policy)", "ddpg_final": "DDPG (final policy)",
+         "td3_noproj": "TD3 without projection", "td3_noproj_final": "TD3 w/o projection (final)"}
 INK, MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 
 
 def color(c):
     if c in REFERENCE:
         return REFERENCE[c]
+    if c in EXTRA:
+        return EXTRA[c]
     if c in ORDER:
         return PALETTE[ORDER.index(c)]
     return PALETTE[(abs(hash(c)) % 3) + 5]
@@ -59,7 +66,7 @@ def learning_curves(cfg, out):
     """Validation return (training objective, incl. RL regularisers) vs episode, mean ± std over
     seeds, for the RL runs in eval.controllers. Episode 0 = untrained residual policy = base VSG."""
     runs = resolve_path(cfg["train"]["out_dir"])
-    names = [c for c in cfg["eval"]["controllers"] if (runs / c).is_dir()]
+    names = [c for c in ["td3", "ddpg", "td3_noproj"] if (runs / c).is_dir()]
     fig, ax = plt.subplots(figsize=(4.6, 2.9))
     base = None
     for name in names:
@@ -69,7 +76,7 @@ def learning_curves(cfg, out):
         m = pd.concat(logs).groupby("episode")["val_return"]
         mu, sd = m.mean(), m.std().fillna(0)
         c = color(name)
-        ax.plot(mu.index, mu.values, color=c, label=f"{name.upper()} (n={len(logs)} seeds)")
+        ax.plot(mu.index, mu.values, color=c, label=f"{LABEL.get(name, name).split(' (')[0]} (n={len(logs)} seeds)")
         ax.fill_between(mu.index, mu - sd, mu + sd, color=c, alpha=0.18, linewidth=0)
         if 0 in mu.index:
             base = mu.loc[0]
@@ -128,7 +135,7 @@ def boxes(cfg, out):
     if not f.exists():
         return
     df = pd.read_csv(f)
-    df = df[~df.controller.isin(["none", "fixed_feasible"])]   # ≤ 8 series: one palette slot each
+    df = df[df.controller.isin(RESULT_SET + ["droop"])]       # distinct controllers, one colour each
     per = df.groupby(["controller", "scenario"]).mean(numeric_only=True).reset_index()
     ctrls = [c for c in ORDER if c in per.controller.unique()] + \
             [c for c in per.controller.unique() if c not in ORDER]

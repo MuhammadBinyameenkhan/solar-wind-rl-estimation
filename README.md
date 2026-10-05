@@ -21,10 +21,10 @@ Code for the thesis and paper. A TD3 (and DDPG) agent schedules the **virtual in
 
 > **New here? Start with [docs/VSCODE.md](docs/VSCODE.md)** (set-up in VS Code), then run `scripts/walkthrough.py` cell by cell. It explains the whole study step by step with plots.
 >
-> **Main findings so far** (details in [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)):
-> * The headroom feasibility projection is essentially free (return −105.9 → −106.0).
+> **Main findings** (full budget, 5 seeds × 1000 episodes; details in [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)):
+> * The headroom feasibility projection removes infeasible inertia/damping commitments: without it, TD3 learns to over-commit for 5.1 s of every 30 s episode; with it, 0.02 s (p_Holm ≈ 10⁻³²). For a tuned fixed VSG it costs essentially nothing (return −105.9 → −106.1).
 > * The oracle bound shows adaptive (H, D) scheduling can gain at most about 2 % here.
-> * TD3/DDPG residual policies do not beat the tuned VSG. TD3 trades lower nadir and RoCoF for more BESS energy (non-dominated); DDPG is dominated.
+> * TD3/DDPG residual policies do not beat the tuned VSG. TD3 trades a lower nadir for more BESS energy (non-dominated); DDPG is dominated.
 
 ## 1. Install
 

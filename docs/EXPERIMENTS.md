@@ -203,3 +203,37 @@ TD3 beats DDPG on nadir, RoCoF and return (all p < 10⁻⁵).
 Training-curve values include the RL regularisers (action rate, trust region), so they sit below the test-set objective returns.
 
 To reproduce at the paper's full budget: `bash run_all.sh` (5 seeds × 1000 episodes; ≈4 h on 4 cores).
+
+---
+
+## Full-budget results (5 seeds × 1000 episodes) + projection ablation — **use these in the paper**
+
+Setup as in the previous section, at the full budget: TD3, DDPG and TD3 **without** the projection (`td3_noproj`), 5 seeds × 1000 episodes each (≈52–65 min per seed). Parameters are now clipped to the feasible bounds *after* the rate limit (feasibility before smoothness). There are 200 test scenarios. P-values are paired Wilcoxon, Holm-corrected over all comparisons. Source: `results/summary.csv`, `results/significance.csv`.
+
+| Controller | Nadir (Hz) | RoCoF (Hz/s) | BESS (kWh) | Saturation (s) | **Infeasible commit. (s)** | Return |
+|---|---|---|---|---|---|---|
+| Fixed VSG, tuned (H 3, D 15) | 0.573 | 1.474 | 0.775 | 0.103 | 2.330 | **−105.9** |
+| Fixed VSG, tuned + projection | 0.573 | 1.479 | 0.775 | 0.123 | **0.007** | −106.1 |
+| TD3 / DDPG validation-selected (= base, 10/10 runs) | 0.573 | 1.479 | 0.775 | 0.123 | 0.007 | −106.1 |
+| Fixed VSG, standard (H 3, D 20) | 0.508 | 1.452 | 0.934 | 0.126 | 2.340 | −115.8 |
+| Bang-bang VSG | 0.505 | 1.423 | 0.936 | 0.121 | 2.989 | −116.4 |
+| **TD3, final policy** | 0.522 | 1.482 | 0.849 | 0.136 | **0.019** | −122.0 |
+| TD3 *without projection*, final policy | 0.540 | 1.457 | 0.832 | 0.108 | 5.069 | −124.2 |
+| DDPG, final policy | 0.596 | 1.594 | 0.845 | 0.128 | 0.022 | −133.4 |
+| BESS droop (no inertia) | 0.732 | 5.520 | 0.927 | 0.645 | 1.103 | −286.8 |
+| Diesel only | 3.06 (97.5 % collapse) | 7.38 | 0 | 0 | 0 | −557.7 |
+
+"Infeasible commitment" is the time per 30 s episode during which the scheduled D (damping power at the ±0.2 Hz band edge) or H (inertial power at 1 Hz/s) needs more power than the direction-aware BESS + PV headroom.
+
+**E2 — projection ablation (the paper's main positive result):**
+* **Without the projection, TD3 learns to over-commit.** It has infeasible commitments for 5.07 s of every 30 s episode (4–7 s on every seed), more than the fixed VSG (2.33 s). With the projection this falls to 0.02 s: lower in 98 % of scenarios, p_Holm ≈ 6·10⁻³².
+* **The projection also improves TD3's nadir:** 0.522 vs 0.540 Hz, p_Holm ≈ 3·10⁻⁶. Its effect on return (−122.0 vs −124.2) is not significant after Holm correction (raw p = 0.003, p_Holm = 0.087).
+* **For the tuned fixed VSG, feasibility costs almost nothing:** infeasible time 2.33 → 0.007 s, nadir unchanged (p = 0.56), return −105.93 → −106.06.
+* **Caveat to report:** actual current-limit saturation is slightly *higher* with the projection (0.123 vs 0.103 s for the fixed VSG; 0.136 vs 0.108 s for TD3). It is small in absolute terms. A likely cause is that lower damping lets frequency drift further, so BESS secondary control raises the set-point harder.
+
+**RL vs tuned fixed VSG (full budget):**
+* TD3's learned policy lowers the nadir by 0.061 Hz (better in 85 % of scenarios, p_Holm ≈ 7·10⁻²¹). RoCoF is not significantly different.
+* It uses 0.067 kWh more BESS energy (p_Holm ≈ 10⁻³¹), giving a worse return (−13.5, p_Holm ≈ 6·10⁻³²).
+* It is non-dominated against the fixed-VSG family (fast energy, band time, nadir, RoCoF): a different trade-off, not a better one.
+* DDPG's learned policy is dominated by the tuned fixed VSG and is worse than TD3 on nadir, RoCoF and return (all p_Holm < 10⁻⁹).
+* In all 15 runs the best validation checkpoint is the untrained base controller. More training (600 → 1000 episodes) does not change this.
