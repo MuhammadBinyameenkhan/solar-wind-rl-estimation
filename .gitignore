@@ -1,7 +1,7 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-results/checkpoints/
+results/checkpoints/*_checkpoint.pt
 results/smoke/
 results/pilot/
 results/eval_cache.pt

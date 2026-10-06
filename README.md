@@ -35,6 +35,28 @@ Useful options:
 On a 4-core CPU one 1000-episode run takes roughly 1 h; the full ten-run study
 with `--workers 4` takes about 3–4 h. A GPU is not needed.
 
+## Results of the 5-seed study
+
+Summary (test scenarios, mean ± 95 % CI over 5 seeds; full tables in
+[`results/RESULTS.md`](results/RESULTS.md), interpretation in
+[`docs/FINDINGS.md`](docs/FINDINGS.md)):
+
+| Controller | IAE (Hz·s) | Nadir (Hz) | RoCoF (Hz/s) | Settling (s) | Reserve (pu) |
+|---|---|---|---|---|---|
+| No VSG | 8.908 | 48.408 | 3.222 | 2.972 | 0.000 |
+| Fixed high (paper, J=4, D=30) | 2.644 | 49.730 | 0.541 | 0.204 | 0.385 (100 % derated) |
+| Fixed tuned (J=0, D=30, Kq=20) | 1.857 | 49.778 | 0.450 | 0.084 | 0.299 |
+| Rule-based adaptive | 1.859 | 49.787 | 0.450 | 0.096 | 0.244 |
+| DDPG-VSG | 1.857 ± 0.185 | 49.807 ± 0.011 | 0.423 ± 0.039 | 0.326 ± 0.206 | 0.238 ± 0.055 |
+| TD3-VSG | 1.888 ± 0.064 | 49.812 ± 0.006 | 0.399 ± 0.025 | 0.494 ± 0.161 | 0.229 ± 0.037 |
+
+The learned controllers match the tuned baselines on the error integrals,
+give the best nadir and RoCoF, and reserve ~20 % less headroom than the tuned
+constant controller. TD3 and DDPG are not significantly different. Trained
+actors and training histories are in `results/checkpoints/`, so
+`python -m vsg_rl --stage evaluate` reproduces every table and figure
+without retraining.
+
 ## Outputs (`results/`)
 
 * `RESULTS.md` — all tables, statistical tests and critic calibration
