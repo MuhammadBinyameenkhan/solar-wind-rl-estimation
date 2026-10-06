@@ -12,7 +12,8 @@ Metric definitions (all computed identically for every controller):
                   episode, i.e. it measured contingency 2.]
   rocof_win       peak 500 ms-window RoCoF (relay view)
   settle_s        time after the last contingency clears until |df| < 0.05 Hz
-                  permanently;  settle1_s the same after contingency 1
+                  permanently (NaN, and skipped in averages, if the
+                  contingency is still active at the end of the episode);  settle1_s the same after contingency 1
                   (measured up to the start of contingency 2)
   iae / ise / itae
   reserve_pu      mean DELIVERED headroom commitment (Eq. 22 with J_eff, D_eff)
@@ -131,7 +132,10 @@ def evaluate_many(policies: dict, episodes, workers: int = 4) -> dict:
 
 
 def episode_mean(rows: list) -> dict:
-    return {k: float(np.mean([r[k] for r in rows])) for k in METRIC_KEYS}
+    """Mean over episodes.  NaN-aware: settling is undefined when a randomised
+    contingency ends after the episode does, and those episodes are skipped."""
+    with np.errstate(all="ignore"):
+        return {k: float(np.nanmean([r[k] for r in rows])) for k in METRIC_KEYS}
 
 
 # ----------------------------------------------------------------
