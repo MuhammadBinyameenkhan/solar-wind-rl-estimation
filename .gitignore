@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+results/checkpoints/
+results/smoke/
+results/pilot/
+results/eval_cache.pt
+results/training_log.txt

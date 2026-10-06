@@ -1,0 +1,14 @@
+{
+ "source": "manuscript calibration run (Open-Meteo, 768 x 15-min samples, 7 past days + 1 forecast day). irr/cloud_depth/combined behaviour as reported in the paper (Sec. 4.1); wind_before/wind_after/temps reconstructed to reproduce the paper's Table 2 baselines. Replace with an archive calibration: python -m vsg_rl.weather --calibrate",
+ "samples": 768,
+ "lat": 14.9799,
+ "lon": 102.0977,
+ "irr": 708.0,
+ "temp": 29.0,
+ "wind": 5.0,
+ "cloud_depth": 0.30,
+ "wind_before": 7.0,
+ "wind_after": 3.0,
+ "night_wind": 5.5,
+ "night_temp": 24.0
+}
