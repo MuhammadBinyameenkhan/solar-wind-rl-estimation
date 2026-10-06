@@ -18,6 +18,10 @@ import torch.nn.functional as F
 from . import config as C
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# Weight decay drives many weights into the denormal range during long runs;
+# on CPU that made updates ~10x slower by mid-training.  Flushing them to zero
+# only affects values below ~1e-38.
+torch.set_flush_denormal(True)
 
 
 def _bounds():
