@@ -58,8 +58,9 @@ def apply_args(args):
         C.EPISODE_DURATION = 10.0
         C.FIXED_GRID_J = [0.0, 1.0]
         C.FIXED_GRID_D = [10.0, 30.0]
+        C.FIXED_GRID_KQ = [8.0, 20.0]
         from . import baselines
-        baselines.RULE_GRID = dict(J0=[0.5], kJ=[0.0, 5.0], D0=[20.0], kD=[40.0])
+        baselines.RULE_GRID = dict(J0=[0.5], kJ=[0.0, 5.0], D0=[20.0], kD=[40.0], Kq=[8.0, 20.0])
         args.seeds = "0,1"
 
 
@@ -183,9 +184,9 @@ def write_report(agg_test, agg_stress, test, stress, tuned, hists, order, seeds,
              "RL values: mean ± 95 % CI over seeds (each seed averaged over the episodes). "
              "Baselines are deterministic and tuned on the validation episodes only.\n")
     ft, ar = tuned["fixed_tuned"], tuned["adaptive_rule"]
-    L.append(f"* **Fixed tuned**: J = {ft['J']}, D = {ft['D']}  ")
+    L.append(f"* **Fixed tuned**: J = {ft['J']}, D = {ft['D']}, Kq = {ft['Kq']}  ")
     L.append(f"* **Rule-based adaptive**: J0 = {ar['J0']}, kJ = {ar['kJ']}, "
-             f"D0 = {ar['D0']}, kD = {ar['kD']}\n")
+             f"D0 = {ar['D0']}, kD = {ar['kD']}, Kq = {ar['Kq']}\n")
     L.append("## Test scenarios (average of the five)\n")
     L.append(E.markdown_table(agg_test, order) + "\n")
     L.append("## Held-out stress test\n")

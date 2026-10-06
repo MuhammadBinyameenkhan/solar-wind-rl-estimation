@@ -6,7 +6,7 @@ that does NOT learn, tuned with the same information.  Two such baselines
 are provided, both tuned on the VALIDATION episodes (never on the test
 scenarios) by maximising the SAME reward the RL agents maximise:
 
-  fixed_tuned    best constant (J, D) from a grid
+  fixed_tuned    best constant (J, D, Kq) from a grid
   adaptive_rule  rule-based adaptive VSG in the spirit of Alipoor et al.
                  (2014) and Li et al. (2016): extra inertia while the
                  deviation is growing, extra damping proportional to |df|
@@ -35,10 +35,14 @@ class AdaptiveRulePolicy:
     """J = J0 + kJ |RoCoF| while |df| is growing, else J0;  D = D0 + kD |df|.
 
     Uses only the measured (PLL) frequency and RoCoF from the observation.
+    Kq is a tuned constant: the agents adapt Kq, so a baseline stuck at the
+    default droop would lose on the voltage term for reasons unrelated to
+    frequency control.
     """
 
-    def __init__(self, J0, kJ, D0, kD):
+    def __init__(self, J0, kJ, D0, kD, Kq=None):
         self.J0, self.kJ, self.D0, self.kD = J0, kJ, D0, kD
+        self.Kq = C.KQ_VSG if Kq is None else Kq
 
     def __call__(self, s):
         df = float(s[0]) * 0.5                  # Hz
@@ -46,14 +50,14 @@ class AdaptiveRulePolicy:
         growing = df * rocof > 0.0
         J = self.J0 + (self.kJ * abs(rocof) if growing else 0.0)
         D = self.D0 + self.kD * abs(df)
-        return np.array([min(J, C.J_MAX), min(D, C.D_MAX), C.KQ_VSG])
+        return np.array([min(J, C.J_MAX), min(D, C.D_MAX), self.Kq])
 
     def params(self):
-        return dict(J0=self.J0, kJ=self.kJ, D0=self.D0, kD=self.kD)
+        return dict(J0=self.J0, kJ=self.kJ, D0=self.D0, kD=self.kD, Kq=self.Kq)
 
 
-RULE_GRID = dict(J0=[0.0, 0.5, 1.0], kJ=[0.0, 2.0, 5.0, 10.0],
-                 D0=[10.0, 20.0, 30.0], kD=[0.0, 40.0, 80.0])
+RULE_GRID = dict(J0=[0.0, 0.5], kJ=[0.0, 5.0], D0=[10.0, 20.0, 30.0],
+                 kD=[0.0, 40.0, 80.0], Kq=[8.0, 14.0, 20.0])
 
 
 # ----------------------------------------------------------------
@@ -86,7 +90,7 @@ def tune_baselines(workers: int = 4, cache: str | None = None, fresh: bool = Fal
     if not fresh and os.path.exists(cache):
         with open(cache) as fh:
             return json.load(fh)
-    specs = [("fixed", (J, D)) for J, D in product(C.FIXED_GRID_J, C.FIXED_GRID_D)]
+    specs = [("fixed", p) for p in product(C.FIXED_GRID_J, C.FIXED_GRID_D, C.FIXED_GRID_KQ)]
     specs += [("rule", p) for p in product(*RULE_GRID.values())]
     log(f"[baselines] tuning on {C.N_VAL} validation episodes: "
         f"{len(specs)} candidates, {workers} workers ...")
@@ -94,16 +98,16 @@ def tune_baselines(workers: int = 4, cache: str | None = None, fresh: bool = Fal
         scored = list(ex.map(_score_job, specs))
     fixed = [(p, s) for (k, p), s in scored if k == "fixed"]
     rule = [(p, s) for (k, p), s in scored if k == "rule"]
-    (Jb, Db), sf = max(fixed, key=lambda x: x[1])
+    (Jb, Db, Kb), sf = max(fixed, key=lambda x: x[1])
     pr, sr = max(rule, key=lambda x: x[1])
     out = dict(
-        fixed_tuned=dict(J=Jb, D=Db, val_return=sf),
+        fixed_tuned=dict(J=Jb, D=Db, Kq=Kb, val_return=sf),
         adaptive_rule=dict(zip(RULE_GRID.keys(), pr), val_return=sr),
-        fixed_grid=[dict(J=p[0], D=p[1], val_return=s) for p, s in fixed],
+        fixed_grid=[dict(J=p[0], D=p[1], Kq=p[2], val_return=s) for p, s in fixed],
     )
     with open(cache, "w") as fh:
         json.dump(out, fh, indent=1)
-    log(f"[baselines] fixed_tuned   J={Jb} D={Db}  val return {sf:.1f}")
+    log(f"[baselines] fixed_tuned   J={Jb} D={Db} Kq={Kb}  val return {sf:.1f}")
     log(f"[baselines] adaptive_rule {dict(zip(RULE_GRID.keys(), pr))}  val return {sr:.1f}")
     return out
 
@@ -114,10 +118,10 @@ def make_policy(name: str, agents: dict | None = None, tuned: dict | None = None
         return FixedPolicy(b["J"], b["D"])
     if name == "fixed_tuned":
         t = tuned["fixed_tuned"]
-        return FixedPolicy(t["J"], t["D"])
+        return FixedPolicy(t["J"], t["D"], t.get("Kq"))
     if name == "adaptive_rule":
         t = tuned["adaptive_rule"]
-        return AdaptiveRulePolicy(t["J0"], t["kJ"], t["D0"], t["kD"])
+        return AdaptiveRulePolicy(t["J0"], t["kJ"], t["D0"], t["kD"], t.get("Kq"))
     agent = (agents or {}).get(name)
     if agent is None:
         raise ValueError(f"controller '{name}' needs a trained agent")

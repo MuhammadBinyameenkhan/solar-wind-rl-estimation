@@ -231,7 +231,7 @@ def event_windows():
 # 7. BASELINE CONTROLLERS
 # ================================================================
 #   none / fixed_low / fixed_high / fixed_max  -- the paper's originals
-#   fixed_tuned   best constant (J, D) on the VALIDATION set, chosen by the
+#   fixed_tuned   best constant (J, D, Kq) on the VALIDATION set, chosen by the
 #                 same reward the agents maximise (fair, data-split-clean)
 #   adaptive_rule rule-based adaptive VSG (Alipoor 2014 / Li 2016 family),
 #                 its gains tuned the same way
@@ -242,8 +242,9 @@ BASELINES = {
     "fixed_max":  dict(J=15.0, D=60.0),
 }
 TUNED_BASELINES = ["fixed_tuned", "adaptive_rule"]
-FIXED_GRID_J = [0.0, 0.25, 0.5, 1.0, 2.0, 4.0]
-FIXED_GRID_D = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0]
+FIXED_GRID_J = [0.0, 0.5, 1.0, 2.0, 4.0]
+FIXED_GRID_D = [10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0]
+FIXED_GRID_KQ = [8.0, 14.0, 20.0]
 
 CONTROLLERS = ["none", "fixed_low", "fixed_high", "fixed_max",
                "fixed_tuned", "adaptive_rule", "ddpg", "td3"]
