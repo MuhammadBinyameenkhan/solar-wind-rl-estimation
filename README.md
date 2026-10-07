@@ -57,6 +57,15 @@ actors and training histories are in `results/checkpoints/`, so
 `python -m vsg_rl --stage evaluate` reproduces every table and figure
 without retraining.
 
+### With measured weather
+
+Re-run on measured 1 Hz Cabauw irradiance and FINO1 80 m wind
+(`--weather measured`; [`results_measured/RESULTS.md`](results_measured/RESULTS.md),
+[`docs/FINDINGS_MEASURED.md`](docs/FINDINGS_MEASURED.md)). On held-out real
+weather **TD3 reduces IAE by 5.5 % against the tuned constant controller
+(significant over 5 seeds) while reserving 27 % less headroom** (0.218 vs
+0.299 pu), and it matches the rule-based adaptive VSG with 15 % less reserve.
+
 ## Outputs (`results/`)
 
 * `RESULTS.md` — all tables, statistical tests and critic calibration
