@@ -260,10 +260,13 @@ SCENARIO_LABELS = {"clear": "Clear day", "cloud": "Cloud shadow",
 # ================================================================
 # 8. WEATHER
 # ================================================================
-#   "calibrated"  levels from data/weather_calibration.json (default)
-#   "synthetic"   built-in levels, no data file needed
+#   "calibrated"  synthetic shapes, levels from data/weather_calibration.json
+#   "synthetic"   synthetic shapes, built-in levels
+#   "measured"    windows cut from a measured high-resolution record
+#                 configured in data/measured/dataset.json (vsg_rl/realdata.py)
 WEATHER_SOURCE = "calibrated"
 CALIBRATION_FILE = os.path.join(DATA_DIR, "weather_calibration.json")
+MEASURED_CONFIG = os.path.join(DATA_DIR, "measured", "dataset.json")
 REAL_LAT = 14.9799
 REAL_LON = 102.0977
 

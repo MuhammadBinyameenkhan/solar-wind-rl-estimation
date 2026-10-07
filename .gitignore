@@ -6,3 +6,6 @@ results/smoke/
 results/pilot/
 results/eval_cache.pt
 results/training_log.txt
+data/measured/*.csv
+data/measured/*.npz
+data/measured/dataset.json

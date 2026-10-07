@@ -1,0 +1,26 @@
+{
+ "description": "Copy this file to dataset.json and point it at your downloaded data. File paths are relative to this folder. Each file is a CSV with a header row; time is ISO-8601 ('2010-07-01 06:30:01') or numeric seconds.",
+
+ "irradiance": {
+  "file": "irradiance.csv",
+  "time_column": "time",
+  "value_column": "ghi",
+  "scale": 1.0
+ },
+
+ "wind": {
+  "file": "wind.csv",
+  "time_column": "time",
+  "value_column": "wind_speed",
+  "height_m": 80.0,
+  "scale": 1.0
+ },
+
+ "temperature": null,
+
+ "hub_height_m": 80.0,
+ "shear_exponent": 0.14,
+ "analysis_dt_s": 1.0,
+ "rescale_to_site": true,
+ "split_fractions": [0.7, 0.15, 0.15]
+}

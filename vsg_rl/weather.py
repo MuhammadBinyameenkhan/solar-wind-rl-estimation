@@ -129,7 +129,7 @@ class WeatherScenarios:
                 np.clip(wind, 2.5, 25.0), self._const(0.75))
 
     # -- dispatch -------------------------------------------------
-    def get(self, name: str, stochastic: bool = False, rng=None):
+    def get(self, name: str, stochastic: bool = False, rng=None, split: str = "test"):
         fn = getattr(self, name) if name in SCENARIOS else self.clear
         irr, temp, wind, turb = fn()
         if stochastic:
@@ -143,6 +143,9 @@ class WeatherScenarios:
 
 
 def build_weather(dt=None, duration=None) -> WeatherScenarios:
+    if C.WEATHER_SOURCE == "measured":
+        from .realdata import MeasuredWeatherScenarios
+        return MeasuredWeatherScenarios(dt=dt, duration=duration)
     levels = None
     if C.WEATHER_SOURCE == "calibrated":
         levels = load_calibration()

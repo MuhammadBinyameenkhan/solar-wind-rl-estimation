@@ -29,7 +29,7 @@ Useful options:
 | `--episodes 1000` | episodes per run |
 | `--stage train / evaluate / figures` | run part of the pipeline; training resumes from checkpoints |
 | `--n-stress 50` | held-out randomised episodes per controller |
-| `--weather calibrated / synthetic` | scenario levels from `data/weather_calibration.json` or built-in |
+| `--weather calibrated / synthetic / measured` | synthetic shapes with calibrated or built-in levels, or real 30 s windows cut from measured 1 s data (see [`docs/REAL_DATA.md`](docs/REAL_DATA.md)) |
 | `--fresh` | delete `results/` and start over |
 
 On a 4-core CPU one 1000-episode run takes roughly 1 h; the full ten-run study
@@ -73,6 +73,7 @@ vsg_rl/
   config.py     every constant with units; data-split seeds
   models.py     PV, wind turbine (rotor dynamics), BESS
   weather.py    the five scenarios + Open-Meteo archive calibration tool
+  realdata.py   measured 1 s data -> scenario windows (train/val/test by time)
   env.py        swing equation, BESS droop + VSG, headroom limiter, voltage loop, reward
   baselines.py  fixed and rule-based adaptive VSG, tuned on validation episodes
   agents.py     SumTree PER, DDPG, TD3
@@ -143,6 +144,11 @@ python -m vsg_rl.weather --calibrate --start 2024-01-01 --end 2024-12-31
 These are reanalysis data for the site coordinates, not on-site
 measurements, and the sub-second disturbance shapes are synthetic. The paper
 should state both.
+
+**Measured data.** To replace the synthetic disturbance shapes with real
+high-resolution irradiance and wind records, follow
+[`docs/REAL_DATA.md`](docs/REAL_DATA.md). It lists the data sources and gives the
+step-by-step procedure. Only `data/measured/dataset.json` changes.
 
 See [`docs/CHANGES.md`](docs/CHANGES.md) for every correction relative to the
 original single-file script and the matching edits the manuscript needs.

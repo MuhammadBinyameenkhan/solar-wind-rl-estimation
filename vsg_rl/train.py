@@ -62,7 +62,7 @@ def discounted_returns(rewards, gamma):
 
 def validate(agent) -> dict:
     """Validation return (model selection) + critic calibration."""
-    env = MicrogridVSGEnv(stochastic=True)
+    env = MicrogridVSGEnv(stochastic=True, split="val")
     pol = agent.policy()
     rets, q1s, qmins, mcs = [], [], [], []
     for sc, seed in validation_episodes():
@@ -96,7 +96,7 @@ def train_agent(algo: str, seed: int = 0, episodes: int | None = None,
     ckpt_path, best_path, hist_path = _paths(algo, seed)
     set_global_seed(seed)
     agent = make_agent(algo, seed=seed)
-    env = MicrogridVSGEnv(stochastic=True)
+    env = MicrogridVSGEnv(stochastic=True, split="train")
 
     keys = ["reward", "nadir", "rocof", "J_mean", "D_mean", "Kq_mean", "critic_loss",
             "actor_loss", "q1", "q2", "scenario", "noise", "lr", "eval_ep",
@@ -218,7 +218,7 @@ def load_agent(algo: str, seed: int):
 # Parallel multi-seed training
 # ----------------------------------------------------------------
 _OVERRIDE_KEYS = ("EPISODES", "EVAL_EVERY", "WARMUP_STEPS", "EPISODE_DURATION",
-                  "F_NOM", "WEATHER_SOURCE", "OUT_DIR", "N_VAL")
+                  "F_NOM", "WEATHER_SOURCE", "OUT_DIR", "N_VAL", "MEASURED_CONFIG")
 
 
 def config_overrides() -> dict:

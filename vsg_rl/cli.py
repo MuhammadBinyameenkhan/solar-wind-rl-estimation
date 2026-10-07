@@ -30,7 +30,10 @@ def parse_args(argv=None):
                     help="parallel processes for training and evaluation")
     ap.add_argument("--stage", choices=["all", "train", "evaluate", "figures"], default="all")
     ap.add_argument("--n-stress", type=int, default=C.N_STRESS)
-    ap.add_argument("--weather", choices=["calibrated", "synthetic"], default=C.WEATHER_SOURCE)
+    ap.add_argument("--weather", choices=["calibrated", "synthetic", "measured"],
+                    default=C.WEATHER_SOURCE)
+    ap.add_argument("--data-config", default=None,
+                    help="measured-data JSON (default data/measured/dataset.json)")
     ap.add_argument("--hz", type=float, default=None)
     ap.add_argument("--out", default=None, help="output directory (default results/)")
     ap.add_argument("--fresh", action="store_true")
@@ -45,6 +48,8 @@ def apply_args(args):
     if args.hz:
         C.set_nominal_frequency(args.hz)
     C.WEATHER_SOURCE = args.weather
+    if args.data_config:
+        C.MEASURED_CONFIG = os.path.abspath(args.data_config)
     C.EPISODES = args.episodes
     C.N_STRESS = args.n_stress
     C.SAVE_PANELS = not args.no_panels

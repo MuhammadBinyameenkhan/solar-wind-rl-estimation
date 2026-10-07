@@ -38,13 +38,15 @@ class MicrogridVSGEnv:
 
     def __init__(self, scenario: str = "combined", stochastic: bool = False,
                  seed: int | None = None, dt: float | None = None,
-                 duration: float | None = None):
+                 duration: float | None = None, split: str = "test"):
         self.dt = C.CONTROL_DT if dt is None else dt
         self.duration = C.EPISODE_DURATION if duration is None else duration
         self.n_steps = int(round(self.duration / self.dt))
         self.h = self.dt / C.PHYS_SUBSTEPS
         self.scenario = scenario
         self.stochastic = stochastic
+        self.split = split          # "train" / "val" / "test": which part of a
+        #                             measured record the weather is cut from
         self.rng = np.random.default_rng(seed)
 
         self.pv = SolarPV()
@@ -60,7 +62,7 @@ class MicrogridVSGEnv:
     # ------------------------------------------------------------
     def _load_profile(self):
         irr, temp, wind, turb = self.weather.get(
-            self.scenario, stochastic=self.stochastic, rng=self.rng)
+            self.scenario, stochastic=self.stochastic, rng=self.rng, split=self.split)
         n = self.n_steps
         self._irr = np.resize(irr, n)
         self._temp = np.resize(temp, n)

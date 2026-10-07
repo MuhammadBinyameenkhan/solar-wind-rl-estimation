@@ -70,7 +70,7 @@ def validation_episodes():
 
 def validation_score(policy) -> float:
     """Mean episode return over the fixed validation episodes."""
-    env = MicrogridVSGEnv(stochastic=True)
+    env = MicrogridVSGEnv(stochastic=True, split="val")
     total = 0.0
     for sc, seed in validation_episodes():
         env.scenario = sc
