@@ -8,3 +8,6 @@ results/eval_cache.pt
 results/training_log.txt
 data/measured/*.csv
 data/measured/*.npz
+results_measured/checkpoints/*_checkpoint.pt
+results_measured/eval_cache.pt
+results_measured/training_log.txt
