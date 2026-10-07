@@ -56,3 +56,12 @@ def test_measured_scenarios_end_to_end(tmp_path, monkeypatch):
     out = env.rollout(FixedPolicy(1.0, 20.0), seed=0)
     assert np.isfinite(out["f"]).all() and not out["tripped"]
     realdata._CACHE.clear()
+
+
+def test_split_ignores_calendar_gaps():
+    from vsg_rl.realdata import _split_ranges
+    # 100 s of data, a 10 000 s gap, 100 s of data
+    gap = np.r_[np.zeros(100, bool), np.ones(10_000, bool), np.zeros(100, bool)]
+    r = _split_ranges(gap, [0.5, 0.25, 0.25])
+    have = lambda a, b: int((~gap[a:b]).sum())
+    assert have(*r["train"]) == 100 and have(*r["val"]) == 50 and have(*r["test"]) == 50

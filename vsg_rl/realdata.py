@@ -105,9 +105,15 @@ def _uniform(t, v, dt):
     return grid, vi, gap
 
 
-def _split_ranges(n, fractions):
+def _split_ranges(gap, fractions):
+    """Chronological split by the amount of DATA, not calendar time: a record
+    of a few separate days (e.g. March and July) must not put a whole split
+    inside the gap between them."""
     edges = np.concatenate([[0], np.cumsum(fractions)]) / np.sum(fractions)
-    return {s: (int(edges[i] * n), int(edges[i + 1] * n)) for i, s in enumerate(SPLITS)}
+    have = np.cumsum(~gap)
+    cut = np.searchsorted(have, edges * have[-1], side="left") + 1   # exclusive end
+    cut[0], cut[-1] = 0, len(gap)
+    return {s: (int(cut[i]), int(cut[i + 1])) for i, s in enumerate(SPLITS)}
 
 
 def _top_events(score, valid, w, k, lo, hi):
@@ -183,8 +189,8 @@ class MeasuredRecord:
         ok_g = lambda s: _window_ok(self.g_gap, s, win)
         ok_v = lambda s: _window_ok(self.v_gap, s, win)
         self.cand = {}
-        rg = _split_ranges(len(g), frac)
-        rv = _split_ranges(len(v), frac)
+        rg = _split_ranges(self.g_gap, frac)
+        rv = _split_ranges(self.v_gap, frac)
         rng = np.random.default_rng(0)
         for sp in SPLITS:
             lo, hi = rg[sp]
