@@ -12,7 +12,55 @@ The code supports both:
 | Disturbance shapes: cloud dips, wind lulls | ≤ 1 s (1-min works but loses sub-minute dynamics) | `--weather measured`: every episode is a real 30 s window cut from the record |
 | Site levels for Nakhon Ratchasima | hourly | `data/weather_calibration.json` (`python -m vsg_rl.weather --calibrate`) |
 
-## 1. Where to get the data
+## 0. Recommended combination (both free with a Zenodo/GitHub login)
+
+| | Dataset | Resolution |
+|---|---|---|
+| Irradiance | **BSRN Cabauw 1 Hz**, part 1: [Zenodo 7093164](https://zenodo.org/records/7093164) (Knap & Mol 2022) | 1 s GHI, 2011–2020 |
+| Wind | **FINO1 post-processed sonic anemometer**: [Zenodo 15826678 (2007)](https://zenodo.org/records/15826678), [Zenodo 15826899 (2008)](https://zenodo.org/records/15826899) | 10 Hz, 40/60/**80 m**, hourly `.mat` files, components u, v, w |
+
+FINO1 is a North Sea research platform close to the Netherlands, and its
+80 m sonic matches the hub height. The two records are from different years,
+which is fine: each scenario window is selected independently, and the
+combined scenario is a designed superposition anyway.
+
+Same-site alternative: part 2 of the Cabauw dataset, [Zenodo 7462362](https://zenodo.org/records/7462362),
+contains the Cabauw tower wind speed for the same days. It is most likely
+10-minute data (check the file), which is too slow for gust dynamics, but it
+is useful to cite as site context.
+
+### Quick procedure for Cabauw + FINO1
+
+```bash
+pip install -r requirements.txt
+
+# 1  download 1–3 months of Cabauw files and 1–3 months of FINO1 80 m files,
+#    unpack them into e.g. downloads/cabauw/ and downloads/fino1/
+
+# 2  look inside one file of each to find the variable names
+python tools/convert_to_csv.py inspect downloads/cabauw/<one file>.nc
+python tools/convert_to_csv.py inspect downloads/fino1/<one file>.mat
+
+# 3  convert (replace GHI / u / v with the names printed in step 2)
+python tools/convert_to_csv.py irradiance --var GHI --hz 1 \
+    --out data/measured/irradiance.csv "downloads/cabauw/*.nc"
+python tools/convert_to_csv.py wind --u u --v v --hz 10 \
+    --out data/measured/wind.csv "downloads/fino1/*.mat"
+
+# 4  configure (the example is already set up for these two CSVs; height_m = 80)
+cp data/measured/dataset.example.json data/measured/dataset.json
+
+# 5  check, then run
+python -m vsg_rl.realdata --check
+python -m vsg_rl --weather measured --smoke
+python -m vsg_rl --weather measured --out results_measured --fresh
+```
+
+If the FINO1 files contain only the along-wind component, use `--u u` and
+omit `--v`. If a FINO1 folder mixes 40, 60 and 80 m files, convert only the
+80 m ones (for example `"downloads/fino1/*80*.mat"`).
+
+## 1. Where to get the data (all options)
 
 ### Irradiance (choose one)
 

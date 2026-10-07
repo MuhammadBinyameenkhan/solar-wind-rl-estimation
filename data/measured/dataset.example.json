@@ -1,17 +1,17 @@
 {
- "description": "Copy this file to dataset.json and point it at your downloaded data. File paths are relative to this folder. Each file is a CSV with a header row; time is ISO-8601 ('2010-07-01 06:30:01') or numeric seconds.",
+ "description": "Copy this file to dataset.json. Set up for Cabauw BSRN 1 Hz irradiance + FINO1 10 Hz sonic wind at 80 m, converted with tools/convert_to_csv.py (which writes time,value columns). File paths are relative to this folder. Each file is a CSV with a header row; time is ISO-8601 ('2010-07-01 06:30:01') or numeric seconds.",
 
  "irradiance": {
   "file": "irradiance.csv",
   "time_column": "time",
-  "value_column": "ghi",
+  "value_column": "value",
   "scale": 1.0
  },
 
  "wind": {
   "file": "wind.csv",
   "time_column": "time",
-  "value_column": "wind_speed",
+  "value_column": "value",
   "height_m": 80.0,
   "scale": 1.0
  },

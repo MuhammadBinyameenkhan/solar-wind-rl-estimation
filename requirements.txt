@@ -2,3 +2,5 @@ numpy>=1.24
 torch>=2.0
 matplotlib>=3.7
 pytest>=7
+scipy>=1.10      # tools/convert_to_csv.py (.mat / NetCDF-3)
+h5py>=3.8        # tools/convert_to_csv.py (NetCDF-4 / MATLAB v7.3)
