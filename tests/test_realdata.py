@@ -65,3 +65,12 @@ def test_split_ignores_calendar_gaps():
     r = _split_ranges(gap, [0.5, 0.25, 0.25])
     have = lambda a, b: int((~gap[a:b]).sum())
     assert have(*r["train"]) == 100 and have(*r["val"]) == 50 and have(*r["test"]) == 50
+
+
+def test_despike_removes_dropouts_keeps_gusts():
+    from vsg_rl.realdata import despike
+    v = np.full(20, 18.0)
+    v[5] = 12.8                    # single-sample dropout -> removed
+    v[10:14] = 23.0                # 4-second gust -> kept
+    out, n = despike(v, 3.0)
+    assert n == 1 and out[5] == 18.0 and (out[10:14] == 23.0).all()

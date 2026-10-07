@@ -95,6 +95,26 @@ def read_series(spec: dict, base_dir: str):
 # ----------------------------------------------------------------
 # Event detection
 # ----------------------------------------------------------------
+def despike(v, jump, settle_frac=0.5):
+    """Replace isolated single-sample outliers (sensor dropouts / spikes).
+
+    A sample is a spike if it departs from BOTH neighbours by more than
+    ``jump`` in opposite directions while the neighbours agree with each
+    other to within ``settle_frac * jump``; it is replaced by their mean.
+    Real gusts persist for several samples and are left untouched.
+    Returns (cleaned copy, number of samples replaced).
+    """
+    v = np.asarray(v, dtype=float).copy()
+    if len(v) < 3:
+        return v, 0
+    a, b, c = v[:-2], v[1:-1], v[2:]
+    spike = ((np.abs(b - a) > jump) & (np.abs(c - b) > jump)
+             & (np.sign(b - a) != np.sign(c - b)) & (np.abs(c - a) < settle_frac * jump))
+    idx = np.where(spike)[0] + 1
+    v[idx] = 0.5 * (v[idx - 1] + v[idx + 1])
+    return v, int(len(idx))
+
+
 def _uniform(t, v, dt):
     """Resample onto a uniform grid; mark samples next to data gaps."""
     grid = np.arange(t[0], t[-1], dt)
@@ -152,6 +172,9 @@ class MeasuredRecord:
         ti, gi, self.t0_irr = read_series(cfg["irradiance"], base)
         self.t_irr, self.g, self.g_gap = _uniform(ti, np.maximum(gi, 0.0), self.dt)
         tw, vw, self.t0_wind = read_series(cfg["wind"], base)
+        self.n_despiked = 0
+        if cfg["wind"].get("despike", True):
+            vw, self.n_despiked = despike(vw, float(cfg["wind"].get("despike_jump_ms", 3.0)))
         h = float(cfg["wind"].get("height_m", 80.0))
         hub = float(cfg.get("hub_height_m", 80.0))
         vw = vw * (hub / h) ** float(cfg.get("shear_exponent", 0.14))
@@ -296,7 +319,8 @@ def _check(cfg_path, out_png):
     rec = get_record(cfg_path)
     print(f"irradiance: {len(rec.g)} samples at {rec.dt} s  (record start {rec.t0_irr}); "
           f"daytime P90 = {rec.g_hi:.0f} W/m2")
-    print(f"wind:       {len(rec.v)} samples at {rec.dt} s  (record start {rec.t0_wind})")
+    print(f"wind:       {len(rec.v)} samples at {rec.dt} s  (record start {rec.t0_wind}); "
+          f"{rec.n_despiked} isolated spikes removed")
     print("candidate windows per split:")
     for sp, d in rec.summary().items():
         print(f"  {sp:<5}  " + "  ".join(f"{k}={n}" for k, n in d.items()))

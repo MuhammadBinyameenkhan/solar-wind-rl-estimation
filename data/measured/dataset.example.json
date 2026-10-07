@@ -13,7 +13,9 @@
   "time_column": "time",
   "value_column": "value",
   "height_m": 80.0,
-  "scale": 1.0
+  "scale": 1.0,
+  "despike": true,
+  "despike_jump_ms": 3.0
  },
 
  "temperature": null,

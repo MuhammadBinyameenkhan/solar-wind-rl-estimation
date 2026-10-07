@@ -1,0 +1,28 @@
+{
+ "description": "Cabauw BSRN 1 Hz GHI (31 Mar, 17 Jul, 22 Jul 2015) + FINO1 sonic wind at 80 m, 1 s means (21-23 Jan 2007).",
+ "irradiance": {
+  "file": "irradiance.csv",
+  "time_column": "time",
+  "value_column": "ghi_wm2",
+  "scale": 1.0
+ },
+ "wind": {
+  "file": "wind.csv",
+  "time_column": "time",
+  "value_column": "wind_ms",
+  "height_m": 80.0,
+  "scale": 1.0,
+  "despike": true,
+  "despike_jump_ms": 3.0
+ },
+ "temperature": null,
+ "hub_height_m": 80.0,
+ "shear_exponent": 0.14,
+ "analysis_dt_s": 1.0,
+ "rescale_to_site": true,
+ "split_fractions": [
+  0.7,
+  0.15,
+  0.15
+ ]
+}
