@@ -57,14 +57,17 @@ actors and training histories are in `results/checkpoints/`, so
 `python -m vsg_rl --stage evaluate` reproduces every table and figure
 without retraining.
 
-### With measured weather
+### With measured weather (10 seeds)
 
-Re-run on measured 1 Hz Cabauw irradiance and FINO1 80 m wind
+Re-run on measured 1 Hz Cabauw irradiance and FINO1 80 m wind with ten seeds
 (`--weather measured`; [`results_measured/RESULTS.md`](results_measured/RESULTS.md),
 [`docs/FINDINGS_MEASURED.md`](docs/FINDINGS_MEASURED.md)). On held-out real
-weather **TD3 reduces IAE by 5.5 % against the tuned constant controller
-(significant over 5 seeds) while reserving 27 % less headroom** (0.218 vs
-0.299 pu), and it matches the rule-based adaptive VSG with 15 % less reserve.
+weather both agents **match the tuned controllers' regulation while
+reserving 24–26 % less headroom than the tuned constant controller and
+10–13 % less than the rule-based one, on every seed**. DDPG also lowers IAE
+by 5.6 % (significant); TD3's −2.5 % is not significant. With 5 seeds the
+ordering of the two algorithms was reversed, a reminder that few-seed
+rankings are fragile.
 
 ## Outputs (`results/`)
 
