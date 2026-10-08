@@ -136,7 +136,10 @@ def main(argv=None):
         log(f"[evaluate] held-out stress test: {C.N_STRESS} randomised episodes each ...")
         stress = E.evaluate_many(policies, E.stress_episodes(), workers=args.workers)
         log("[evaluate] fixed-gain grid on the test scenarios (Pareto frontier) ...")
-        grid_pol = {(f"J{J}_D{D}", None): FixedPolicy(J, D)
+        # same reactive droop as the tuned constant controller, so the
+        # frontier isolates the effect of (J, D) on frequency regulation
+        kq_grid = tuned["fixed_tuned"].get("Kq", C.KQ_VSG)
+        grid_pol = {(f"J{J}_D{D}", None): FixedPolicy(J, D, kq_grid)
                     for J in np.arange(0.0, 4.01, 0.5) for D in np.arange(5.0, 60.1, 5.0)}
         grid_res = E.evaluate_many(grid_pol, E.test_episodes(), workers=args.workers)
         grid = [E.episode_mean(r) for r in grid_res.values()]

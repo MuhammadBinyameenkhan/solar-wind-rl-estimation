@@ -627,7 +627,7 @@ def figure_metrics(agg: dict, per_key: dict, grid: list, stress_rows: dict,
     ax = fig.add_subplot(gs[2, 0])
     if grid:
         g = np.array([(p["reserve_pu"], p["iae"]) for p in grid])
-        ax.scatter(g[:, 0], g[:, 1], s=14, color="#BDBDBD", label="fixed (J, D) grid")
+        ax.scatter(g[:, 0], g[:, 1], s=14, color="#BDBDBD", label="fixed (J, D) grid, tuned Kq")
         fr = _pareto([tuple(p) for p in g])
         ax.plot(fr[:, 0], fr[:, 1], "-", color=C.COLORS["dim"], lw=1.2,
                 label="fixed-gain Pareto frontier")
