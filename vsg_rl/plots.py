@@ -665,3 +665,129 @@ def figure_metrics(agg: dict, per_key: dict, grid: list, stress_rows: dict,
            ylabel="P_vsg (kW)")
     ax.legend(fontsize=7); ax.grid(alpha=.4)
     return _save(fig, "figure7_metrics.png")
+
+
+# ================================================================
+# FIGURE 2 (measured-weather study) -- the measured records themselves
+# ================================================================
+def figure2_measured() -> str:
+    """Measured irradiance and wind records and the component models.
+
+    Every weather panel shows recorded data (BSRN 1 Hz GHI, 1 s sonic wind);
+    only panels (e)-(g) show model characteristics.
+    """
+    from .realdata import get_record
+    rec = get_record()
+    pv, wt = SolarPV(), WindTurbine()
+    t0_irr = np.datetime64(rec.t0_irr)
+    t0_w = np.datetime64(rec.t0_wind)
+
+    g = np.where(rec.g_gap, np.nan, rec.g)
+    t_abs = t0_irr + (rec.t_irr * 1000).astype("timedelta64[ms]")
+    days = t_abs.astype("datetime64[D]")
+    hours = (t_abs - days).astype("timedelta64[ms]").astype(float) / 3.6e6
+    v = np.where(rec.v_gap, np.nan, rec.v)
+    tw_h = rec.t_w / 3600.0
+    T_amb = rec.ambient_temp_c
+
+    fig = plt.figure(figsize=(15, 10))
+    gs = GridSpec(3, 3, figure=fig, hspace=0.45, wspace=0.30)
+    fig.suptitle("Figure 2 — Measured weather records and component models\n"
+                 "BSRN Cabauw 1 Hz global irradiance · FINO1 80 m sonic wind (1 s means)",
+                 fontsize=13, fontweight="bold")
+    day_list = [d for d in np.unique(days) if np.isfinite(g[days == d]).sum() > 3600]
+    dcol = plt.cm.viridis(np.linspace(0.1, 0.85, max(len(day_list), 1)))
+
+    ax = fig.add_subplot(gs[0, 0])
+    for d, c in zip(day_list, dcol):
+        m = days == d
+        ax.plot(hours[m], g[m], lw=0.6, color=c, label=str(d))
+    ax.set(title="(a) Measured GHI, 1 Hz (Cabauw)", xlabel="Hour (UTC)", ylabel="GHI (W/m²)",
+           xlim=(0, 24))
+    ax.legend(fontsize=7); ax.grid(alpha=.4)
+
+    ax = fig.add_subplot(gs[0, 1])
+    for d, c in zip(day_list, dcol):
+        m = days == d
+        p = np.array([pv.power(x, T_amb) if np.isfinite(x) else np.nan for x in g[m][::10]]) / 1e3
+        ax.plot(hours[m][::10], p, lw=0.7, color=c, label=str(d))
+    ax.axhline(C.PV_RATED / 1e3, ls=":", color=C.COLORS["dim"])
+    ax.set(title=f"(b) PV output from measured GHI (T_amb = {T_amb:.0f} °C)",
+           xlabel="Hour (UTC)", ylabel="PV power (kW)", xlim=(0, 24))
+    ax.grid(alpha=.4)
+
+    ax = fig.add_subplot(gs[0, 2])
+    ax.plot(tw_h, v, lw=0.3, color=C.COLORS["wind"], alpha=.6, label="1 s")
+    n10 = 600
+    k = (len(v) // n10) * n10
+    with np.errstate(all="ignore"):
+        v10 = np.nanmean(v[:k].reshape(-1, n10), axis=1)
+    ax.plot(tw_h[:k:n10] + 600 / 7200, v10, color="k", lw=1.2, label="10 min mean")
+    for x, lab in [(wt.v_in, "cut-in"), (wt.v_rated, "rated")]:
+        ax.axhline(x, ls=":", color=C.COLORS["dim"])
+        ax.text(tw_h[0], x, lab, fontsize=7, va="bottom")
+    ax.set(title=f"(c) Measured hub-height wind (FINO1, from {str(t0_w)[:10]})",
+           xlabel="Hours from start of record", ylabel="Wind speed (m/s)")
+    ax.legend(fontsize=7); ax.grid(alpha=.4)
+
+    ax = fig.add_subplot(gs[1, 0])
+    vv = v[np.isfinite(v)][::10]
+    pw = np.array([wt.power_static(x) for x in vv]) / 1e3
+    ax.plot(tw_h[np.isfinite(v)][::10], pw, lw=0.4, color=C.COLORS["wind"])
+    ax.set(title="(d) Wind power from measured wind (steady-state curve)",
+           xlabel="Hours from start of record", ylabel="Wind power (kW)")
+    ax.grid(alpha=.4)
+
+    ax = fig.add_subplot(gs[1, 1])
+    G = np.linspace(0, 1300, 300)
+    for T, ls in [(T_amb, "-"), (T_amb + 15, "--")]:
+        ax.plot(G, [pv.power(x, T) / 1e3 for x in G], ls, color=C.COLORS["solar"],
+                label=f"T_amb = {T:.0f} °C")
+    ax.set(title="(e) PV model: output vs irradiance", xlabel="Irradiance (W/m²)",
+           ylabel="PV power (kW)")
+    ax.legend(fontsize=7); ax.grid(alpha=.4)
+
+    ax = fig.add_subplot(gs[1, 2])
+    vg = np.linspace(0, 26, 400)
+    ax.plot(vg, [wt.power_static(x) / 1e3 for x in vg], color=C.COLORS["wind"], label="power curve")
+    ax.set(title="(f) Wind power curve and measured speed distribution",
+           xlabel="Wind speed (m/s)", ylabel="Wind power (kW)", ylim=(0, 600))
+    ax2 = ax.twinx()
+    ax2.hist(v[np.isfinite(v)], bins=52, range=(0, 26), color=C.COLORS["dim"], alpha=.35,
+             density=True, label="measured (FINO1)")
+    ax2.set_ylabel("Probability density")
+    ax.legend(loc="upper left", fontsize=7); ax2.legend(loc="center right", fontsize=7)
+    ax.grid(alpha=.4)
+
+    ax = fig.add_subplot(gs[2, 0])
+    lam = np.linspace(0.5, 14, 400)
+    for beta, c in [(0, C.COLORS["wind"]), (5, C.COLORS["J"]), (10, C.COLORS["D"])]:
+        ax.plot(lam, [wt.cp(x, beta) for x in lam], color=c, label=f"β = {beta}°")
+    ax.set(title="(g) Power coefficient Cp(λ, β)", xlabel="Tip-speed ratio λ", ylabel="Cp")
+    ax.legend(fontsize=7); ax.grid(alpha=.4)
+
+    ax = fig.add_subplot(gs[2, 1])
+    dg = np.abs(np.diff(g))
+    dg = dg[np.isfinite(dg) & (g[1:] > 50)]
+    dv = np.abs(np.diff(v))
+    dv = dv[np.isfinite(dv)]
+    ax.hist(dg / max(np.nanmax(g), 1) * 100, bins=60, range=(0, 30), log=True, alpha=.7,
+            color=C.COLORS["solar"], label="GHI, % of record peak per s")
+    ax.hist(dv / max(np.nanmax(v), 1) * 100, bins=60, range=(0, 30), log=True, alpha=.7,
+            color=C.COLORS["wind"], label="wind, % of record peak per s")
+    ax.set(title="(h) Measured 1 s ramp distribution", xlabel="|Δ| per second (%)",
+           ylabel="Count (log)")
+    ax.legend(fontsize=7); ax.grid(alpha=.4)
+
+    ax = fig.add_subplot(gs[2, 2])
+    env = MicrogridVSGEnv(scenario="wind_drop")
+    r = env.rollout(FixedPolicy(0, 0), seed=C.TEST_SEED)
+    ax.plot(r["t"], r["v_wind"], color=C.COLORS["wind"], label="measured wind")
+    ax.set(title="(i) Rotor dynamics on the measured wind-lull window",
+           xlabel="Time (s)", ylabel="Wind speed (m/s)")
+    ax2 = ax.twinx()
+    ax2.plot(r["t"], r["P_wind"] / 1e3, color=C.COLORS["J"], label="electrical power")
+    ax2.set_ylabel("Wind power (kW)")
+    ax.legend(loc="upper right", fontsize=7); ax2.legend(loc="lower left", fontsize=7)
+    ax.grid(alpha=.4)
+    return _save(fig, "figure2_measured_records.png")

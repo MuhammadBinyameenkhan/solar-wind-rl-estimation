@@ -57,6 +57,12 @@ actors and training histories are in `results/checkpoints/`, so
 `python -m vsg_rl --stage evaluate` reproduces every table and figure
 without retraining.
 
+> **Note (re-run in progress).** The measured-weather results below were produced
+> with the windows rescaled to irradiance/wind levels that were not taken from
+> any measurement (708 W/m², 5–7 m/s). They are superseded. The study is being
+> re-run with the windows at their measured levels (no rescaling); the
+> results will replace `results_measured/` when complete.
+
 ### With measured weather (10 seeds)
 
 Re-run on measured 1 Hz Cabauw irradiance and FINO1 80 m wind with ten seeds

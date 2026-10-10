@@ -1,3 +1,5 @@
+> **SUPERSEDED.** These results used weather windows rescaled to levels that were not measurements (708 W/m², 5–7 m/s wind). A re-run at the measured levels is in progress and will replace this file.
+
 # Results
 
 Seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]. Episodes per run: 1000. Weather: measured. Test = five deterministic paper scenarios (seed 70007); stress = 50 randomised held-out episodes. RL values: mean ± 95 % CI over seeds (each seed averaged over the episodes). Baselines are deterministic and tuned on the validation episodes only.

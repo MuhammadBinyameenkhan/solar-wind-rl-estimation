@@ -165,7 +165,8 @@ def main(argv=None):
             s = representative_seed(hists[a])
             recs[a] = MicrogridVSGEnv("combined").rollout(agents[(a, s)].policy(), seed=C.TEST_SEED)
     log("\n[figures] ...")
-    figs = [P.figure2_generation(), P.figure3_scenarios()]
+    fig2 = P.figure2_measured() if C.WEATHER_SOURCE == "measured" else P.figure2_generation()
+    figs = [fig2, P.figure3_scenarios()]
     for a, num in (("ddpg", 4), ("td3", 5)):
         if a in recs:
             figs.append(P.figure_training(a, hists[a], recs, num))

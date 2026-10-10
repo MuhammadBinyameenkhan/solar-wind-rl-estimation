@@ -19,10 +19,12 @@
  "hub_height_m": 80.0,
  "shear_exponent": 0.14,
  "analysis_dt_s": 1.0,
- "rescale_to_site": true,
+ "rescale_to_site": false,
  "split_fractions": [
   0.7,
   0.15,
   0.15
- ]
+ ],
+ "ambient_temp_c": 25.0,
+ "ambient_temp_note": "Assumption: IEC standard test temperature. The Cabauw irradiance file has no temperature column; supply a measured series under 'temperature' to replace it."
 }

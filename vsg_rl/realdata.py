@@ -32,7 +32,7 @@ import os
 import numpy as np
 
 from . import config as C
-from .weather import WeatherScenarios, load_calibration
+from .weather import WeatherScenarios
 
 EVENT_AT = 0.20          # event onset as a fraction of the window
 N_CANDIDATES = 40        # windows kept per scenario and split
@@ -179,10 +179,18 @@ class MeasuredRecord:
         hub = float(cfg.get("hub_height_m", 80.0))
         vw = vw * (hub / h) ** float(cfg.get("shear_exponent", 0.14))
         self.t_w, self.v, self.v_gap = _uniform(tw, np.maximum(vw, 0.0), self.dt)
+        # Ambient temperature: a measured series on the irradiance clock if
+        # one is configured, otherwise an explicit, reported assumption.
         self.temp = None
+        self.ambient_temp_c = float(cfg.get("ambient_temp_c", 25.0))
         if cfg.get("temperature"):
-            tt, vt, _ = read_series(cfg["temperature"], base)
-            self.temp = (tt, vt)
+            tt, vt, t0_temp = read_series(cfg["temperature"], base)
+            try:
+                shift = float((np.datetime64(self.t0_irr) - np.datetime64(t0_temp))
+                              / np.timedelta64(1, "s"))
+            except ValueError:
+                shift = 0.0          # numeric time columns: assume a common origin
+            self.temp = (tt - shift, vt)   # temperature time on the irradiance clock
 
         g, v = self.g, self.v
         day = g > 50.0
@@ -274,41 +282,62 @@ def get_record(cfg_path: str | None = None) -> MeasuredRecord:
 # Scenario generator used by the environment
 # ----------------------------------------------------------------
 class MeasuredWeatherScenarios(WeatherScenarios):
-    """Scenario windows cut from the measured record.
+    """Scenario windows cut from the measured record, at their MEASURED levels.
 
-    If ``rescale_to_site`` is true (default) each window keeps its measured
-    RELATIVE variability but its pre-event level is set to the site levels
-    in data/weather_calibration.json (Nakhon Ratchasima), because public
-    1-second records come from other sites.  State this in the paper.
+    Nothing is rescaled by default: irradiance and wind are exactly what the
+    instruments recorded (after the despiking and height correction set in
+    dataset.json).  Ambient temperature comes from a measured series when one
+    is configured; otherwise the constant ``ambient_temp_c`` (default 25 degC,
+    the IEC standard test temperature) is used and must be reported as an
+    assumption.
+
+    ``rescale_to_site: true`` is still available for site-transfer studies,
+    but then the target levels must be given explicitly under ``site_levels``
+    in dataset.json together with their source; there is no hidden default.
     """
 
     def __init__(self, dt=None, duration=None):
-        super().__init__(load_calibration(), dt=dt, duration=duration)
+        super().__init__(None, dt=dt, duration=duration)
         self.rec = get_record()
-        self.rescale = bool(self.rec.cfg.get("rescale_to_site", True))
+        cfg = self.rec.cfg
+        self.rescale = bool(cfg.get("rescale_to_site", False))
+        if self.rescale:
+            lv = cfg.get("site_levels")
+            need = {"irr", "wind", "wind_before", "night_wind", "source"}
+            if not lv or not need <= set(lv):
+                raise ValueError("rescale_to_site=true requires site_levels with keys "
+                                 f"{sorted(need)} (including their data source) in dataset.json")
+            self.lv = lv
         self.source = "measured"
 
     def _to_control_grid(self, x):
         t_src = np.arange(len(x)) * self.rec.dt
         return np.interp(self.t, t_src, x)
 
+    def _temperature(self, info, n):
+        rec = self.rec
+        if rec.temp is None or info.get("irr_start_s") is None:
+            return np.full(n, rec.ambient_temp_c)
+        tt, vt = rec.temp
+        return np.interp(info["irr_start_s"] + np.arange(n) * rec.dt, tt, vt)
+
     def get(self, name: str, stochastic: bool = False, rng=None, split: str = "test"):
         rng = rng or np.random.default_rng()
         rank = int(rng.integers(0, N_CANDIDATES)) if stochastic else 0
-        irr, wind, _ = self.rec.window(name, split, rank)
-        lead = max(1, int(round(EVENT_AT * len(irr))))
+        irr, wind, info = self.rec.window(name, split, rank)
+        temp = self._temperature(info, len(irr))
         if self.rescale:
+            lead = max(1, int(round(EVENT_AT * len(irr))))
             lv = self.lv
             if irr.max() > 0:
                 irr = irr * lv["irr"] / max(irr[:lead].mean(), 1.0)
-            target = {"wind_drop": lv["wind_before"], "combined": lv["wind"] * 1.1,
+            target = {"wind_drop": lv["wind_before"], "combined": lv["wind_before"],
                       "night": lv["night_wind"]}.get(name, lv["wind"])
             wind = wind * target / max(wind[:lead].mean(), 0.5)
         irr = np.clip(self._to_control_grid(irr), 0.0, 1400.0)
-        wind = np.clip(self._to_control_grid(wind), 0.5, 28.0)
-        temp_const = self.lv["night_temp"] if name == "night" else self.lv["temp"]
-        temp = self._const(temp_const)
-        turb = self._const(0.0)      # measured wind already carries turbulence
+        wind = np.clip(self._to_control_grid(wind), 0.0, 40.0)
+        temp = self._to_control_grid(temp)
+        turb = self._const(0.0)      # measured wind already carries its turbulence
         return irr, temp, wind, turb
 
 

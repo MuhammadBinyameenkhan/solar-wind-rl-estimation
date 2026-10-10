@@ -74,3 +74,35 @@ def test_despike_removes_dropouts_keeps_gusts():
     v[10:14] = 23.0                # 4-second gust -> kept
     out, n = despike(v, 3.0)
     assert n == 1 and out[5] == 18.0 and (out[10:14] == 23.0).all()
+
+
+def test_measured_windows_are_unscaled_raw_data(tmp_path, monkeypatch):
+    """With the default config the simulation sees exactly the recorded values."""
+    from vsg_rl import realdata
+    monkeypatch.setattr(C, "MEASURED_CONFIG", _write_record(tmp_path))
+    monkeypatch.setattr(C, "WEATHER_SOURCE", "measured")
+    realdata._CACHE.clear()
+    w = realdata.MeasuredWeatherScenarios()
+    assert not w.rescale
+    for sc in ("clear", "cloud", "wind_drop", "night", "combined"):
+        raw_irr, raw_wind, _ = w.rec.window(sc, "test", 0)
+        irr, temp, wind, _ = w.get(sc, split="test")
+        t_src = np.arange(len(raw_irr)) * w.rec.dt
+        assert np.allclose(irr, np.clip(np.interp(w.t, t_src, raw_irr), 0, 1400))
+        assert np.allclose(wind, np.interp(w.t, t_src, raw_wind))
+        assert np.allclose(temp, 25.0)            # explicit assumption, no data supplied
+    realdata._CACHE.clear()
+
+
+def test_rescaling_requires_explicit_sourced_levels(tmp_path, monkeypatch):
+    import pytest
+    from vsg_rl import realdata
+    cfg_path = _write_record(tmp_path)
+    cfg = json.loads(open(cfg_path).read())
+    cfg["rescale_to_site"] = True
+    open(cfg_path, "w").write(json.dumps(cfg))
+    monkeypatch.setattr(C, "MEASURED_CONFIG", cfg_path)
+    realdata._CACHE.clear()
+    with pytest.raises(ValueError):
+        realdata.MeasuredWeatherScenarios()
+    realdata._CACHE.clear()
