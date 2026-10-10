@@ -57,23 +57,27 @@ actors and training histories are in `results/checkpoints/`, so
 `python -m vsg_rl --stage evaluate` reproduces every table and figure
 without retraining.
 
-> **Note (re-run in progress).** The measured-weather results below were produced
-> with the windows rescaled to irradiance/wind levels that were not taken from
-> any measurement (708 W/m², 5–7 m/s). They are superseded. The study is being
-> re-run with the windows at their measured levels (no rescaling); the
-> results will replace `results_measured/` when complete.
-
 ### With measured weather (10 seeds)
 
-Re-run on measured 1 Hz Cabauw irradiance and FINO1 80 m wind with ten seeds
-(`--weather measured`; [`results_measured/RESULTS.md`](results_measured/RESULTS.md),
-[`docs/FINDINGS_MEASURED.md`](docs/FINDINGS_MEASURED.md)). On held-out real
-weather both agents **match the tuned controllers' regulation while
-reserving 24–26 % less headroom than the tuned constant controller and
-10–13 % less than the rule-based one, on every seed**. DDPG also lowers IAE
-by 5.6 % (significant); TD3's −2.5 % is not significant. With 5 seeds the
-ordering of the two algorithms was reversed, a reminder that few-seed
-rankings are fragile.
+Re-run on measured 1 Hz Cabauw irradiance and FINO1 80 m wind at their
+**recorded levels** (no rescaling; `--weather measured`;
+[`results_measured/RESULTS.md`](results_measured/RESULTS.md),
+[`docs/FINDINGS_MEASURED.md`](docs/FINDINGS_MEASURED.md)). The only
+non-measured weather input is a 25 °C ambient temperature for the PV model.
+
+* On 50 held-out measured-weather episodes, both agents **match the IAE of
+  the best constant-gain VSG** (DDPG +1.9 %, TD3 −0.9 %, not significant).
+  They commit **25–27 % less converter headroom** on every seed and are
+  derated less often.
+* TD3 also beats the tuned rule-based adaptive VSG on IAE (−5.2 %) and
+  RoCoF (−8.9 %), both significant.
+* On the five deterministic test windows, the constant-gain VSG keeps a
+  7–9 % IAE advantage. The agents' headroom there is not significantly
+  below the rule-based controller's.
+* DDPG and TD3 do not differ significantly.
+
+An earlier measured run rescaled the windows to levels that were not
+measured. It has been withdrawn and remains in the git history only.
 
 ## Outputs (`results/`)
 
@@ -150,18 +154,19 @@ are selected with this same reward.
 ## Weather data
 
 `data/weather_calibration.json` holds the scenario levels (irradiance,
-temperature, wind, cloud depth, wind fall). The shipped file reproduces the
-operating point of the manuscript's calibration run. To regenerate it from a
-fixed, reproducible window of the Open-Meteo **historical archive** (ERA5
-reanalysis) on a machine with internet access:
+temperature, wind, cloud depth, wind fall) for the **synthetic-profile**
+study (`--weather calibrated`). The shipped values are illustrative and are
+**not** measurements. The measured study does not use them. To replace them
+with reanalysis levels for the site (Open-Meteo historical archive, ERA5) on
+a machine with internet access:
 
 ```bash
 python -m vsg_rl.weather --calibrate --start 2024-01-01 --end 2024-12-31
 ```
 
-These are reanalysis data for the site coordinates, not on-site
-measurements, and the sub-second disturbance shapes are synthetic. The paper
-should state both.
+Even then, the levels are reanalysis, not on-site measurements, and the
+sub-second disturbance shapes are synthetic. A paper using this mode must
+state both.
 
 **Measured data.** To replace the synthetic disturbance shapes with real
 high-resolution irradiance and wind records, follow
