@@ -10,7 +10,7 @@ The code supports both:
 | What | Resolution needed | How it is used |
 |---|---|---|
 | Disturbance shapes: cloud dips, wind lulls | ≤ 1 s (1-min works but loses sub-minute dynamics) | `--weather measured`: every episode is a real 30 s window cut from the record |
-| Site levels for Nakhon Ratchasima | hourly | `data/weather_calibration.json` (`python -m vsg_rl.weather --calibrate`) |
+| Levels | — | `--weather measured` uses the windows at their **recorded** levels; nothing is rescaled |
 
 ## 0. Recommended combination (both free with a Zenodo/GitHub login)
 
@@ -132,25 +132,20 @@ Edit `data/measured/dataset.json`:
 * `irradiance.file`, `time_column`, `value_column`
 * `wind.file`, `time_column`, `value_column`, and **`height_m`**, the
   anemometer height. The code corrects it to the 80 m hub with a power law.
-* `rescale_to_site` (default `true`):
-  * `true` keeps each window's **measured relative variability** but sets its
-    pre-event level to the Nakhon Ratchasima levels in
-    `data/weather_calibration.json`. Use this when the data come from another
-    site (Oahu, Colorado).
-  * `false` uses the raw levels. Choose this with Thai/SUT data.
+* `rescale_to_site` (default `false`): the windows are used at their
+  **recorded levels**. Setting it to `true` rescales each window to other
+  levels and is refused unless `site_levels` gives those levels together with
+  a `source` naming the measurement they come from. Never rescale to
+  invented levels.
+* `ambient_temp_c` (default 25 °C) is used only when the record has no
+  temperature column. It is an assumption, and the paper must say so. If you
+  have a measured temperature series (e.g. KNMI CESAR for Cabauw), add it
+  under `temperature` and it is used instead.
 * `split_fractions` (default 70 / 15 / 15 % of the record **by time**) sets the
   train / validation / test segments, so the agents are tested on weather
   they never trained on.
 
-### Step 4 — (Optional) refresh the site levels
-
-On a machine with internet:
-
-```bash
-python -m vsg_rl.weather --calibrate --start 2024-01-01 --end 2024-12-31
-```
-
-### Step 5 — Check what was detected
+### Step 4 — Check what was detected
 
 ```bash
 python -m vsg_rl.realdata --check
@@ -165,7 +160,7 @@ If a split has zero windows for a scenario, download a longer period. If
 there are no night windows, night is simulated with zero irradiance, which is
 exact.
 
-### Step 6 — Smoke test, then the full study
+### Step 5 — Smoke test, then the full study
 
 ```bash
 python -m vsg_rl --weather measured --smoke                         # ~1-2 min
@@ -194,16 +189,15 @@ grid-code test, not weather.
 ## 4. What to write in the paper
 
 > *Disturbance profiles are taken from measured 1-s data: global horizontal
-> irradiance from the NREL Oahu Solar Measurement Grid [ref] (station …,
-> dates …) and hub-height wind speed from the NREL NWTC M5 met mast [ref]
-> (… m, 20 Hz averaged to 1 s, dates …). Each 30-s episode is a window of
-> these records, selected automatically by event type (Section 3.5). The
-> record is split chronologically into training (70 %), validation (15 %)
-> and test (15 %) segments. Because no public 1-s record exists for Nakhon
-> Ratchasima, the windows retain their measured relative variability and are
-> rescaled to the site's steady-state levels obtained from ERA5 reanalysis
-> [ref]. The combined-stress scenario superimposes a measured cloud event
-> and a measured wind lull to represent a worst case.*
+> irradiance from the BSRN Cabauw station [ref] (dates …) and 80 m wind
+> speed from the FINO1 sonic anemometer [ref] (10 Hz averaged to 1 s,
+> dates …). Each 30-s episode is a window of these records at its recorded
+> level, selected automatically by event type (Section 3.5). The record is
+> split chronologically into training (70 %), validation (15 %) and test
+> (15 %) segments. The irradiance record has no temperature; PV cell
+> temperature is computed from an assumed 25 °C ambient. The combined-stress
+> scenario plays a measured cloud event and a measured wind lull together
+> to represent a worst case.*
 
 Cite the dataset DOIs given on the download pages, e.g. the Oahu grid's
 DOI 10.7799/1052451.
