@@ -196,6 +196,9 @@ HIDDEN = 256
 WARMUP_STEPS = 2000
 UPDATE_EVERY = 4
 GRAD_CLIP = 1.0
+# Adam epsilon: with REWARD_SCALE the critic's gradient RMS is ~1e-7, close to
+# the default 1e-8, which would damp its updates.
+ADAM_EPS = 1e-10
 LR_ANNEAL = True
 
 # Learner-side reward: r_learn = REWARD_SCALE * (r - R_ALIVE), with an extra
@@ -213,7 +216,7 @@ OBS_NORM_MIN_STD = 0.05      # floor: stops near-constant features (PLL noise
 
 # Small L2 penalty on the actor's pre-tanh outputs (keeps them out of tanh
 # saturation).  A generic actor regulariser, so it is applied to BOTH agents.
-ACTOR_PRE_L2 = 1e-4
+ACTOR_PRE_L2 = 2e-5          # pilot: L2 gradient ~1-2 % of the Q-term gradient
 
 EXPL_NOISE_START = 0.30      # identical schedule for both agents
 EXPL_NOISE_END = 0.03

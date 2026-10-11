@@ -262,9 +262,9 @@ class BaseAgent:
         self.critic = Critic(s_dim, a_dim, h, n_q=self.n_critics).to(DEVICE)
         self.critic_t = copy.deepcopy(self.critic)
         self.opt_a = torch.optim.Adam(self.actor.parameters(), lr=C.LR_ACTOR,
-                                      weight_decay=C.WEIGHT_DECAY)
+                                      weight_decay=C.WEIGHT_DECAY, eps=C.ADAM_EPS)
         self.opt_c = torch.optim.Adam(self.critic.parameters(), lr=C.LR_CRITIC,
-                                      weight_decay=C.WEIGHT_DECAY)
+                                      weight_decay=C.WEIGHT_DECAY, eps=C.ADAM_EPS)
         self.buffer = PrioritizedReplay(s_dim=s_dim, a_dim=a_dim, rng=self.rng)
         self.updates = 0
         self.beta = C.PER_BETA_START
