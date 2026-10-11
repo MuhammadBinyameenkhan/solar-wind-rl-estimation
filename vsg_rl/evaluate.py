@@ -22,6 +22,10 @@ Metric definitions (all computed identically for every controller):
   E_vsg_kwh       battery energy spent on the VSG term
   J_bound_pct     % of steps with the in-force J within 1 % of the range from
   D_bound_pct     J_MIN/J_MAX (D_MIN/D_MAX);  bound_pct = either of the two
+  dJ_quiet        mean |J(k) - J(k-1)| per step in quiet periods (before
+  dD_quiet        contingency 1, and between 1.5 s after it and contingency 2)
+  J_release_spike max J in the 1 s after contingency 1 clears, minus the mean J
+                  of the second before it
 """
 import csv
 import json
@@ -81,6 +85,11 @@ def compute_metrics(rec: dict) -> dict:
     td = C.BOUND_TOL * (C.D_MAX - C.D_MIN)
     J, D = rec["J"][:n], rec["D"][:n]
     either = ((J <= C.J_MIN + tj) | (J >= C.J_MAX - tj) | (D <= C.D_MIN + td) | (D >= C.D_MAX - td))
+    tv = t[:n]
+    quiet = (tv < a1 - 0.2) | ((tv > b1 + 1.5) & (tv < a2 - 0.2))
+    qd = quiet[1:] & quiet[:-1]
+    rel, pre = (tv >= b1) & (tv < b1 + 1.0), (tv >= b1 - 1.0) & (tv < b1)
+    spike = float(J[rel].max() - J[pre].mean()) if rel.any() and pre.any() else float("nan")
     return {
         "nadir_hz": nadir,
         "zenith_hz": zenith,
@@ -106,6 +115,9 @@ def compute_metrics(rec: dict) -> dict:
         "J_bound_pct": 100.0 * (bf["J_lo"] + bf["J_hi"]),
         "D_bound_pct": 100.0 * (bf["D_lo"] + bf["D_hi"]),
         "bound_pct": float(100.0 * np.mean(either)),
+        "dJ_quiet": float(np.abs(np.diff(J))[qd].mean()) if qd.any() else float("nan"),
+        "dD_quiet": float(np.abs(np.diff(D))[qd].mean()) if qd.any() else float("nan"),
+        "J_release_spike": spike,
         "reward": float(rec["total_reward"]),
         "tripped": float(rec["tripped"]),
     }
@@ -115,6 +127,7 @@ METRIC_KEYS = ["nadir_hz", "zenith_hz", "df_max_hz", "overshoot_pct", "rocof_win
                "settle1_s", "settle_s", "iae", "ise", "itae", "v_min", "dv_max",
                "E_vsg_kwh", "reserve_pu", "reserve_req_pu", "derate_pct",
                "J_mean", "D_mean", "J_bound_pct", "D_bound_pct", "bound_pct",
+               "dJ_quiet", "dD_quiet", "J_release_spike",
                "reward", "tripped"]
 
 

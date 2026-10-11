@@ -330,7 +330,8 @@ class MicrogridVSGEnv:
         a_norm = self.normalise_action(action)
         prev = a_norm if self._prev_action_norm is None else self._prev_action_norm
         da = a_norm - prev
-        rocof_n = abs(self.rocof_meas) / C.ROCOF_LIMIT       # 500 ms relay window
+        rocof_src = self.rocof_meas if C.ROCOF_REWARD_WINDOW else self.rocof_filt
+        rocof_n = abs(rocof_src) / C.ROCOF_LIMIT       # 500 ms relay window by default
         r = (-C.W_FREQ * df ** 2
              - C.W_ROCOF * rocof_n ** 2
              - C.W_ROCOF_HINGE * max(0.0, rocof_n - 1.0)

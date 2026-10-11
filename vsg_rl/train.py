@@ -75,7 +75,7 @@ def rocof_stress_overrides(seed: int, ep: int, episodes: int) -> dict:
 
 def learner_reward(r, tripped):
     """Scaled, shifted reward the networks are trained on (see config)."""
-    out = C.REWARD_SCALE * (np.asarray(r, dtype=float) - C.R_ALIVE)
+    out = C.REWARD_SCALE * (np.asarray(r, dtype=float) - (C.R_ALIVE if C.REWARD_SHIFT else 0.0))
     if tripped:
         out = out - trip_shift()
     return out
@@ -84,6 +84,8 @@ def learner_reward(r, tripped):
 def trip_shift() -> float:
     """Shift owed for the steps a trip cuts off: sum_{i>=1} gamma^i R_ALIVE,
     so every state's discounted value moves by exactly -R_ALIVE/(1-gamma)."""
+    if not C.REWARD_SHIFT:
+        return 0.0
     return C.REWARD_SCALE * C.R_ALIVE * C.GAMMA / (1.0 - C.GAMMA)
 
 
@@ -312,7 +314,11 @@ def load_agent(algo: str, seed: int, which: str = "best"):
 # ----------------------------------------------------------------
 _OVERRIDE_KEYS = ("EPISODES", "EVAL_EVERY", "WARMUP_STEPS", "EPISODE_DURATION",
                   "F_NOM", "WEATHER_SOURCE", "OUT_DIR", "N_VAL", "MEASURED_CONFIG",
-                  "N_STRESS")
+                  "N_STRESS",
+                  # switches used by the ablation study (vsg_rl/ablation.py)
+                  "ROCOF_REWARD_WINDOW", "W_ROCOF", "W_ROCOF_HINGE", "W_RATE",
+                  "ACTION_FILTER_TAU", "OBS_NORM", "REWARD_SCALE", "REWARD_SHIFT",
+                  "ROCOF_STRESS_PROB", "ADAM_EPS", "PER_EPS")
 
 
 def config_overrides() -> dict:

@@ -140,7 +140,7 @@ def test_rocof_reward_uses_relay_window():
     assert max(inst) > 2 * max(win)            # the mismatch that caused the J spike
     import inspect
     src = inspect.getsource(MicrogridVSGEnv._reward)
-    assert "rocof_meas" in src and "rocof_filt" not in src
+    assert C.ROCOF_REWARD_WINDOW and "rocof_meas" in src
 
 
 def test_learner_reward_shift_is_policy_invariant():

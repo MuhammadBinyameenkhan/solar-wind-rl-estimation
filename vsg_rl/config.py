@@ -159,6 +159,7 @@ W_FREQ = 25.0            # (df in Hz)^2
 # typical event (0.4 Hz/s window RoCoF) costs as much as a typical deviation
 # (0.2 Hz) on the W_FREQ term.
 W_ROCOF = 25.0           # (RoCoF_500ms / 2 Hz/s)^2
+ROCOF_REWARD_WINDOW = True   # False = old 50 ms instantaneous RoCoF (ablation only)
 W_ROCOF_HINGE = 20.0     # max(0, |RoCoF_500ms| / 2 Hz/s - 1): the relay limit binds
 W_VOLT = 6.0             # (dV / 0.05 pu)^2
 W_EFFORT = 5.0           # mean squared change of the normalised action
@@ -207,6 +208,7 @@ LR_ANNEAL = True
 # so the optimal policy is unchanged; episode returns fall in about [-12, 0].
 # Reported returns and model selection use the unscaled environment reward.
 REWARD_SCALE = 1e-3
+REWARD_SHIFT = True          # subtract R_ALIVE (+ trip correction); ablation switch
 
 # Running mean / std normalisation of observations (shared by both agents).
 OBS_NORM = True
