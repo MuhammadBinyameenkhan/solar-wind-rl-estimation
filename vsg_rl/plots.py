@@ -548,15 +548,19 @@ def figure_critic_bias(hists_by_algo: dict) -> str:
     fig, axes = plt.subplots(1, 3, figsize=(16, 4.8))
     fig.subplots_adjust(wspace=0.32, top=0.80)
     fig.suptitle("Figure 8 — Critic calibration on validation states, DDPG vs TD3\n"
-                 "mean ± 95 % CI over seeds; thin lines = individual seeds; learner-reward units",
+                 "mean ± 95 % CI over seeds; thin lines = individual seeds; learner-reward "
+                 "units; symlog axes (linear within ±0.05)",
                  fontsize=12.5, fontweight="bold")
     for ax, algo, tag in ((axes[0], "ddpg", "(a) DDPG (single critic)"),
                           (axes[1], "td3", "(b) TD3 (twin critics)")):
         _critic_panel(ax, algo, hists_by_algo[algo])
         ax.set_title(tag)
+    # symlog: DDPG's critic can diverge by orders of magnitude, which on a
+    # linear axis would flatten TD3's curves to a line
     lo = min(axes[0].get_ylim()[0], axes[1].get_ylim()[0])
     hi = max(axes[0].get_ylim()[1], axes[1].get_ylim()[1])
     for ax in axes[:2]:
+        ax.set_yscale("symlog", linthresh=0.05)
         ax.set_ylim(lo, hi)
     ax = axes[2]
     _seed_band(ax, hists_by_algo["ddpg"], "q_bias", C.COLORS["ddpg"], "DDPG  Q − G",
@@ -564,7 +568,8 @@ def figure_critic_bias(hists_by_algo: dict) -> str:
     _seed_band(ax, hists_by_algo["td3"], "q_min_bias", C.COLORS["td3"], "TD3  min(Q1,Q2) − G",
                x_key="eval_ep", smooth=1)
     ax.axhline(0, color="k", lw=.8)
-    ax.set(title="(c) Critic bias (estimate − Monte-Carlo return)", xlabel="Episode",
+    ax.set_yscale("symlog", linthresh=0.05)
+    ax.set(title="(c) Critic bias (estimate − Monte-Carlo return), symlog", xlabel="Episode",
            ylabel="Bias")
     ax.legend(fontsize=7); ax.grid(alpha=.4)
     return _save(fig, "figure8_critic_bias.png")

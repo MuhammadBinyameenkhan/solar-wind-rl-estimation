@@ -60,6 +60,15 @@ non-measured weather input is a 25 °C ambient temperature for the PV model.
 An earlier measured run rescaled the windows to levels that were not
 measured. It has been withdrawn and remains in the git history only.
 
+### RL-fixes rerun (10 seeds, `results_measured_v2/`)
+
+A second 10-seed run applied a set of shared training fixes and the TD3-only
+smoothing change ([`docs/FINDINGS_RL_FIXES.md`](docs/FINDINGS_RL_FIXES.md)).
+TD3 now beats DDPG significantly on IAE, ISE, nadir and RoCoF, and DDPG's
+critic diverges late in training. Both deployed agents, however, regulate
+worse than in the run above. That run's critics were partly collapsed by
+weight decay (now removed).
+
 ## Earlier study: synthetic weather (5 seeds, not real data)
 
 > These results use **synthetic** disturbance profiles with **illustrative**
