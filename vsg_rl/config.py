@@ -187,7 +187,11 @@ GAMMA = 0.99
 TAU_SOFT = 0.005
 LR_ACTOR = 1e-4
 LR_CRITIC = 1e-3
-WEIGHT_DECAY = 1e-5
+# No weight decay.  Coupled L2 inside Adam shrinks every weight by ~lr per
+# step whenever the loss gradient is small next to wd*w: in the previous run
+# 29 % (DDPG) and 51 % (TD3) of critic weights had collapsed to ~1e-30, and
+# with the scaled reward 56-89 % of all weights did within 260 episodes.
+WEIGHT_DECAY = 0.0
 HIDDEN = 256
 WARMUP_STEPS = 2000
 UPDATE_EVERY = 4
