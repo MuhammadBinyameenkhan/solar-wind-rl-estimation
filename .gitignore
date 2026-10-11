@@ -14,3 +14,7 @@ results_measured/training_log.txt
 results_*/checkpoints/*_checkpoint.pt
 results_*/eval_cache.pt
 results_*/training_log.txt
+results_ablation/*/checkpoints/*_checkpoint.pt
+results_ablation/*/training_log.txt
+results_ablation/training_log.txt
+results_ablation/*/eval_cache.pt
