@@ -150,15 +150,33 @@ def action_bounds():
 
 # --- Reward weights (fixed a priori; see README "Reward") ----------
 W_FREQ = 25.0            # (df in Hz)^2
-W_ROCOF = 10.0           # (RoCoF / 2 Hz/s)^2
+# RoCoF enters the reward through the SAME 500 ms relay-window measurement
+# that Eq. (20) limits and the tables report.  The earlier version used the
+# instantaneous RoCoF with a 50 ms filter: during a 0.1 s load ramp it reached
+# ~1.7 Hz/s while the relay window saw ~0.3 Hz/s, so the agent was paid to
+# fight a sub-window transient it cannot observe in time -- the cause of the
+# J spike at contingency release.  W_ROCOF is raised from 10 to 25 so that a
+# typical event (0.4 Hz/s window RoCoF) costs as much as a typical deviation
+# (0.2 Hz) on the W_FREQ term.
+W_ROCOF = 25.0           # (RoCoF_500ms / 2 Hz/s)^2
+W_ROCOF_HINGE = 20.0     # max(0, |RoCoF_500ms| / 2 Hz/s - 1): the relay limit binds
 W_VOLT = 6.0             # (dV / 0.05 pu)^2
 W_EFFORT = 5.0           # mean squared change of the normalised action
+W_RATE = 0.05            # |dJ|/J_range + |dD|/D_range per step (anti-chattering)
 W_SOC = 2.0              # |SOC - 0.5|
 W_BESS = 0.3             # (P_vsg / S)^2
+# Headroom cost = Eq. (22) itself (0.08 pu per s of J, 0.01 pu per pu of D at
+# 50 Hz).  J is dearer per unit because emulated inertia must be backed by
+# 2 RoCoF_max / f0 of converter capacity; this is physics, not a tuning
+# choice, and it is the quantity the tables report, so it is kept as is.
 W_RESERVE = 0.5          # x h_req in pu (Eq. 22) -- the same quantity reported
 W_INFEAS = 8.0           # max(0, h_req - h_avail)
 R_ALIVE = 1.0
 R_TERM_PENALTY = 100.0
+
+# --- Actuator ------------------------------------------------------
+ACTION_FILTER_TAU = 0.08     # s  first-order low-pass on commanded J, D, Kq
+#                              (before the slew limiter; all controllers)
 
 # ================================================================
 # 6. TRAINING (identical for DDPG and TD3)
@@ -176,19 +194,37 @@ UPDATE_EVERY = 4
 GRAD_CLIP = 1.0
 LR_ANNEAL = True
 
-EXPL_NOISE_START = 0.30
+# Learner-side reward: r_learn = REWARD_SCALE * (r - R_ALIVE), with an extra
+# -GAMMA * R_ALIVE / (1 - GAMMA) on a trip (the shift of the cut-off steps).  The shift moves every discounted value
+# by the same constant (the agent bootstraps through time-limit truncation),
+# so the optimal policy is unchanged; episode returns fall in about [-12, 0].
+# Reported returns and model selection use the unscaled environment reward.
+REWARD_SCALE = 1e-3
+
+# Running mean / std normalisation of observations (shared by both agents).
+OBS_NORM = True
+OBS_NORM_CLIP = 5.0
+OBS_NORM_MIN_STD = 0.05      # floor: stops near-constant features (PLL noise
+#                              in quiet periods) from being amplified > 20x
+
+# Small L2 penalty on the actor's pre-tanh outputs (keeps them out of tanh
+# saturation).  A generic actor regulariser, so it is applied to BOTH agents.
+ACTOR_PRE_L2 = 1e-4
+
+EXPL_NOISE_START = 0.30      # identical schedule for both agents
 EXPL_NOISE_END = 0.03
 NOISE_DECAY_FRACTION = 0.8
 
-POLICY_NOISE = 0.2
-NOISE_CLIP = 0.5
+# TD3 only: target-policy smoothing, in the NORMALISED action space [-1, 1]
+POLICY_NOISE = 0.1
+NOISE_CLIP = 0.3
 POLICY_FREQ = 2
 
 PER_CAPACITY = 200_000
 PER_ALPHA = 0.6
 PER_BETA_START = 0.4
 PER_BETA_END = 1.0
-PER_EPS = 1e-5
+PER_EPS = 1e-6               # TD errors are ~1e-3 of their old size (REWARD_SCALE)
 
 EVAL_EVERY = 10
 CONV_WINDOW = 5
@@ -214,6 +250,18 @@ CURRICULUM = [
     (0.60, ["clear", "cloud", "wind_drop", "night"]),
     (1.00, ["clear", "cloud", "wind_drop", "night", "combined"]),
 ]
+
+# RoCoF-stress episodes (training only): a larger load step on a system with
+# less residual inertia, where the 2 Hz/s relay limit can actually bind.
+# Probability per curriculum stage; drawn from a per-(seed, episode) RNG so
+# both algorithms see the same episodes.
+ROCOF_STRESS_PROB = (0.0, 0.15, 0.30)
+ROCOF_STRESS_H = (0.15, 0.35)       # s    residual inertia H_sys
+ROCOF_STRESS_STEP = (0.25, 0.35)    # pu   load step
+
+# An action is "at a bound" when the in-force value is within 1 % of the
+# range from J_MIN/J_MAX or D_MIN/D_MAX.
+BOUND_TOL = 0.01
 
 RAND_STEP_FRAC = (0.08, 0.32)
 RAND_JITTER = 0.25
@@ -249,6 +297,7 @@ FIXED_GRID_KQ = [8.0, 14.0, 20.0]
 CONTROLLERS = ["none", "fixed_low", "fixed_high", "fixed_max",
                "fixed_tuned", "adaptive_rule", "ddpg", "td3"]
 CONTROLLER_LABELS = {
+    "ddpg_final": "DDPG-VSG (final ckpt)", "td3_final": "TD3-VSG (final ckpt)",
     "none": "No VSG", "fixed_low": "Fixed low", "fixed_high": "Fixed high",
     "fixed_max": "Fixed max", "fixed_tuned": "Fixed tuned",
     "adaptive_rule": "Rule-based adaptive", "ddpg": "DDPG-VSG", "td3": "TD3-VSG",
@@ -278,6 +327,7 @@ COLORS = {
     "none": "#E53935", "fixed_low": "#BDBDBD", "fixed_high": "#757575",
     "fixed_max": "#37474F", "fixed_tuned": "#6D4C41", "adaptive_rule": "#FB8C00",
     "ddpg": "#1976D2", "td3": "#00A86B",
+    "ddpg_final": "#64B5F6", "td3_final": "#66CDAA",
     "rocof": "#FB8C00", "J": "#2E7D32", "D": "#D81B60", "volt": "#8E24AA",
     "limit": "#FF6F00", "dim": "#8A8F99", "text": "#1F2430",
     "q1": "#1976D2", "q2": "#E53935",

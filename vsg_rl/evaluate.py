@@ -20,6 +20,8 @@ Metric definitions (all computed identically for every controller):
   reserve_req_pu  mean DECLARED headroom requirement (Eq. 22 with J, D)
   derate_pct      % of steps with h_req > h_avail
   E_vsg_kwh       battery energy spent on the VSG term
+  J_bound_pct     % of steps with the in-force J within 1 % of the range from
+  D_bound_pct     J_MIN/J_MAX (D_MIN/D_MAX);  bound_pct = either of the two
 """
 import csv
 import json
@@ -33,6 +35,15 @@ from .env import MicrogridVSGEnv
 from .utils import mean_ci95, trapz, welch_t
 
 SETTLE_BAND = 0.05
+
+
+def bound_fractions(J, D) -> dict:
+    """Fraction of steps with the in-force J or D within BOUND_TOL of a bound."""
+    J, D = np.asarray(J, dtype=float), np.asarray(D, dtype=float)
+    tj = C.BOUND_TOL * (C.J_MAX - C.J_MIN)
+    td = C.BOUND_TOL * (C.D_MAX - C.D_MIN)
+    return dict(J_lo=float(np.mean(J <= C.J_MIN + tj)), J_hi=float(np.mean(J >= C.J_MAX - tj)),
+                D_lo=float(np.mean(D <= C.D_MIN + td)), D_hi=float(np.mean(D >= C.D_MAX - td)))
 
 
 def _settle(t, err, t_from, t_to, band=SETTLE_BAND):
@@ -64,6 +75,12 @@ def compute_metrics(rec: dict) -> dict:
     zenith = float(f[w2].max())
 
     res = lambda J, D: 2.0 * J * (C.ROCOF_LIMIT / C.F_NOM) + D * (C.F_BAND_OK / C.F_NOM)
+    n = int(rec.get("n_valid", len(t)))
+    bf = bound_fractions(rec["J"][:n], rec["D"][:n])
+    tj = C.BOUND_TOL * (C.J_MAX - C.J_MIN)
+    td = C.BOUND_TOL * (C.D_MAX - C.D_MIN)
+    J, D = rec["J"][:n], rec["D"][:n]
+    either = ((J <= C.J_MIN + tj) | (J >= C.J_MAX - tj) | (D <= C.D_MIN + td) | (D >= C.D_MAX - td))
     return {
         "nadir_hz": nadir,
         "zenith_hz": zenith,
@@ -86,6 +103,9 @@ def compute_metrics(rec: dict) -> dict:
         "derate_pct": float(100.0 * np.mean(rec["h_req"] > rec["h_avail"] + 1e-9)),
         "J_mean": float(rec["J"].mean()),
         "D_mean": float(rec["D"].mean()),
+        "J_bound_pct": 100.0 * (bf["J_lo"] + bf["J_hi"]),
+        "D_bound_pct": 100.0 * (bf["D_lo"] + bf["D_hi"]),
+        "bound_pct": float(100.0 * np.mean(either)),
         "reward": float(rec["total_reward"]),
         "tripped": float(rec["tripped"]),
     }
@@ -94,7 +114,8 @@ def compute_metrics(rec: dict) -> dict:
 METRIC_KEYS = ["nadir_hz", "zenith_hz", "df_max_hz", "overshoot_pct", "rocof_win",
                "settle1_s", "settle_s", "iae", "ise", "itae", "v_min", "dv_max",
                "E_vsg_kwh", "reserve_pu", "reserve_req_pu", "derate_pct",
-               "J_mean", "D_mean", "reward", "tripped"]
+               "J_mean", "D_mean", "J_bound_pct", "D_bound_pct", "bound_pct",
+               "reward", "tripped"]
 
 
 def test_episodes():

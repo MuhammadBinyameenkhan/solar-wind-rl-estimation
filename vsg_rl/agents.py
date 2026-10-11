@@ -6,7 +6,12 @@ The two agents share everything except the three TD3 changes:
     DDPG                          TD3
     1 critic                      2 critics, target = min(Q1, Q2)
     target = Q'(s', mu'(s'))      + clipped Gaussian target-policy smoothing
+                                    (normalised action space, sigma 0.1, clip 0.3)
     actor + targets every update  actor + targets every POLICY_FREQ updates
+
+Shared by both: running observation normalisation, PER, gradient-norm
+clipping (1.0) on actor and critic, Adam with cosine-annealed learning
+rates, Polyak tau, and a small L2 penalty on the actor's pre-tanh output.
 """
 import copy
 
@@ -34,6 +39,51 @@ def to_env_action(a_norm) -> np.ndarray:
     lo, hi = _bounds()
     a = np.clip(np.asarray(a_norm, dtype=np.float32), -1.0, 1.0)
     return lo + (a + 1.0) * 0.5 * (hi - lo)
+
+
+# ================================================================
+# Observation normalisation (running mean / std, shared by both agents)
+# ================================================================
+class RunningNorm:
+    """Welford running statistics; ``normalize`` uses a std floor and clip."""
+
+    def __init__(self, dim: int):
+        self.mean = np.zeros(dim, dtype=np.float64)
+        self.var = np.ones(dim, dtype=np.float64)
+        self.count = 1e-4
+
+    def update(self, x) -> None:
+        x = np.asarray(x, dtype=np.float64).reshape(-1, self.mean.size)
+        b_mean, b_var, b_n = x.mean(0), x.var(0), x.shape[0]
+        delta = b_mean - self.mean
+        tot = self.count + b_n
+        self.mean = self.mean + delta * b_n / tot
+        m2 = self.var * self.count + b_var * b_n + delta ** 2 * self.count * b_n / tot
+        self.var = m2 / tot
+        self.count = tot
+
+    def arrays(self):
+        std = np.maximum(np.sqrt(self.var), C.OBS_NORM_MIN_STD)
+        return self.mean.astype(np.float32), std.astype(np.float32)
+
+    def state_dict(self):
+        return dict(mean=self.mean.tolist(), var=self.var.tolist(), count=self.count)
+
+    def load_state_dict(self, sd):
+        self.mean = np.asarray(sd["mean"], dtype=np.float64)
+        self.var = np.asarray(sd["var"], dtype=np.float64)
+        self.count = float(sd["count"])
+
+
+def normalize_obs(x, mean, std):
+    """Works on numpy arrays and torch tensors alike."""
+    if mean is None:
+        return x
+    if isinstance(x, torch.Tensor):
+        m = torch.as_tensor(mean, device=x.device)
+        sd = torch.as_tensor(std, device=x.device)
+        return ((x - m) / sd).clamp(-C.OBS_NORM_CLIP, C.OBS_NORM_CLIP)
+    return np.clip((x - mean) / std, -C.OBS_NORM_CLIP, C.OBS_NORM_CLIP).astype(np.float32)
 
 
 # ================================================================
@@ -161,6 +211,9 @@ class Actor(nn.Module):
     def forward(self, s):
         return self.net(s)
 
+    def pre_tanh(self, s):
+        return self.net[:-1](s)
+
 
 class Critic(nn.Module):
     def __init__(self, s_dim, a_dim, h, n_q=1):
@@ -179,14 +232,17 @@ class Critic(nn.Module):
 
 
 class ActorPolicy:
-    """Picklable deterministic policy wrapper: state -> physical action."""
+    """Picklable deterministic policy wrapper: state -> physical action.
+    Carries a frozen copy of the observation-normalisation statistics."""
 
-    def __init__(self, actor: nn.Module):
+    def __init__(self, actor: nn.Module, obs_mean=None, obs_std=None):
         self.actor = copy.deepcopy(actor).cpu().eval()
+        self.obs_mean, self.obs_std = obs_mean, obs_std
 
     @torch.no_grad()
     def __call__(self, s):
-        a = self.actor(torch.as_tensor(np.asarray(s, np.float32)).unsqueeze(0))
+        x = normalize_obs(np.asarray(s, np.float32), self.obs_mean, self.obs_std)
+        a = self.actor(torch.as_tensor(x).unsqueeze(0))
         return to_env_action(a.numpy()[0])
 
 
@@ -213,10 +269,25 @@ class BaseAgent:
         self.buffer = PrioritizedReplay(s_dim=s_dim, a_dim=a_dim, rng=self.rng)
         self.updates = 0
         self.beta = C.PER_BETA_START
+        self.obs_norm = RunningNorm(s_dim) if C.OBS_NORM else None
+
+    # -- observation normalisation --------------------------------
+    def observe(self, state) -> None:
+        """Update the running statistics with a visited state (training)."""
+        if self.obs_norm is not None:
+            self.obs_norm.update(state)
+
+    def norm_arrays(self):
+        return self.obs_norm.arrays() if self.obs_norm is not None else (None, None)
+
+    def _norm(self, x):
+        mean, std = self.norm_arrays()
+        return normalize_obs(x, mean, std)
 
     @torch.no_grad()
     def act_norm(self, state, noise: float = 0.0) -> np.ndarray:
-        s = torch.as_tensor(np.asarray(state, np.float32), device=DEVICE).unsqueeze(0)
+        s = torch.as_tensor(self._norm(np.asarray(state, np.float32)),
+                            device=DEVICE).unsqueeze(0)
         a = self.actor(s).cpu().numpy()[0]
         if noise > 0.0:
             a = a + noise * self.rng.standard_normal(self.a_dim)
@@ -226,12 +297,12 @@ class BaseAgent:
         return to_env_action(self.act_norm(state, noise))
 
     def policy(self) -> ActorPolicy:
-        return ActorPolicy(self.actor)
+        return ActorPolicy(self.actor, *self.norm_arrays())
 
     @torch.no_grad()
     def q_policy(self, states: np.ndarray) -> dict:
         """Critic estimates of Q(s, mu(s)) for the actor's own actions."""
-        s = torch.as_tensor(np.asarray(states, np.float32), device=DEVICE)
+        s = torch.as_tensor(self._norm(np.asarray(states, np.float32)), device=DEVICE)
         qs = [q.squeeze(1).cpu().numpy() for q in self.critic(s, self.actor(s))]
         return dict(q1=qs[0], q_min=np.min(np.stack(qs), axis=0))
 
@@ -251,20 +322,54 @@ class BaseAgent:
             g["lr"] = lr_c
 
     def state_dict(self):
-        return {k: getattr(self, k).state_dict()
-                for k in ("actor", "critic", "actor_t", "critic_t", "opt_a", "opt_c")}
+        sd = {k: getattr(self, k).state_dict()
+              for k in ("actor", "critic", "actor_t", "critic_t", "opt_a", "opt_c")}
+        if self.obs_norm is not None:
+            sd["obs_norm"] = self.obs_norm.state_dict()
+        return sd
 
     def load_state_dict(self, sd):
         for k, v in sd.items():
-            getattr(self, k).load_state_dict(v)
+            if k == "obs_norm":
+                if self.obs_norm is not None:
+                    self.obs_norm.load_state_dict(v)
+            else:
+                getattr(self, k).load_state_dict(v)
+
+    def actor_snapshot(self) -> dict:
+        """Deployable actor: weights + frozen normalisation statistics."""
+        sd = {"actor": copy.deepcopy(self.actor.state_dict())}
+        if self.obs_norm is not None:
+            sd["obs_norm"] = self.obs_norm.state_dict()
+        return sd
+
+    def load_actor_snapshot(self, snap) -> None:
+        if "actor" not in snap:                  # legacy file: bare state_dict
+            self.actor.load_state_dict(snap)
+            self.obs_norm = None
+            return
+        self.actor.load_state_dict(snap["actor"])
+        if "obs_norm" in snap:
+            self.obs_norm = RunningNorm(C.STATE_DIM)
+            self.obs_norm.load_state_dict(snap["obs_norm"])
+        else:
+            self.obs_norm = None
+
+    def _sample(self):
+        """PER batch; raw states are stored, normalised with current stats."""
+        s, a, r, s2, d, idxs, w = self.buffer.sample(C.BATCH_SIZE, self.beta)
+        return self._norm(s), a, r, self._norm(s2), d, idxs, w
 
     def _actor_step(self, s):
-        loss_a = -self.critic.q1(s, self.actor(s)).mean()
+        pre = self.actor.pre_tanh(s)
+        q_term = -self.critic.q1(s, torch.tanh(pre)).mean()
+        loss_a = q_term + C.ACTOR_PRE_L2 * (pre ** 2).mean()
         self.opt_a.zero_grad(set_to_none=True)
         loss_a.backward()
         nn.utils.clip_grad_norm_(self.actor.parameters(), C.GRAD_CLIP)
         self.opt_a.step()
         self._soft_update()
+        self.last_q_term = float(q_term.item())
         return float(loss_a.item())
 
     def _critic_step(self, qs, y, w):
@@ -283,7 +388,7 @@ class DDPGAgent(BaseAgent):
     def update(self):
         if len(self.buffer) < C.BATCH_SIZE:
             return {}
-        s, a, r, s2, d, idxs, w = self.buffer.sample(C.BATCH_SIZE, self.beta)
+        s, a, r, s2, d, idxs, w = self._sample()
         with torch.no_grad():
             y = r + C.GAMMA * (1.0 - d) * self.critic_t(s2, self.actor_t(s2))[0]
         q = self.critic(s, a)[0]
@@ -303,7 +408,7 @@ class TD3Agent(BaseAgent):
     def update(self):
         if len(self.buffer) < C.BATCH_SIZE:
             return {}
-        s, a, r, s2, d, idxs, w = self.buffer.sample(C.BATCH_SIZE, self.beta)
+        s, a, r, s2, d, idxs, w = self._sample()
         with torch.no_grad():
             noise = (torch.randn_like(a) * C.POLICY_NOISE).clamp(-C.NOISE_CLIP, C.NOISE_CLIP)
             a2 = (self.actor_t(s2) + noise).clamp(-1.0, 1.0)

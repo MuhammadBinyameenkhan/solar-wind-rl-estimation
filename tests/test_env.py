@@ -120,3 +120,87 @@ def test_sumtree_vectorised_matches_scalar(cap):
     assert np.allclose(a.tree, b.tree)
     vals = rng.uniform(0, a.total(), 300)
     assert (np.array([a.sample(v) for v in vals]) == b.sample_batch(vals)).all()
+
+
+# ---------------------------------------------------------------- RL fixes
+def test_rocof_reward_uses_relay_window():
+    """The RoCoF term must use the 500 ms relay-window value (Eq. 20 quantity),
+    not the unobservable 50 ms-filtered instantaneous RoCoF, which spikes far
+    above the window value during a 0.1 s load ramp."""
+    env = MicrogridVSGEnv("combined")
+    env.reset(seed=C.TEST_SEED)
+    pol = FixedPolicy(0.5, 20.0, 14.0)
+    inst, win = [], []
+    while True:
+        _, _, done, _ = env.step(pol(None))
+        if 6.0 < env.t < 6.3:
+            inst.append(abs(env.rocof_filt)); win.append(abs(env.rocof_meas))
+        if done:
+            break
+    assert max(inst) > 2 * max(win)            # the mismatch that caused the J spike
+    import inspect
+    src = inspect.getsource(MicrogridVSGEnv._reward)
+    assert "rocof_meas" in src and "rocof_filt" not in src
+
+
+def test_learner_reward_shift_is_policy_invariant():
+    """Shift by -R_ALIVE per step plus -R_ALIVE/(1-gamma) on a trip moves the
+    discounted value of every state by the same constant."""
+    from vsg_rl.train import discounted_returns, learner_reward
+    g = C.GAMMA
+    r_env = np.array([1.0, 0.4, -2.0, 0.9])
+    alive = discounted_returns(learner_reward(r_env, False), g)[0] / C.REWARD_SCALE \
+        - discounted_returns(r_env, g)[0]
+    r_trip = np.array([1.0, -100.0])
+    lr = np.array([float(learner_reward(r_trip[0], False)),
+                   float(learner_reward(r_trip[1], True))])   # per step, as in training
+    trip = discounted_returns(lr, g)[0] / C.REWARD_SCALE - discounted_returns(r_trip, g)[0]
+    # infinite-horizon shift is -1/(1-g); a full episode sees the truncated
+    # sum, a tripped one the exact constant
+    assert abs(trip - (-1.0 / (1 - g))) < 1e-6
+    assert alive < 0 and abs(alive - (-(1 - g ** 4) / (1 - g))) < 1e-6
+
+
+def test_rocof_stress_draws_are_identical_for_both_algorithms():
+    from vsg_rl.train import rocof_stress_overrides
+    a = [rocof_stress_overrides(3, ep, 1000) for ep in range(1000)]
+    b = [rocof_stress_overrides(3, ep, 1000) for ep in range(1000)]
+    assert a == b
+    assert not any(a[:300])                             # none in stage 1
+    frac = np.mean([bool(x) for x in a[600:]])
+    assert 0.2 < frac < 0.4
+    env = MicrogridVSGEnv("cloud", stochastic=True)
+    env.reset(seed=1, overrides=dict(H_sys=0.2, step_frac=0.3))
+    assert env.H_sys == 0.2 and env.step_frac == 0.3
+    env.reset(seed=1)
+    assert env.H_sys == C.H_SYS
+
+
+def test_action_filter_smooths_commands():
+    env = MicrogridVSGEnv("clear")
+    env.reset(seed=0)
+    env.step([1.0, 10.0, 8.0])
+    env.step([10.0, 50.0, 8.0])                         # big jump
+    alpha = env.dt / (C.ACTION_FILTER_TAU + env.dt)
+    assert abs(env._cmd_filt[0] - (1.0 + alpha * 9.0)) < 1e-9
+    assert env.J < 10.0
+
+
+def test_obs_norm_snapshot_roundtrip():
+    from vsg_rl.agents import make_agent
+    ag = make_agent("ddpg", seed=0)
+    rng = np.random.default_rng(0)
+    for _ in range(50):
+        ag.observe(rng.normal(2.0, 3.0, C.STATE_DIM))
+    s = rng.normal(size=C.STATE_DIM).astype(np.float32)
+    a1 = ag.policy()(s)
+    ag2 = make_agent("ddpg", seed=1)
+    ag2.load_actor_snapshot(ag.actor_snapshot())
+    assert np.allclose(ag2.policy()(s), a1)
+    assert abs(ag.obs_norm.mean.mean() - 2.0) < 1.0
+
+
+def test_bound_fractions():
+    from vsg_rl.evaluate import bound_fractions
+    b = bound_fractions([C.J_MIN, C.J_MIN, 5.0, C.J_MAX], [C.D_MAX, 30.0, 30.0, 30.0])
+    assert b["J_lo"] == 0.5 and b["J_hi"] == 0.25 and b["D_hi"] == 0.25 and b["D_lo"] == 0.0

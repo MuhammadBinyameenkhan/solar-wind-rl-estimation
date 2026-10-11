@@ -5,8 +5,10 @@ produce the reported numbers.
   figure2_generation_profiles   PV and wind models, seasonal profiles
   figure3_weather_scenarios     the five scenarios and the no-VSG response
   figure4_ddpg_training / figure5_td3_training
-                                training curves (mean +/- sd over seeds),
-                                learned parameters, critic calibration
+                                training curves (mean +/- 95 % CI over seeds,
+                                thin lines = individual seeds), learned
+                                parameters, critic calibration
+  figure8_critic_bias           DDPG and TD3 critic calibration side by side
   figure6_comparison            time-domain comparison, combined stress
   figure7_metrics               error integrals with 95 % CIs, the fixed-gain
                                 Pareto frontier, held-out stress test
@@ -388,18 +390,27 @@ def figure3_scenarios() -> str:
 RL = ("ddpg", "td3")
 
 
-def _seed_band(ax, hists: dict, key: str, color, label, x_key=None, smooth=20):
-    """Mean +/- sd over seeds of a per-episode (or per-eval) history series."""
+def _seed_band(ax, hists: dict, key: str, color, label, x_key=None, smooth=20,
+               seed_lines=True):
+    """Mean +/- 95 % CI (t * sd / sqrt(n)) over seeds of a per-episode (or
+    per-eval) history series, with each seed as a thin line."""
+    from .utils import _T95
     series = [np.asarray(h.get(key, []), dtype=float) for h in hists.values() if h.get(key)]
     if not series:
         return
     n = min(len(s) for s in series)
     arr = np.stack([_smooth(s[:n], smooth) if smooth > 1 else s[:n] for s in series])
     x = (np.asarray(list(hists.values())[0][x_key][:n]) if x_key else np.arange(1, n + 1))
-    mu, sd = np.nanmean(arr, 0), np.nanstd(arr, 0)
-    ax.plot(x, mu, color=color, label=f"{label} (n={len(series)})")
-    if len(series) > 1:
-        ax.fill_between(x, mu - sd, mu + sd, color=color, alpha=.18, lw=0)
+    k = len(series)
+    if seed_lines and k > 1:
+        for row in arr:
+            ax.plot(x, row, color=color, lw=0.5, alpha=0.25)
+    mu = np.nanmean(arr, 0)
+    ax.plot(x, mu, color=color, label=f"{label} (mean, n={k})")
+    if k > 1:
+        t = _T95[min(k - 1, len(_T95)) - 1]
+        ci = t * np.nanstd(arr, 0, ddof=1) / np.sqrt(k)
+        ax.fill_between(x, mu - ci, mu + ci, color=color, alpha=.22, lw=0)
 
 
 def _shade_events(ax, rec):
@@ -420,20 +431,30 @@ def _label(c):
 # ================================================================
 # FIGURES 4 & 5 -- per-algorithm training performance
 # ================================================================
+def _transitions(rec):
+    out = []
+    for i, (a, b) in enumerate(rec.get("event_windows", C.event_windows())):
+        out += [(a, f"contingency {i + 1} on"), (b, f"contingency {i + 1} off")]
+    return out
+
+
 def figure_training(algo: str, hists: dict, recs: dict, fignum: int) -> str:
     c = C.COLORS[algo]
-    fig = plt.figure(figsize=(15, 10))
-    gs = GridSpec(3, 3, figure=fig, hspace=0.45, wspace=0.32)
+    fig = plt.figure(figsize=(16, 13))
+    # wide wspace: panel (d) has a right-hand axis whose label must clear (e)
+    gs = GridSpec(3, 3, figure=fig, hspace=0.42, wspace=0.52,
+                  height_ratios=[1, 1, 1.35])
     extra = ("clipped double Q-learning, target policy smoothing, delayed updates"
              if algo == "td3" else "single critic, prioritised replay, curriculum")
     fig.suptitle(f"Figure {fignum} — {algo.upper()} training performance "
-                 f"(mean ± sd over {len(hists)} seeds)\n{extra}",
+                 f"(mean ± 95 % CI over {len(hists)} seeds; thin lines = seeds)\n{extra}",
                  fontsize=13, fontweight="bold")
 
     ax = fig.add_subplot(gs[0, 0])
     _seed_band(ax, hists, "reward", c, "training return")
-    ax.set(title="(a) Training return", xlabel="Episode", ylabel="Episode return")
-    ax.legend(fontsize=7); ax.grid(alpha=.4)
+    ax.set_yscale("symlog", linthresh=100)
+    ax.set(title="(a) Training return (symlog)", xlabel="Episode", ylabel="Episode return")
+    ax.legend(fontsize=7, loc="lower right"); ax.grid(alpha=.4)
 
     ax = fig.add_subplot(gs[0, 1])
     _seed_band(ax, hists, "val_return", C.COLORS["limit"], "validation return",
@@ -460,31 +481,40 @@ def figure_training(algo: str, hists: dict, recs: dict, fignum: int) -> str:
     ax = fig.add_subplot(gs[1, 1])
     _seed_band(ax, hists, "rocof", C.COLORS["rocof"], "peak RoCoF")
     ax.axhline(C.ROCOF_LIMIT, ls="--", color=C.COLORS["limit"], label="2 Hz/s relay limit")
-    ax.set(title="(e) Peak RoCoF during training", xlabel="Episode", ylabel="RoCoF (Hz/s)")
+    ax.set(title="(e) Peak RoCoF (500 ms) during training", xlabel="Episode", ylabel="RoCoF (Hz/s)")
     ax.legend(fontsize=7); ax.grid(alpha=.4)
 
     ax = fig.add_subplot(gs[1, 2])
-    _seed_band(ax, hists, "mc_mean", "k", "Monte-Carlo return", x_key="eval_ep", smooth=1)
-    _seed_band(ax, hists, "q_mean", C.COLORS["q1"], "critic Q1(s, μ(s))", x_key="eval_ep", smooth=1)
-    if algo == "td3":
-        _seed_band(ax, hists, "q_min_mean", C.COLORS["q2"], "min(Q1, Q2)", x_key="eval_ep", smooth=1)
-    ax.set(title="(f) Critic calibration on validation states", xlabel="Episode",
-           ylabel="Discounted return")
-    ax.legend(fontsize=7); ax.grid(alpha=.4)
+    _critic_panel(ax, algo, hists)
+    ax.set_title("(f) Critic calibration on validation states")
 
-    ax = fig.add_subplot(gs[2, 0:2])
-    for n in ("none", "fixed_high", "fixed_tuned", "adaptive_rule"):
-        if n in recs:
-            r = recs[n]
-            ax.plot(r["t"], r["f"], "--", lw=1.1, color=C.COLORS[n],
-                    label=f"{_label(n)} (nadir {r['f'].min():.2f} Hz)")
+    sub = gs[2, 0:2].subgridspec(2, 4, height_ratios=[1.5, 1], hspace=0.75, wspace=0.35)
+    ax = fig.add_subplot(sub[0, :])
+    shown = [n for n in ("none", "fixed_high", "fixed_tuned", "adaptive_rule") if n in recs]
+    for n in shown:
+        r = recs[n]
+        ax.plot(r["t"], r["f"], "--", lw=1.1, color=C.COLORS[n],
+                label=f"{_label(n)} (nadir {r['f'].min():.2f} Hz)")
     r = recs[algo]
     ax.plot(r["t"], r["f"], color=c, lw=2.2, label=f"{algo.upper()}-VSG (nadir {r['f'].min():.2f} Hz)")
     ax.axhline(C.F_NOM - C.F_BAND_OK, ls=":", color=C.COLORS["limit"])
     _shade_events(ax, r)
     ax.set(title="(g) Frequency response — combined stress (test scenario)",
            xlabel="Time (s)", ylabel="Frequency (Hz)")
-    ax.legend(fontsize=7, ncol=2); ax.grid(alpha=.4)
+    ax.legend(fontsize=7, ncol=3, loc="lower right"); ax.grid(alpha=.4)
+    for j, (t0, lab) in enumerate(_transitions(r)[:4]):
+        z = fig.add_subplot(sub[1, j])
+        w = (r["t"] >= t0 - 0.05) & (r["t"] <= t0 + 1.0)
+        for n in shown:
+            z.plot(recs[n]["t"][w], recs[n]["f"][w], "--",
+                   lw=0.9, color=C.COLORS[n])
+        z.plot(r["t"][w], r["f"][w], color=c, lw=1.8)
+        ys = np.concatenate([recs[n]["f"][w] for n in shown if n != "none"] + [r["f"][w]])
+        pad = max(0.02, 0.1 * (ys.max() - ys.min()))
+        z.set_ylim(ys.min() - pad, ys.max() + pad)
+        z.set_title(f"(g{j + 1}) {lab}: first 1 s", fontsize=8.5)
+        z.tick_params(labelsize=7); z.grid(alpha=.4)
+        z.set_xlabel("Time (s)", fontsize=7.5)
 
     ax = fig.add_subplot(gs[2, 2])
     ax.plot(r["t"], r["J"], color=C.COLORS["J"], label="J")
@@ -497,6 +527,47 @@ def figure_training(algo: str, hists: dict, recs: dict, fignum: int) -> str:
     ax.legend(loc="upper left", fontsize=7); ax2.legend(loc="upper right", fontsize=7)
     ax.grid(alpha=.4)
     return _save(fig, f"figure{fignum}_{algo}_training.png")
+
+
+def _critic_panel(ax, algo, hists):
+    """Critic Q(s, mu(s)) vs Monte-Carlo return on the validation states."""
+    _seed_band(ax, hists, "mc_mean", "k", "Monte-Carlo return G", x_key="eval_ep", smooth=1)
+    if algo == "td3":
+        _seed_band(ax, hists, "q_mean", C.COLORS["q1"], "critic Q1(s, μ(s))", x_key="eval_ep", smooth=1)
+        _seed_band(ax, hists, "q_min_mean", C.COLORS["q2"], "min(Q1, Q2)", x_key="eval_ep", smooth=1)
+    else:   # single critic
+        _seed_band(ax, hists, "q_mean", C.COLORS["q1"], "critic Q(s, μ(s))", x_key="eval_ep", smooth=1)
+    ax.set(xlabel="Episode", ylabel=f"Discounted return (×{C.REWARD_SCALE:g} reward units)")
+    ax.legend(fontsize=7); ax.grid(alpha=.4)
+
+
+# ================================================================
+# FIGURE 8 -- critic calibration, DDPG and TD3 side by side
+# ================================================================
+def figure_critic_bias(hists_by_algo: dict) -> str:
+    fig, axes = plt.subplots(1, 3, figsize=(16, 4.8))
+    fig.subplots_adjust(wspace=0.32, top=0.80)
+    fig.suptitle("Figure 8 — Critic calibration on validation states, DDPG vs TD3\n"
+                 "mean ± 95 % CI over seeds; thin lines = individual seeds; learner-reward units",
+                 fontsize=12.5, fontweight="bold")
+    for ax, algo, tag in ((axes[0], "ddpg", "(a) DDPG (single critic)"),
+                          (axes[1], "td3", "(b) TD3 (twin critics)")):
+        _critic_panel(ax, algo, hists_by_algo[algo])
+        ax.set_title(tag)
+    lo = min(axes[0].get_ylim()[0], axes[1].get_ylim()[0])
+    hi = max(axes[0].get_ylim()[1], axes[1].get_ylim()[1])
+    for ax in axes[:2]:
+        ax.set_ylim(lo, hi)
+    ax = axes[2]
+    _seed_band(ax, hists_by_algo["ddpg"], "q_bias", C.COLORS["ddpg"], "DDPG  Q − G",
+               x_key="eval_ep", smooth=1)
+    _seed_band(ax, hists_by_algo["td3"], "q_min_bias", C.COLORS["td3"], "TD3  min(Q1,Q2) − G",
+               x_key="eval_ep", smooth=1)
+    ax.axhline(0, color="k", lw=.8)
+    ax.set(title="(c) Critic bias (estimate − Monte-Carlo return)", xlabel="Episode",
+           ylabel="Bias")
+    ax.legend(fontsize=7); ax.grid(alpha=.4)
+    return _save(fig, "figure8_critic_bias.png")
 
 
 # ================================================================
@@ -512,7 +583,8 @@ def figure_comparison(hists_by_algo: dict, recs: dict, per_key: dict, controller
     ax = fig.add_subplot(gs[0, 0])
     for a, h in hists_by_algo.items():
         _seed_band(ax, h, "reward", C.COLORS[a], a.upper())
-    ax.set(title="(a) Training return", xlabel="Episode", ylabel="Smoothed return")
+    ax.set_yscale("symlog", linthresh=100)
+    ax.set(title="(a) Training return (symlog)", xlabel="Episode", ylabel="Smoothed return")
     ax.legend(fontsize=7); ax.grid(alpha=.4)
 
     ax = fig.add_subplot(gs[0, 1])
@@ -523,7 +595,8 @@ def figure_comparison(hists_by_algo: dict, recs: dict, per_key: dict, controller
 
     ax = fig.add_subplot(gs[0, 2])
     for a, h in hists_by_algo.items():
-        _seed_band(ax, h, "q_bias", C.COLORS[a], f"{a.upper()} Q1 − G", x_key="eval_ep", smooth=1)
+        _seed_band(ax, h, "q_bias", C.COLORS[a], f"{a.upper()} " + ("Q1 − G" if a == "td3" else "Q − G"),
+                   x_key="eval_ep", smooth=1)
         if a == "td3":
             _seed_band(ax, h, "q_min_bias", C.COLORS["q2"], "TD3 min(Q1,Q2) − G",
                        x_key="eval_ep", smooth=1)

@@ -21,6 +21,15 @@ HEADROOM (paper Section 3.4.1, Eqs. 20-25)
 If the BESS still saturates (rating or SOC) the step is re-solved with
 only the physical inertia H_sys.
 
+ACTUATOR
+    commanded (J, D, Kq) -> first-order low-pass (ACTION_FILTER_TAU)
+                         -> slew limiter (SLEW_TIME for the full range)
+
+REWARD (per control step; weights in config.py)
+    RoCoF is taken from the 500 ms relay window (the Eq. 20 / grid-code
+    quantity), with a hinge once it exceeds the 2 Hz/s limit.  An action-rate
+    term |dJ|/J_range + |dD|/D_range discourages chattering.
+
 VOLTAGE
     T_v dV/dt = X_th (Q_vsg - Q_load) / S + (V_nom - V)
     Q_vsg     = Kq (V_nom - V), bounded by sqrt(S^2 - P_bess^2)
@@ -48,6 +57,8 @@ class MicrogridVSGEnv:
         self.split = split          # "train" / "val" / "test": which part of a
         #                             measured record the weather is cut from
         self.rng = np.random.default_rng(seed)
+        self.H_sys = C.H_SYS
+        self._overrides = {}
 
         self.pv = SolarPV()
         self.wt = WindTurbine()
@@ -100,11 +111,18 @@ class MicrogridVSGEnv:
             down = np.clip((t - t_b) / C.LOAD_STEP_RAMP, 0.0, 1.0)
             self._pulse = self._pulse + mag * (up - down)
             self.event_windows.append((t_a, t_b))
+        if "step_frac" in self._overrides:
+            step_frac = float(self._overrides["step_frac"])
         self.step_frac = step_frac
         self._load_series = C.P_LOAD_NOM * (1.0 + step_frac * self._pulse)
 
     def reset(self, scenario: str | None = None, stochastic: bool | None = None,
-              seed: int | None = None):
+              seed: int | None = None, overrides: dict | None = None):
+        """``overrides`` (training only) may set ``H_sys`` and ``step_frac`` for
+        one episode -- the RoCoF-stress curriculum.  They last until the next
+        reset."""
+        self._overrides = dict(overrides or {})
+        self.H_sys = float(self._overrides.get("H_sys", C.H_SYS))
         if scenario is not None:
             self.scenario = scenario
         if stochastic is not None:
@@ -138,7 +156,8 @@ class MicrogridVSGEnv:
         self.P_agc = C.P_LOAD_NOM * (self.V / C.V_NOM) ** C.LOAD_V_EXP - self.P_gen_filt
         self.P_sched = self.P_bess = self.P_agc
         self.h_avail = max(0.0, (self.bess.S_rated - abs(self.P_sched)) / C.S_BASE)
-        self._prev_action_norm = np.zeros(self.action_dim)
+        self._prev_action_norm = None
+        self._cmd_filt = None
         nwin = max(2, int(round(C.ROCOF_WINDOW / self.dt)))
         self._f_hist = collections.deque([C.F_NOM] * nwin, maxlen=nwin)
         return self._state()
@@ -184,6 +203,16 @@ class MicrogridVSGEnv:
         Kq_cmd = (float(np.clip(a[2], C.KQ_MIN, C.KQ_MAX))
                   if (self.action_dim >= 3 and a.size >= 3) else C.KQ_VSG)
 
+        # actuator stage 1: first-order low-pass on the command
+        cmd = np.array([J_cmd, D_cmd, Kq_cmd])
+        if self._cmd_filt is None or C.ACTION_FILTER_TAU <= 0.0:
+            self._cmd_filt = cmd
+        else:
+            alpha = self.dt / (C.ACTION_FILTER_TAU + self.dt)
+            self._cmd_filt = self._cmd_filt + alpha * (cmd - self._cmd_filt)
+        J_cmd, D_cmd, Kq_cmd = (float(x) for x in self._cmd_filt)
+
+        # actuator stage 2: slew limiter
         if self._first_action:
             self.J, self.D, self.Kq = J_cmd, D_cmd, Kq_cmd
             self._first_action = False
@@ -267,13 +296,13 @@ class MicrogridVSGEnv:
 
         # swing equation, VSG law solved in closed form
         dP_ext = (P_gen + self.P_sched - self.P_load_actual) / C.S_BASE
-        ddw = (dP_ext - self.D_eff * self.dw_meas) / (2.0 * (C.H_SYS + self.J_eff))
+        ddw = (dP_ext - self.D_eff * self.dw_meas) / (2.0 * (self.H_sys + self.J_eff))
         p_vsg = -2.0 * self.J_eff * ddw - self.D_eff * self.dw_meas
 
         P_req = self.P_sched + p_vsg * C.S_BASE
         P_act = self.bess.apply(P_req, h)
         if abs(P_act - P_req) > 1.0:                 # rating / SOC saturation
-            ddw = (P_gen + P_act - self.P_load_actual) / C.S_BASE / (2.0 * C.H_SYS)
+            ddw = (P_gen + P_act - self.P_load_actual) / C.S_BASE / (2.0 * self.H_sys)
             p_vsg = (P_act - self.P_sched) / C.S_BASE
         self.P_bess = P_act
         self.P_vsg = p_vsg * C.S_BASE
@@ -299,10 +328,16 @@ class MicrogridVSGEnv:
         df = self.f - C.F_NOM
         dv = self.V - C.V_NOM
         a_norm = self.normalise_action(action)
+        prev = a_norm if self._prev_action_norm is None else self._prev_action_norm
+        da = a_norm - prev
+        rocof_n = abs(self.rocof_meas) / C.ROCOF_LIMIT       # 500 ms relay window
         r = (-C.W_FREQ * df ** 2
-             - C.W_ROCOF * (self.rocof_filt / C.ROCOF_LIMIT) ** 2
+             - C.W_ROCOF * rocof_n ** 2
+             - C.W_ROCOF_HINGE * max(0.0, rocof_n - 1.0)
              - C.W_VOLT * (dv / 0.05) ** 2
-             - C.W_EFFORT * float(np.mean((a_norm - self._prev_action_norm) ** 2))
+             - C.W_EFFORT * float(np.mean(da ** 2))
+             # |dJ|/J_range + |dD|/D_range  (a_norm spans 2 per range)
+             - C.W_RATE * 0.5 * (abs(da[0]) + abs(da[1]))
              - C.W_SOC * abs(self.bess.soc - 0.5)
              - C.W_BESS * (self.P_vsg / C.S_BASE) ** 2
              - C.W_RESERVE * self.h_req

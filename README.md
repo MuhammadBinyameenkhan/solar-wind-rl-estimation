@@ -150,14 +150,27 @@ bias needs.
 Per control step (20 ms), with fixed weights from `config.py`:
 
 ```
-r = −25·Δf² − 10·(RoCoF/2)² − 6·(ΔV/0.05)² − 5·‖Δa‖² − 2·|SOC−0.5|
+r = −25·Δf² − 25·(RoCoF₅₀₀/2)² − 20·max(0, |RoCoF₅₀₀|/2 − 1) − 6·(ΔV/0.05)²
+    − 5·‖Δa‖² − 0.05·(|ΔJ|/J_range + |ΔD|/D_range) − 2·|SOC−0.5|
     − 0.3·(P_vsg/S)² − 0.5·h_req − 8·max(0, h_req − h_avail) + 1[|Δf| < 0.5 Hz]
     − 100·1[trip]
 ```
 
-`h_req = 0.08 J + 0.01 D` is the paper's Eq. (22), so the reserve cost the
-agent pays is the same quantity reported in the tables. The tuned baselines
-are selected with this same reward.
+* `RoCoF₅₀₀` is the 500 ms relay-window RoCoF: the quantity Eq. (20) limits
+  and the tables report. (An earlier version used the 50 ms-filtered
+  instantaneous RoCoF. During a 0.1 s load ramp it reached about 1.7 Hz/s
+  while the relay window read about 0.3 Hz/s. That mismatch paid the agent
+  to throw a large J at contingency release.)
+* `h_req = 0.08 J + 0.01 D` is the paper's Eq. (22), so the reserve cost the
+  agent pays is the same quantity reported in the tables.
+* The tuned baselines are selected with this same reward.
+* The networks train on `1e-3·(r − 1)`, with an extra `−1e-3·γ/(1−γ)` on a
+  trip. This shift moves every discounted value by the same constant, so
+  the optimal policy is unchanged, and episode returns fall in about
+  [−12, 0]. Tables and model selection use the unscaled `r`.
+
+The actuator applies a first-order low-pass filter (τ = 0.08 s) and then a
+slew limiter to the commanded J, D and Kq, for every controller.
 
 ## Weather data
 

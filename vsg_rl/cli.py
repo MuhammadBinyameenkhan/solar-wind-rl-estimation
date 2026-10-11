@@ -112,25 +112,29 @@ def main(argv=None):
         if args.stage == "train":
             return 0
 
-    agents, hists = {}, {a: {} for a in algos}
+    agents, finals, hists = {}, {}, {a: {} for a in algos}
     for a in algos:
         for s in seeds:
             ag, h = load_agent(a, s)
             if ag is not None:
                 agents[(a, s)], hists[a][s] = ag, h
+            fa, _ = load_agent(a, s, which="final")
+            if fa is not None:
+                finals[(f"{a}_final", s)] = fa
     if not agents:
         log("No trained agents found — run with --stage all or train first.")
         return 1
 
     tdir = E.tables_dir()
     baseline_names = [c for c in C.CONTROLLERS if c not in ("ddpg", "td3")]
-    order = baseline_names + [a for a in algos]
+    order = baseline_names + [a for a in algos] + sorted({k[0] for k in finals})
 
     # 3 -- evaluation on the test scenarios and the held-out stress test
     res_path = os.path.join(C.OUT_DIR, "eval_cache.pt")
     if args.stage in ("all", "evaluate") or not os.path.exists(res_path):
         policies = {(c, None): make_policy(c, tuned=tuned) for c in baseline_names}
         policies.update({(a, s): ag.policy() for (a, s), ag in agents.items()})
+        policies.update({k: ag.policy() for k, ag in finals.items()})
         log(f"\n[evaluate] {len(policies)} controllers x {len(C.EVAL_SCENARIOS)} test scenarios ...")
         test = E.evaluate_many(policies, E.test_episodes(), workers=args.workers)
         log(f"[evaluate] held-out stress test: {C.N_STRESS} randomised episodes each ...")
@@ -172,7 +176,10 @@ def main(argv=None):
             figs.append(P.figure_training(a, hists[a], recs, num))
     cmp_ctrl = ["none", "fixed_high", "fixed_tuned", "adaptive_rule"] + [a for a in algos if a in recs]
     figs.append(P.figure_comparison({a: hists[a] for a in algos if hists[a]}, recs, test, cmp_ctrl))
-    figs.append(P.figure_metrics(agg_test, test, grid, stress, recs, order))
+    figs.append(P.figure_metrics(agg_test, {k: v for k, v in test.items() if not k[0].endswith("_final")},
+                                 grid, stress, recs, [c for c in order if not c.endswith("_final")]))
+    if all(hists.get(a) for a in ("ddpg", "td3")):
+        figs.append(P.figure_critic_bias(hists))
 
     log("\n" + "=" * 72)
     log(f"  COMPLETE in {time.time() - t0:.0f}s — outputs in {C.OUT_DIR}/")
@@ -227,16 +234,90 @@ def write_report(agg_test, agg_stress, test, stress, tuned, hists, order, seeds,
                              f"{better}/{len(vals)} seeds better "
                              f"(RL mean {np.mean(vals):.4g}, baseline {base:.4g})")
     L.append("")
-    L.append("## Critic calibration at the selected checkpoint (validation states)\n")
-    L.append("Bias = critic estimate − Monte-Carlo discounted return actually obtained.\n")
-    L.append("| Algorithm | Seed | Q1 − G | min(Q1,Q2) − G |")
-    L.append("|---|---|---|---|")
+    L.append(agent_summary(test, stress, hists, algos))
+    L.append("## Critic calibration and model selection per seed (validation states)\n")
+    L.append("Bias = critic estimate − Monte-Carlo discounted return actually obtained, both "
+             f"in learner-reward units (REWARD_SCALE = {C.REWARD_SCALE:g}, shifted by −R_ALIVE).\n")
+    L.append("| Algorithm | Seed | Best episode | Q − G (best) | min(Q1,Q2) − G (best) | "
+             "Q − G (final) | min(Q1,Q2) − G (final) |")
+    L.append("|---|---|---|---|---|---|---|")
     for a in algos:
         for s, h in sorted(hists[a].items()):
             if not h.get("val_return"):
                 continue
-            i = int(np.argmax(h["val_return"]))
-            L.append(f"| {a.upper()} | {s} | {h['q_bias'][i]:+.2f} | {h['q_min_bias'][i]:+.2f} |")
+            i = _best_index(h)
+            L.append(f"| {a.upper()} | {s} | {h['eval_ep'][i]} | {h['q_bias'][i]:+.4f} | "
+                     f"{h['q_min_bias'][i]:+.4f} | {h['q_bias'][-1]:+.4f} | {h['q_min_bias'][-1]:+.4f} |")
     with open(os.path.join(C.OUT_DIR, "RESULTS.md"), "w") as fh:
         fh.write("\n".join(L) + "\n")
     log("\n".join(L))
+
+
+def _best_index(h) -> int:
+    """Index of the validation evaluation that selected the deployed actor."""
+    be = h.get("best_episode")
+    if be is not None and be in h["eval_ep"]:
+        return h["eval_ep"].index(be)
+    return int(np.argmax(h["val_return"]))
+
+
+SUMMARY_METRICS = [("iae", "IAE (Hz·s)", "{:.3f}"), ("ise", "ISE (Hz²·s)", "{:.3f}"),
+                   ("itae", "ITAE (Hz·s²)", "{:.2f}"), ("settle_s", "Settling (s)", "{:.3f}"),
+                   ("overshoot_pct", "Overshoot (%)", "{:.1f}"), ("nadir_hz", "Nadir (Hz)", "{:.3f}"),
+                   ("rocof_win", "Peak RoCoF (Hz/s)", "{:.3f}"),
+                   ("reserve_pu", "Reserve (pu)", "{:.3f}"),
+                   ("bound_pct", "At bounds (%)", "{:.1f}"),
+                   ("J_bound_pct", "J at bound (%)", "{:.1f}"),
+                   ("D_bound_pct", "D at bound (%)", "{:.1f}")]
+
+
+def agent_summary(test, stress, hists, algos) -> str:
+    """Per-agent table, mean ± 95 % CI over seeds, best and final checkpoints,
+    with Welch t (TD3 − DDPG) for every metric."""
+    from . import evaluate as E
+    from .utils import mean_ci95, welch_t
+    L = ["## DDPG vs TD3 summary (mean ± 95 % CI over seeds)\n",
+         "Each seed is first averaged over the episodes. 'best' = validation-selected "
+         "checkpoint (deployed); 'final' = the network after the last episode. Critic bias "
+         "is measured on the validation states, in learner-reward units. t = Welch t, "
+         "TD3 − DDPG, on the per-seed values.\n"]
+
+    def per_seed(per, name, m):
+        return [E.episode_mean(r)[m] for (c, s), r in sorted(per.items(), key=lambda kv: str(kv[0]))
+                if c == name]
+
+    def bias(a, which, key):
+        out = []
+        for s, h in sorted(hists.get(a, {}).items()):
+            if h.get(key):
+                out.append(h[key][_best_index(h)] if which == "best" else h[key][-1])
+        return out
+
+    fmt = lambda v, f: f"{f.format(v[0])} ± {f.replace('+', '').format(v[2])}"
+    for which in ("best", "final"):
+        names = {a: (a if which == "best" else f"{a}_final") for a in algos}
+        for split, per in (("test scenarios", test), ("held-out stress test", stress)):
+            if not all(any(c == n for (c, s) in per) for n in names.values()):
+                continue
+            L.append(f"### {which.capitalize()} checkpoint — {split}\n")
+            L.append("| Metric | " + " | ".join(a.upper() for a in algos) + " | t (TD3 − DDPG) |")
+            L.append("|---|" + "---|" * len(algos) + "---|")
+            for m, lab, f in SUMMARY_METRICS:
+                vals = {a: per_seed(per, names[a], m) for a in algos}
+                cells = [fmt(mean_ci95(np.asarray(vals[a])[~np.isnan(vals[a])]), f) for a in algos]
+                t = (welch_t(vals["td3"], vals["ddpg"])[0]
+                     if {"td3", "ddpg"} <= set(algos) else float("nan"))
+                L.append(f"| {lab} | " + " | ".join(cells) + f" | {t:+.2f} |")
+            for key, lab in (("q_bias", "Critic bias Q − G"), ("q_min_bias", "min(Q1,Q2) − G")):
+                vals = {a: bias(a, which, key) for a in algos}
+                cells = [fmt(mean_ci95(vals[a]), "{:+.4f}") for a in algos]
+                t = (welch_t(vals["td3"], vals["ddpg"])[0]
+                     if {"td3", "ddpg"} <= set(algos) else float("nan"))
+                L.append(f"| {lab} | " + " | ".join(cells) + f" | {t:+.2f} |")
+            L.append("")
+    be = {a: [h.get("best_episode") for s, h in sorted(hists.get(a, {}).items())] for a in algos}
+    for a in algos:
+        L.append(f"* {a.upper()} best-checkpoint episodes by seed: {be[a]}")
+    L.append("")
+    return "\n".join(L)
+
