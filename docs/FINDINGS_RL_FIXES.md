@@ -171,3 +171,30 @@ by seed), TD3 −0.16 ± 0.05.
 4. **The previous run was affected by weight-decay collapse:** 29–51 % of
    critic weights were dead. Results built on that run (including the
    current manuscript) used partly collapsed critics.
+
+## Ablation: which change helps and which hurts
+
+Full tables: [`results_ablation/RESULTS.md`](../results_ablation/RESULTS.md).
+
+**Setup.** 3 seeds × 500 episodes per variant, best actors. Every variant is
+base A (the original setup plus the weight-decay fix) with one group of
+changes added. Stress-test IAE change against A:
+
+| Variant | TD3 | DDPG | Side effects |
+|---|---|---|---|
+| B relay-window RoCoF reward | −3.1 % | −7.4 % | J release spike 3.9 → 1.5 s (TD3), 3.2 → 0.8 s (DDPG); quiet \|ΔJ\| 10× lower; but J at its lower bound ~90–95 % of steps and quiet \|ΔD\| higher |
+| C actuator filter + rate penalty | +4.5 % | +18.1 % | lowest chattering, but slower response |
+| D observation normalisation | +3.9 % | +0.4 % | no benefit; quiet \|ΔD\| higher |
+| E reward scaling | +1.1 % | −7.8 % (test −9.1 %) | tightest DDPG spread; fewest steps at bounds (36 % / 54 %); critic bias ~0 |
+| F RoCoF-stress episodes | 0 % | 0 % | inert at this budget: stress episodes start at episode 150, and every selected checkpoint came earlier |
+| ALL | −1.0 % | +20.5 % (test +28.5 %, t = 2.55) | the combination hurts DDPG |
+
+**Caveat.** With 3 seeds, no single change is significant on its own; only
+ALL vs A for DDPG on the test set is. The direction is consistent across the
+test and stress sets.
+
+**Conclusion.**
+- **Keep** B and E, plus the weight-decay fix.
+- **Drop** C, which is the main cause of the regression, and D, which gives
+  no benefit.
+- **Leave out** F, because its effect could not be measured.
