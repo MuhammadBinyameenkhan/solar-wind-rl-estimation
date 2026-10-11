@@ -1,5 +1,10 @@
 # Findings from the corrected 5-seed study
 
+> **Synthetic weather, not real data.** This is the earlier 5-seed study on synthetic
+> profiles with illustrative levels. The real-data results are in
+> [`FINDINGS_MEASURED.md`](FINDINGS_MEASURED.md).
+
+
 Full tables: [`results/RESULTS.md`](../results/RESULTS.md). Figures: `results/figures/`.
 Setup: 5 seeds × {DDPG, TD3} × 1000 episodes; baselines tuned on validation
 episodes with the agents' own reward; test = five paper scenarios; stress = 50

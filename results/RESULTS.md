@@ -1,5 +1,9 @@
 # Results
 
+> **Synthetic weather, not real data** (illustrative levels). Real-data results:
+> [`results_measured/RESULTS.md`](../results_measured/RESULTS.md).
+
+
 Seeds: [0, 1, 2, 3, 4]. Episodes per run: 1000. Weather: calibrated. Test = five deterministic paper scenarios (seed 70007); stress = 50 randomised held-out episodes. RL values: mean ± 95 % CI over seeds (each seed averaged over the episodes). Baselines are deterministic and tuned on the validation episodes only.
 
 * **Fixed tuned**: J = 0.0, D = 30.0, Kq = 20.0  

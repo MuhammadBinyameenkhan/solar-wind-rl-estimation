@@ -17,7 +17,10 @@ converter cannot physically reserve.
 pip install -r requirements.txt
 python -m pytest -q tests          # physics / metric / data-split checks (~10 s)
 python -m vsg_rl --smoke           # end-to-end pipeline check (~1 min)
-python -m vsg_rl                   # full study: 5 seeds x {DDPG, TD3}, 1000 episodes
+# the paper's study on REAL data (needs data/measured/irradiance.csv and wind.csv, see docs/REAL_DATA.md):
+python -m vsg_rl --weather measured --seeds 0,1,2,3,4,5,6,7,8,9 --workers 4 --out results_measured
+# without --weather measured, the run uses SYNTHETIC weather (the earlier study):
+python -m vsg_rl                   # synthetic: 5 seeds x {DDPG, TD3}, 1000 episodes
 ```
 
 Useful options:
@@ -35,29 +38,7 @@ Useful options:
 On a 4-core CPU one 1000-episode run takes roughly 1 h; the full ten-run study
 with `--workers 4` takes about 3–4 h. A GPU is not needed.
 
-## Results of the 5-seed study
-
-Summary (test scenarios, mean ± 95 % CI over 5 seeds; full tables in
-[`results/RESULTS.md`](results/RESULTS.md), interpretation in
-[`docs/FINDINGS.md`](docs/FINDINGS.md)):
-
-| Controller | IAE (Hz·s) | Nadir (Hz) | RoCoF (Hz/s) | Settling (s) | Reserve (pu) |
-|---|---|---|---|---|---|
-| No VSG | 8.908 | 48.408 | 3.222 | 2.972 | 0.000 |
-| Fixed high (paper, J=4, D=30) | 2.644 | 49.730 | 0.541 | 0.204 | 0.385 (100 % derated) |
-| Fixed tuned (J=0, D=30, Kq=20) | 1.857 | 49.778 | 0.450 | 0.084 | 0.299 |
-| Rule-based adaptive | 1.859 | 49.787 | 0.450 | 0.096 | 0.244 |
-| DDPG-VSG | 1.857 ± 0.185 | 49.807 ± 0.011 | 0.423 ± 0.039 | 0.326 ± 0.206 | 0.238 ± 0.055 |
-| TD3-VSG | 1.888 ± 0.064 | 49.812 ± 0.006 | 0.399 ± 0.025 | 0.494 ± 0.161 | 0.229 ± 0.037 |
-
-The learned controllers match the tuned baselines on the error integrals,
-give the best nadir and RoCoF, and reserve ~20 % less headroom than the tuned
-constant controller. TD3 and DDPG are not significantly different. Trained
-actors and training histories are in `results/checkpoints/`, so
-`python -m vsg_rl --stage evaluate` reproduces every table and figure
-without retraining.
-
-### With measured weather (10 seeds)
+## Main results: measured weather (10 seeds)
 
 Re-run on measured 1 Hz Cabauw irradiance and FINO1 80 m wind at their
 **recorded levels** (no rescaling; `--weather measured`;
@@ -79,7 +60,34 @@ non-measured weather input is a 25 °C ambient temperature for the PV model.
 An earlier measured run rescaled the windows to levels that were not
 measured. It has been withdrawn and remains in the git history only.
 
-## Outputs (`results/`)
+## Earlier study: synthetic weather (5 seeds, not real data)
+
+> These results use **synthetic** disturbance profiles with **illustrative**
+> levels (`--weather calibrated`, `data/weather_calibration.json`), not
+> measurements. They are kept for reference only. The paper uses the
+> measured-weather results above.
+
+Summary (test scenarios, mean ± 95 % CI over 5 seeds; full tables in
+[`results/RESULTS.md`](results/RESULTS.md), interpretation in
+[`docs/FINDINGS.md`](docs/FINDINGS.md)):
+
+| Controller | IAE (Hz·s) | Nadir (Hz) | RoCoF (Hz/s) | Settling (s) | Reserve (pu) |
+|---|---|---|---|---|---|
+| No VSG | 8.908 | 48.408 | 3.222 | 2.972 | 0.000 |
+| Fixed high (paper, J=4, D=30) | 2.644 | 49.730 | 0.541 | 0.204 | 0.385 (100 % derated) |
+| Fixed tuned (J=0, D=30, Kq=20) | 1.857 | 49.778 | 0.450 | 0.084 | 0.299 |
+| Rule-based adaptive | 1.859 | 49.787 | 0.450 | 0.096 | 0.244 |
+| DDPG-VSG | 1.857 ± 0.185 | 49.807 ± 0.011 | 0.423 ± 0.039 | 0.326 ± 0.206 | 0.238 ± 0.055 |
+| TD3-VSG | 1.888 ± 0.064 | 49.812 ± 0.006 | 0.399 ± 0.025 | 0.494 ± 0.161 | 0.229 ± 0.037 |
+
+The learned controllers match the tuned baselines on the error integrals,
+give the best nadir and RoCoF, and reserve ~20 % less headroom than the tuned
+constant controller. TD3 and DDPG are not significantly different. Trained
+actors and training histories are in `results/checkpoints/`, so
+`python -m vsg_rl --stage evaluate` reproduces every table and figure
+without retraining.
+
+## Outputs (`results_measured/` for real data, `results/` for the synthetic study)
 
 * `RESULTS.md` — all tables, statistical tests and critic calibration
 * `tables/test_summary.csv`, `tables/stress_summary.csv` — mean, sd and 95 % CI per controller
