@@ -215,7 +215,7 @@ end
 if isempty(hit)
     error('Block "%s" not found in the Specialized Power Systems libraries.', name);
 end
-lib_rank = cellfun(@(p) find(strcmp(strtok(p, '/'), {'powerlib', 'sps_lib', 'spsLib', 'powerlib_extras'}), 1), hit);
+lib_rank = cellfun(@(p) find([strcmp(strtok(p, '/'), {'powerlib', 'sps_lib', 'spsLib', 'powerlib_extras'}), true], 1), hit);
 depth = cellfun(@(p) sum(p == '/'), hit);
 [~, i] = min(depth * 10 + lib_rank);              % library-level block, preferring powerlib
 path = hit{i};
