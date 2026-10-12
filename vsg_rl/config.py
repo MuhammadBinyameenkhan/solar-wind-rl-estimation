@@ -163,7 +163,10 @@ ROCOF_REWARD_WINDOW = True   # False = old 50 ms instantaneous RoCoF (ablation o
 W_ROCOF_HINGE = 20.0     # max(0, |RoCoF_500ms| / 2 Hz/s - 1): the relay limit binds
 W_VOLT = 6.0             # (dV / 0.05 pu)^2
 W_EFFORT = 5.0           # mean squared change of the normalised action
-W_RATE = 0.05            # |dJ|/J_range + |dD|/D_range per step (anti-chattering)
+# Action-rate penalty and actuator filter: OFF in the final setup.  The
+# ablation (results_ablation/) showed they cut chattering but slow the
+# response: stress IAE +4.5 % (TD3) and +18 % (DDPG).
+W_RATE = 0.0             # |dJ|/J_range + |dD|/D_range per step (ablation: 0.05)
 W_SOC = 2.0              # |SOC - 0.5|
 W_BESS = 0.3             # (P_vsg / S)^2
 # Headroom cost = Eq. (22) itself (0.08 pu per s of J, 0.01 pu per pu of D at
@@ -176,7 +179,7 @@ R_ALIVE = 1.0
 R_TERM_PENALTY = 100.0
 
 # --- Actuator ------------------------------------------------------
-ACTION_FILTER_TAU = 0.08     # s  first-order low-pass on commanded J, D, Kq
+ACTION_FILTER_TAU = 0.0      # s  first-order low-pass on commanded J, D, Kq (ablation: 0.08)
 #                              (before the slew limiter; all controllers)
 
 # ================================================================
@@ -211,7 +214,7 @@ REWARD_SCALE = 1e-3
 REWARD_SHIFT = True          # subtract R_ALIVE (+ trip correction); ablation switch
 
 # Running mean / std normalisation of observations (shared by both agents).
-OBS_NORM = True
+OBS_NORM = False             # ablation: no benefit (+3.9 % TD3 stress IAE)
 OBS_NORM_CLIP = 5.0
 OBS_NORM_MIN_STD = 0.05      # floor: stops near-constant features (PLL noise
 #                              in quiet periods) from being amplified > 20x
@@ -264,7 +267,7 @@ CURRICULUM = [
 # less residual inertia, where the 2 Hz/s relay limit can actually bind.
 # Probability per curriculum stage; drawn from a per-(seed, episode) RNG so
 # both algorithms see the same episodes.
-ROCOF_STRESS_PROB = (0.0, 0.15, 0.30)
+ROCOF_STRESS_PROB = (0.0, 0.0, 0.0)   # off: effect not measurable (ablation: 0, .15, .30)
 ROCOF_STRESS_H = (0.15, 0.35)       # s    residual inertia H_sys
 ROCOF_STRESS_STEP = (0.25, 0.35)    # pu   load step
 

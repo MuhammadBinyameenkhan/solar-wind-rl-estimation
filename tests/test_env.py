@@ -161,7 +161,8 @@ def test_learner_reward_shift_is_policy_invariant():
     assert alive < 0 and abs(alive - (-(1 - g ** 4) / (1 - g))) < 1e-6
 
 
-def test_rocof_stress_draws_are_identical_for_both_algorithms():
+def test_rocof_stress_draws_are_identical_for_both_algorithms(monkeypatch):
+    monkeypatch.setattr(C, "ROCOF_STRESS_PROB", (0.0, 0.15, 0.30))
     from vsg_rl.train import rocof_stress_overrides
     a = [rocof_stress_overrides(3, ep, 1000) for ep in range(1000)]
     b = [rocof_stress_overrides(3, ep, 1000) for ep in range(1000)]
@@ -176,7 +177,8 @@ def test_rocof_stress_draws_are_identical_for_both_algorithms():
     assert env.H_sys == C.H_SYS
 
 
-def test_action_filter_smooths_commands():
+def test_action_filter_smooths_commands(monkeypatch):
+    monkeypatch.setattr(C, "ACTION_FILTER_TAU", 0.08)
     env = MicrogridVSGEnv("clear")
     env.reset(seed=0)
     env.step([1.0, 10.0, 8.0])
@@ -186,7 +188,8 @@ def test_action_filter_smooths_commands():
     assert env.J < 10.0
 
 
-def test_obs_norm_snapshot_roundtrip():
+def test_obs_norm_snapshot_roundtrip(monkeypatch):
+    monkeypatch.setattr(C, "OBS_NORM", True)
     from vsg_rl.agents import make_agent
     ag = make_agent("ddpg", seed=0)
     rng = np.random.default_rng(0)

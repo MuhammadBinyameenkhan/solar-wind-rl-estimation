@@ -160,7 +160,7 @@ Per control step (20 ms), with fixed weights from `config.py`:
 
 ```
 r = −25·Δf² − 25·(RoCoF₅₀₀/2)² − 20·max(0, |RoCoF₅₀₀|/2 − 1) − 6·(ΔV/0.05)²
-    − 5·‖Δa‖² − 0.05·(|ΔJ|/J_range + |ΔD|/D_range) − 2·|SOC−0.5|
+    − 5·‖Δa‖² − 2·|SOC−0.5|
     − 0.3·(P_vsg/S)² − 0.5·h_req − 8·max(0, h_req − h_avail) + 1[|Δf| < 0.5 Hz]
     − 100·1[trip]
 ```
@@ -178,8 +178,13 @@ r = −25·Δf² − 25·(RoCoF₅₀₀/2)² − 20·max(0, |RoCoF₅₀₀|/2 
   the optimal policy is unchanged, and episode returns fall in about
   [−12, 0]. Tables and model selection use the unscaled `r`.
 
-The actuator applies a first-order low-pass filter (τ = 0.08 s) and then a
-slew limiter to the commanded J, D and Kq, for every controller.
+The actuator slew-limits the commanded J, D and Kq for every controller.
+Three options are switched off in the final setup because the ablation
+([`results_ablation/RESULTS.md`](results_ablation/RESULTS.md)) found they
+hurt or did not help:
+* an action-rate penalty plus a first-order actuator filter;
+* running observation normalisation;
+* RoCoF-stress training episodes.
 
 ## Weather data
 

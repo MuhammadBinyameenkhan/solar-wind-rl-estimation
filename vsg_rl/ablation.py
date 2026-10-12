@@ -26,7 +26,11 @@ from .utils import log, mean_ci95, welch_t
 OLD = dict(ROCOF_REWARD_WINDOW=False, W_ROCOF=10.0, W_ROCOF_HINGE=0.0, W_RATE=0.0,
            ACTION_FILTER_TAU=0.0, OBS_NORM=False, REWARD_SCALE=1.0, REWARD_SHIFT=False,
            ROCOF_STRESS_PROB=(0.0, 0.0, 0.0), ADAM_EPS=1e-8, PER_EPS=1e-5)
-NEW = {k: getattr(C, k) for k in OLD}
+# The full results_measured_v2 setup (pinned: the defaults later changed to
+# the configuration this ablation selected).
+NEW = dict(ROCOF_REWARD_WINDOW=True, W_ROCOF=25.0, W_ROCOF_HINGE=20.0, W_RATE=0.05,
+           ACTION_FILTER_TAU=0.08, OBS_NORM=True, REWARD_SCALE=1e-3, REWARD_SHIFT=True,
+           ROCOF_STRESS_PROB=(0.0, 0.15, 0.30), ADAM_EPS=1e-10, PER_EPS=1e-6)
 
 
 def _with(*keys):
