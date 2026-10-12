@@ -20,6 +20,7 @@ SCENARIOS = 1;            % test scenarios to simulate (1..12); start small, the
 USE_SIMULINK = true;      % false: script-only EMT solver (vsgrl_emt_bench.m)
 
 here = fileparts(mfilename('fullpath'));  if isempty(here), here = pwd; end
+cd(here);                                  % Simulink writes compiled code (slprj/) to the current folder
 root = fileparts(here);                    % the matlab/ folder
 addpath(here);  addpath(root);  addpath(fullfile(root, 'sim'));
 outdir = fullfile(here, 'results');  if ~exist(outdir, 'dir'), mkdir(outdir); end
