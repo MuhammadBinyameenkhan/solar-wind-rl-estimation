@@ -24,6 +24,15 @@ for i = 1:numel(blocks)
     end
 end
 fprintf('Top-level powerlib entries: %s\n', strjoin(find_system('powerlib', 'SearchDepth', 1, 'Type', 'Block')', ' | '));
+for lib = {'sps_lib', 'spsLib', 'powerlib_extras'}
+    try
+        load_system(lib{1});
+        g = find_system(lib{1}, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Name', 'powergui');
+        fprintf('%s loaded; powergui: %s\n', lib{1}, strjoin(g', ' | '));
+    catch
+        fprintf('%s: not available\n', lib{1});
+    end
+end
 fprintf('vsgrl_emt_ctrl.m on path: %s\n', which('vsgrl_emt_ctrl'));
 
 function s = ternary_str(c)

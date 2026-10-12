@@ -190,35 +190,53 @@ end
 end
 
 function path = libblock(name)
-% find a block of the Specialized Power Systems library: standard R2021a path first, then search
-known = struct('powergui', 'powerlib/powergui', ...
-    'cvs', 'powerlib/Electrical Sources/Controlled Voltage Source', ...
-    'ccs', 'powerlib/Electrical Sources/Controlled Current Source', ...
-    'rlc', 'powerlib/Elements/Three-Phase Series RLC Branch', ...
-    'vim', 'powerlib/Measurements/Three-Phase V-I Measurement', ...
-    'gnd', 'powerlib/Elements/Ground');
-keys = fieldnames(known);
-for i = 1:numel(keys)
-    cand = known.(keys{i});
-    if strcmpi(regexprep(cand, '.*/', ''), name)
+% find a block of Simscape Electrical / Specialized Power Systems by its display name
+% (names may contain line breaks; powergui lives outside powerlib in newer releases)
+persistent blocks names
+if isempty(blocks)
+    blocks = {};
+    for lib = {'powerlib', 'sps_lib', 'spsLib', 'powerlib_extras'}
         try
-            get_param(cand, 'Handle');
-            path = cand;  return
+            load_system(lib{1});
+            blocks = [blocks; find_system(lib{1}, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
+                                          'Type', 'Block')]; %#ok<AGROW>
         catch
         end
     end
-end
-persistent blocks names
-if isempty(blocks)
-    blocks = find_system('powerlib', 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Type', 'Block');
     names = regexprep(get_param(blocks, 'Name'), '\s+', ' ');
 end
 hit = blocks(strcmpi(names, name));
-if isempty(hit)
-    error('Block "%s" not found in powerlib (Simscape Electrical / Specialized Power Systems).', name);
+if isempty(hit) && strcmpi(name, 'powergui')
+    hit = blocks(strcmpi(get_param(blocks, 'MaskType'), 'PSB option menu block'));
 end
-[~, i] = min(cellfun(@(p) sum(p == '/'), hit));   % library-level block, not a sub-block
+if isempty(hit) && strcmpi(name, 'powergui')
+    hit = find_powergui_anywhere();
+end
+if isempty(hit)
+    error('Block "%s" not found in the Specialized Power Systems libraries.', name);
+end
+lib_rank = cellfun(@(p) find(strcmp(strtok(p, '/'), {'powerlib', 'sps_lib', 'spsLib', 'powerlib_extras'}), 1), hit);
+depth = cellfun(@(p) sum(p == '/'), hit);
+[~, i] = min(depth * 10 + lib_rank);              % library-level block, preferring powerlib
 path = hit{i};
+fprintf('  using %s\n', strrep(path, newline, ' '));
+end
+
+function hit = find_powergui_anywhere()
+% last resort: search every library file of Specialized Power Systems for the powergui block
+hit = {};
+files = dir(fullfile(matlabroot, 'toolbox', 'physmod', 'sps', '**', '*.slx'));
+files = [files; dir(fullfile(matlabroot, 'toolbox', 'physmod', 'sps', '**', '*.mdl'))];
+for k = 1:numel(files)
+    [~, lib] = fileparts(files(k).name);
+    try
+        load_system(fullfile(files(k).folder, files(k).name));
+        if ~strcmp(get_param(lib, 'BlockDiagramType'), 'library'), continue; end
+        g = find_system(lib, 'SearchDepth', 2, 'Name', 'powergui');
+        if ~isempty(g), hit = g(1); return; end
+    catch
+    end
+end
 end
 
 function set_mlfb(blk, code)
