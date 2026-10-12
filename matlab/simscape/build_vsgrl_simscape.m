@@ -24,6 +24,8 @@ file = fullfile(here, [mdl '.slx']);
 if bdIsLoaded(mdl), close_system(mdl, 0); end
 if exist(file, 'file'), delete(file); end
 new_system(mdl);  open_system(mdl);
+step = 'loading the Specialized Power Systems library (powerlib)';
+try
 load_system('powerlib');
 Ts = PRM.Ts;
 
@@ -35,6 +37,7 @@ L.rlc  = libblock('Three-Phase Series RLC Branch');
 L.vim  = libblock('Three-Phase V-I Measurement');
 L.gnd  = libblock('Ground');
 
+step = 'adding powergui and setting the solver';
 % ---------------- solver ----------------
 add_block(L.gui, [mdl '/powergui'], 'Position', [20 20 90 60]);
 setp([mdl '/powergui'], 'SimulationMode', 'Discrete');
@@ -43,11 +46,13 @@ set_param(mdl, 'Solver', 'FixedStepDiscrete', 'FixedStep', num2str(Ts, 16), ...
           'StopTime', num2str(PRM.Tw + PRM.T_ep), 'SaveOutput', 'off', 'SaveTime', 'off', ...
           'ReturnWorkspaceOutputs', 'on');
 
+step = 'adding the sources';
 % ---------------- three-phase source sets (VSG, diesel) and load injection ----------------
 srcV = add_source(mdl, L, 'VSG', L.cvs, [200 100]);
 srcD = add_source(mdl, L, 'Diesel', L.cvs, [200 500]);
 srcL = add_source(mdl, L, 'Load', L.ccs, [1100 300]);
 
+step = 'adding impedances and measurements';
 % coupling impedances
 add_block(L.rlc, [mdl '/Z_vsg'], 'Position', [420 110 470 210]);
 setrl([mdl '/Z_vsg'], PRM.R_v_ohm, PRM.L_v_H);
@@ -69,6 +74,7 @@ for b = {'VI_vsg', 'VI_diesel', 'VI_load'}          % outputs in volts and amper
     soft([mdl '/' b{1}], 'Vpu', 'off');  soft([mdl '/' b{1}], 'Ipu', 'off');
 end
 
+step = 'connecting the electrical network';
 % electrical connections
 for k = 1:3
     pconn(mdl, srcV.plus(k), port([mdl '/Z_vsg'], 'L', k));
@@ -83,6 +89,7 @@ for k = 1:3
     pconn(mdl, port([mdl '/R_shunt'], 'R', k), port([mdl '/G_shunt'], 'L', 1));
 end
 
+step = 'adding the controller (MATLAB Function block)';
 % ---------------- controller ----------------
 add_block('simulink/Signal Routing/Mux', [mdl '/MeasMux'], 'Inputs', '4', 'Position', [700 680 710 780]);
 add_block('simulink/Discrete/Unit Delay', [mdl '/MeasDelay'], 'SampleTime', num2str(Ts, 16), ...
@@ -106,7 +113,12 @@ add_block('simulink/Sinks/To Workspace', [mdl '/Log'], 'VariableName', 'emt_mon'
           'Decimation', num2str(round(0.01 / Ts)), 'Position', [1100 760 1180 790]);
 add_line(mdl, 'Controller/4', 'Log/1', 'autorouting', 'on');
 
+step = 'saving the model';
 save_system(mdl, file);
+catch err
+    fprintf(2, '\n*** Model build failed while %s:\n%s\n\n', step, err.message);
+    rethrow(err);
+end
 fprintf('Built %s\n', file);
 end
 
@@ -178,13 +190,30 @@ end
 end
 
 function path = libblock(name)
-% find a block in the Specialized Power Systems library by its (display) name
-persistent all names
-if isempty(all)
-    all = find_system('powerlib', 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Type', 'Block');
-    names = regexprep(get_param(all, 'Name'), '\s+', ' ');
+% find a block of the Specialized Power Systems library: standard R2021a path first, then search
+known = struct('powergui', 'powerlib/powergui', ...
+    'cvs', 'powerlib/Electrical Sources/Controlled Voltage Source', ...
+    'ccs', 'powerlib/Electrical Sources/Controlled Current Source', ...
+    'rlc', 'powerlib/Elements/Three-Phase Series RLC Branch', ...
+    'vim', 'powerlib/Measurements/Three-Phase V-I Measurement', ...
+    'gnd', 'powerlib/Elements/Ground');
+keys = fieldnames(known);
+for i = 1:numel(keys)
+    cand = known.(keys{i});
+    if strcmpi(regexprep(cand, '.*/', ''), name)
+        try
+            get_param(cand, 'Handle');
+            path = cand;  return
+        catch
+        end
+    end
 end
-hit = all(strcmpi(names, name));
+persistent blocks names
+if isempty(blocks)
+    blocks = find_system('powerlib', 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Type', 'Block');
+    names = regexprep(get_param(blocks, 'Name'), '\s+', ' ');
+end
+hit = blocks(strcmpi(names, name));
 if isempty(hit)
     error('Block "%s" not found in powerlib (Simscape Electrical / Specialized Power Systems).', name);
 end
