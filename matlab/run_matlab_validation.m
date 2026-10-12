@@ -14,7 +14,9 @@ if exist('OCTAVE_VERSION', 'builtin')            % GNU Octave: use a headless pl
 end
 here = fileparts(mfilename('fullpath'));  if isempty(here), here = pwd; end
 addpath(here);  addpath(fullfile(here, 'sim'));
-ex = fullfile(here, 'export');  outdir = fullfile(here, 'results');
+ex = fullfile(here, 'export');  vis = 'on';
+if exist('OCTAVE_VERSION', 'builtin'), vis = 'off'; end   % show figures in MATLAB
+outdir = fullfile(here, 'results');
 if ~exist(outdir, 'dir'), mkdir(outdir); end
 p   = load(fullfile(ex, 'vsgrl_params.mat'));
 pol = load(fullfile(ex, 'vsgrl_policy_val.mat'));
@@ -102,7 +104,7 @@ fclose(fid);
 % ---- figures (skipped gracefully where no graphics are available, e.g. headless Octave) -------
 try
 cols = {[0.165 0.471 0.839], [0.922 0.408 0.204], [0.290 0.227 0.655]};
-fig = figure('visible', 'off', 'position', [100 100 760 620]);
+fig = figure('visible', vis, 'position', [100 100 760 620]);
 labels = {'Fixed VSG (tuned)', 'Fixed VSG + projection', 'TD3 policy'};
 for c = 1:3
     cname = ctrls{c, 1};  S = S1.(cname);  n = S.n_tr;  py = V.([cname '_df_hz'])(1, 1:n);
@@ -115,7 +117,7 @@ end
 xlabel('Time (s)');
 print(fig, fullfile(outdir, 'validation_scenario1.png'), '-dpng', '-r150');
 
-fig = figure('visible', 'off', 'position', [100 100 900 300]);
+fig = figure('visible', vis, 'position', [100 100 900 300]);
 show = {'nadir_hz', 'rocof_max_hz_s', 'bess_energy_kwh'};
 for j = 1:3
     subplot(1, 3, j); hold on;

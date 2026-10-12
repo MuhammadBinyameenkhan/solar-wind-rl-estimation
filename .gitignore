@@ -9,7 +9,11 @@ runs/
 runs_smoke/
 results/
 results_smoke/
-matlab/export/
+matlab/export/*
 *.slxc
 slprj/
 runs_archive/
+# ...but keep the MATLAB validation package so run_matlab_validation.m works after cloning
+!matlab/export/vsgrl_params.mat
+!matlab/export/vsgrl_policy_val.mat
+!matlab/export/vsgrl_validation.mat
