@@ -60,6 +60,20 @@ non-measured weather input is a 25 °C ambient temperature for the PV model.
 An earlier measured run rescaled the windows to levels that were not
 measured. It has been withdrawn and remains in the git history only.
 
+### Final run (10 seeds, `results_measured_final/`)
+
+This run uses the setup selected by the ablation (no weight decay,
+relay-window RoCoF reward, reward scaling); see
+[`docs/FINDINGS_FINAL.md`](docs/FINDINGS_FINAL.md).
+
+* **Best regulation of all runs.** Stress IAE is 2.148 (TD3) and 2.204
+  (DDPG).
+* **Against the tuned constant-gain VSG:** both agents match it on the
+  stress set and reserve 19–27 % less headroom.
+* **Against the tuned rule-based VSG:** both beat it on stress IAE and RoCoF.
+* **DDPG vs TD3:** no significant difference in regulation. DDPG's critic
+  overestimates and TD3's underestimates.
+
 ### RL-fixes rerun (10 seeds, `results_measured_v2/`)
 
 A second 10-seed run applied a set of shared training fixes and the TD3-only
