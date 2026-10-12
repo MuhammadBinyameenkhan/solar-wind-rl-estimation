@@ -201,14 +201,14 @@ C.push(P("Fig. 4 places each controller against the attainable front of the 24 f
 C.push(...FIGURE("fig_pareto.png", 0, 0, 6.4, "Fig. 4. Controllers against the fixed-VSG family (grey) and its attainable front (dashed): band violation, nadir and RoCoF versus VSG fast energy. Error bars: ±1 s.d. over seeds."));
 C.push(...FIGURE("fig_learning_curves.png", 0, 0, 4.2, "Fig. 5. Validation return during training (mean ± s.d. over 5 seeds); dashed: base controller (episode 0)."));
 C.push(H2("E. MATLAB implementation and cross-validation"));
-C.push(P("The complete model (dispatch with EMS, two-machine dynamics, BESS secondary control, projection, rate limiter and clipping, the exported TD3 actor, and the metrics) was re-implemented independently in MATLAB code that runs without toolboxes. Twelve test scenarios with their exact wind and load noise sequences were re-simulated for the tuned fixed VSG, the projected VSG and a trained TD3 policy (Table VI, Fig. 6). The traces of both fixed controllers are bit-identical to the Python results, and the TD3 traces differ by at most 1.1×10", { t: "−7", sup: true }, " Hz, attributable to single-precision arithmetic in the neural network; all metrics agree to within 0.01 %. The MATLAB code is the starting point for the circuit-level Simscape validation."));
+C.push(P("The complete model (dispatch with EMS, two-machine dynamics, BESS secondary control, projection, rate limiter and clipping, the exported TD3 actor, and the metrics) was re-implemented independently in MATLAB code (R2021a, no toolboxes required). Twelve test scenarios with their exact wind and load noise sequences were re-simulated for the tuned fixed VSG, the projected VSG and a trained TD3 policy (Table VI, Fig. 6). The traces of both fixed controllers are bit-identical to the Python results, and the TD3 traces differ by at most 1.1×10", { t: "−7", sup: true }, " Hz, attributable to single-precision arithmetic in the neural network; all metrics agree to within 0.01 %. The MATLAB code is the starting point for the circuit-level Simscape validation."));
 C.push(...TABLE("TABLE VI. MATLAB vs Python (12 test scenarios, 30 s, 2–3 events each)",
   ["Controller", "max |ΔΔf| (Hz)", "max |ΔP_VSG| (MW)", "Mean nadir Py / MATLAB (Hz)", "Mean return Py / MATLAB"],
   [["Fixed VSG, tuned", "0", "0", "0.5402 / 0.5402", "−80.15 / −80.15"],
    ["Fixed VSG + projection", "0", "0", "0.5418 / 0.5418", "−80.46 / −80.46"],
    ["TD3 policy (seed 1, final)", "1.1×10⁻⁷", "6.3×10⁻⁸", "0.5020 / 0.5020", "−88.96 / −88.96"]],
   [2426, 1500, 1600, 1800, 1700]));
-C.push(P({ t: "Computed with GNU Octave 8.4; ", size: 17, i: true }, TODO("re-run matlab/run_matlab_validation.m in MATLAB and state the release")));
+C.push(P({ t: "Computed with MATLAB R2021a (identical results with GNU Octave 8.4).", size: 17, i: true }));
 C.push(...FIGURE("fig_matlab_validation.png", 0, 0, 6.0, "Fig. 6. MATLAB vs Python: frequency deviation for test scenario 1 (top) and per-scenario metrics for 36 runs (bottom)."));
 
 // VII. DISCUSSION
