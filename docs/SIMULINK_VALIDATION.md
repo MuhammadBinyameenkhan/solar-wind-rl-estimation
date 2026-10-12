@@ -15,13 +15,51 @@ run_matlab_validation                                % about 3 min in Octave, fa
 python scripts/plot_matlab_validation.py            # paper figure: results/figures/fig_matlab_validation.pdf
 ```
 
-**Result (12 test scenarios × 3 controllers, run with GNU Octave 8.4):**
+**Result (12 test scenarios × 3 controllers; MATLAB R2021a and GNU Octave 8.4 give identical numbers):**
 * The operating-point dispatch is identical.
 * Fixed and projected VSG traces are bit-identical (max |Δ| = 0).
 * TD3-policy traces differ by at most 1.1·10⁻⁷ Hz and 6·10⁻⁸ MW. The only source is float32 arithmetic in the PyTorch actor.
 * All metrics (nadir, RoCoF, BESS energy, infeasible commitments, saturation, return) agree to 0.00 %.
 
-See `matlab/results/validation_summary.txt`. This verifies the implementation across tools (code-to-code); it is not yet a circuit-level validation. Sections 1–4 below describe that next step in Simscape.
+See `matlab/results/validation_summary.txt`. This verifies the implementation across tools (code-to-code); it is not yet a circuit-level validation. Section 0b adds that.
+
+## 0b. Circuit-level (EMT) model in Simscape Electrical (`matlab/simscape/`)
+
+A three-phase 400 V, 50 Hz model of the same microgrid, simulated at 100 µs (Specialized Power Systems, discrete). It is built by a script, so there's no manual wiring:
+
+```matlab
+cd matlab/simscape
+run_simscape_validation        % builds vsgrl_emt.slx on the first run, then simulates and compares
+```
+
+| Part | Circuit-level model | RMS model it is compared with |
+|---|---|---|
+| VSG (BESS + PV support) | average-model converter: 3 controlled voltage sources behind R + jX_v; swing equation on **measured** power; power limiter on the angle; bus-voltage regulation | algebraic power share, hard clip |
+| Diesel generator | EMF behind R + jX_d, swing equation, governor + engine lag, droop + AGC | same mechanics, algebraic network |
+| Wind, PV base, load | grid-following current injection synchronised to its PLL (constant power) + 2 % shunt resistance | power balance |
+| Frequency measurement | SRF-PLL (20 Hz) on the bus voltage, then the same 20 ms filter | ideal bus frequency + 20 ms filter |
+| Control | identical 50 ms decisions: fixed / projected VSG / exported TD3 actor with the band-power projection | — |
+
+* **Same parameters as the RMS model:** X_v = 1/K_s = 0.5 pu and X_d = 1/K_d = 1.25 pu (X/R = 10). The operating point, events and wind/load noise are those of the RMS model.
+* **Where differences come from:** network electromagnetics, the E·V·cos δ nonlinearity, reactive power and voltage, the PLL, and the converter limiter acting on measured power.
+* **Warm-up and sign check:** a 0.5 s warm-up precedes each 30 s episode. During it, the controller checks the current-measurement and current-source polarity of the blocks and corrects them automatically.
+* **Controller code:** all control code is in `vsgrl_emt_ctrl.m`, called from one MATLAB Function block.
+* **Without Simulink:** `vsgrl_emt_bench.m` solves the identical circuit as a script (`USE_SIMULINK = false`, also works in Octave). It is the cross-check for the Simulink model.
+
+**First result** (script-only solver, test scenario 1; to be confirmed in Simulink on all 12 scenarios):
+
+| Metric | RMS | EMT |
+|---|---|---|
+| Δf RMSE | — | 0.025–0.028 Hz |
+| Nadir | | +7–8 % deeper |
+| RoCoF, 500 ms window | | +13 % |
+| BESS energy | | within 2 % |
+| Infeasible commitments with the projection | | ≤ 0.03 s per episode |
+
+* **RoCoF over 100 ms is about twice the RMS value.** At each load step, the bus-voltage phase jumps by about 3°, and the PLL turns that into a short frequency spike. RMS models can't represent this effect; it is why grid codes measure RoCoF over longer (500 ms) windows.
+* **The ranking of the controllers is unchanged.**
+
+Sections 1–4 below are the original manual-build notes, kept for reference.
 
 Goal: show that a policy trained on the fast RMS model keeps its advantage in a circuit-level (average-value converter) model. The scenarios, parameters and policy are identical; only the plant fidelity changes.
 
