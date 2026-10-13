@@ -318,7 +318,9 @@ _OVERRIDE_KEYS = ("EPISODES", "EVAL_EVERY", "WARMUP_STEPS", "EPISODE_DURATION",
                   # switches used by the ablation study (vsg_rl/ablation.py)
                   "ROCOF_REWARD_WINDOW", "W_ROCOF", "W_ROCOF_HINGE", "W_RATE",
                   "ACTION_FILTER_TAU", "OBS_NORM", "REWARD_SCALE", "REWARD_SHIFT",
-                  "ROCOF_STRESS_PROB", "ADAM_EPS", "PER_EPS")
+                  "ROCOF_STRESS_PROB", "ADAM_EPS", "PER_EPS",
+                  # sensitivity studies (vsg_rl/sensitivity.py)
+                  "TAU_AGC", "LOAD_STEP", "RAND_STEP_FRAC")
 
 
 def config_overrides() -> dict:
