@@ -39,6 +39,8 @@ def parse_args(argv=None):
     ap.add_argument("--fresh", action="store_true")
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--no-panels", action="store_true")
+    ap.add_argument("--no-time-feature", action="store_true",
+                    help="zero the t/T element of the observation (ablation)")
     return ap.parse_args(argv)
 
 
@@ -53,6 +55,7 @@ def apply_args(args):
     C.EPISODES = args.episodes
     C.N_STRESS = args.n_stress
     C.SAVE_PANELS = not args.no_panels
+    C.OBS_TIME = not args.no_time_feature
     if args.smoke:
         C.OUT_DIR = args.out or os.path.join("results", "smoke")
         C.EPISODES = 6

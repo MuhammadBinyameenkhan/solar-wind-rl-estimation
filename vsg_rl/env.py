@@ -179,7 +179,7 @@ class MicrogridVSGEnv:
         return np.array([
             (self.f_meas - C.F_NOM) / 0.5,
             self.rocof_filt_meas / C.ROCOF_LIMIT,
-            self.t / self.duration,
+            (self.t / self.duration) if C.OBS_TIME else 0.0,   # t/T (ablation: off)
             self.P_pv / self.pv.P_rated,
             self.P_wind / self.wt.P_rated,
             self._wind_series[k] / 25.0,

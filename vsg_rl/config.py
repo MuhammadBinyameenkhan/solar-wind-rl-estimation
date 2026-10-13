@@ -138,6 +138,9 @@ def max_steps() -> int:
 #   actually in force are part of the plant state and must be observed;
 #   h_avail is what the feasibility constraint is evaluated against.
 STATE_DIM = 14
+# Include the normalised episode time t/T in the observation.  False zeroes it
+# (a constant input carries no information), for the 'no t/T' ablation.
+OBS_TIME = True
 ACTION_DIM = 3           # [J, D, Kq]
 J_MIN, J_MAX = 0.05, 15.0     # s
 D_MIN, D_MAX = 5.0, 60.0      # pu

@@ -320,7 +320,7 @@ _OVERRIDE_KEYS = ("EPISODES", "EVAL_EVERY", "WARMUP_STEPS", "EPISODE_DURATION",
                   "ACTION_FILTER_TAU", "OBS_NORM", "REWARD_SCALE", "REWARD_SHIFT",
                   "ROCOF_STRESS_PROB", "ADAM_EPS", "PER_EPS",
                   # sensitivity studies (vsg_rl/sensitivity.py)
-                  "TAU_AGC", "LOAD_STEP", "RAND_STEP_FRAC")
+                  "TAU_AGC", "LOAD_STEP", "RAND_STEP_FRAC", "OBS_TIME")
 
 
 def config_overrides() -> dict:
