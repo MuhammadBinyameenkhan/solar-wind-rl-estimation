@@ -62,3 +62,30 @@ IAE). Inertia collapse is only slightly reduced.
 **Remaining trade-off.** One option is to add a lighter actuator filter
 (τ ≈ 0.02–0.04 s, untested). The other is to report the residual chattering
 and release spike as a limitation.
+
+## Ablation: no time feature t/T (seeds 0–2, `results_measured_notime/`)
+
+DDPG and TD3 were retrained with the normalised episode time t/T zeroed in the
+observation. Everything else is identical to the final run, including the
+tuned baselines. The comparison uses the same three seeds of the final run.
+
+**Pre-event J rise** (mean J in the 1 s before contingency 1, minus the
+earlier quiet period; five test windows):
+
+| | DDPG | TD3 |
+|---|---|---|
+| With t/T | +0.20 s | +0.70 s |
+| Without t/T | +0.03 s | +0.03 s |
+
+With t/T, the policies, TD3 in particular, anticipate the fixed contingency
+time of the test windows. Without t/T they do not.
+
+**Regulation and reserve, with → without t/T:**
+
+| | DDPG | TD3 |
+|---|---|---|
+| Test IAE | 2.025 → 1.873 (−7.5 %, t = −2.67) | 1.813 → 1.885 (+4.0 %, n.s.) |
+| Stress IAE | −2.2 % (n.s.) | +4.7 % (n.s.) |
+| Stress reserve | −1.4 % (n.s.) | −1.3 % (n.s.) |
+
+The reported results do not depend on t/T.
