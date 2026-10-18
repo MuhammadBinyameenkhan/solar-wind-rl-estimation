@@ -40,6 +40,8 @@ class VSGEnv(gym.Env):
         self.rw = e["reward"]
         self.headroom_constraint = e["headroom_constraint"]
         self.projection = e.get("projection", "steady_share")
+        if self.projection not in ("band_power", "steady_share", "sum_scale", "max_scale"):
+            raise ValueError(f"unknown env.projection {self.projection!r}")
         # First-order rate limit on the applied VSG parameters (0 → none)
         self.param_tau = e.get("param_filter_s", 0.0)
         self.act_dims = e.get("action_dims", 3)
@@ -83,6 +85,8 @@ class VSGEnv(gym.Env):
             return v["h_max_s"], v["d_max_pu"]
         mg = self.mg
         h = mg.headroom_up() if mg.f_meas <= 0.0 else mg.headroom_down()
+        if self.projection in ("sum_scale", "max_scale"):     # joint rules: applied in project_params
+            return v["h_max_s"], v["d_max_pu"]
         if self.projection == "band_power":
             f_band = (self.rw.get("f_band_hz") or self.gc["f_target_hz"]) / self.f0
             rocof_lim = self.gc["rocof_limit_hz_s"] / self.f0
@@ -95,6 +99,33 @@ class VSGEnv(gym.Env):
         rho = min(1.0, h / (self.share0 * self.dP_design))
         h_ub = v["h_min_s"] + rho * (v["h_max_s"] - v["h_min_s"])
         return h_ub, d_ub
+
+    def project_params(self, H, D):
+        """Apply the headroom feasibility rule to a commanded (H, D).
+
+        band_power / steady_share: each parameter is clipped to its own bound (param_bounds).
+        sum_scale (rule of the authors' earlier fully-converter studies): the reserved power
+            h_req = 2H·RoCoF_lim + D·Δf_lim, i.e. worst RoCoF and worst deviation at the same time;
+            if h_req > h, H and D are scaled by the same factor h / h_req (ratio preserved).
+        max_scale: h_req = max(2H·RoCoF_lim, D·Δf_lim) with the same proportional scaling.
+        The limits default to the band of the reward and the grid-code RoCoF limit; they can be
+        overridden with env.projection_f_hz and env.projection_rocof_hz_s."""
+        if not self.headroom_constraint:
+            return H, D
+        if self.projection in ("sum_scale", "max_scale"):
+            mg = self.mg
+            h = max(mg.headroom_up() if mg.f_meas <= 0.0 else mg.headroom_down(), 0.0)
+            e = self.cfg["env"]
+            f_lim = (e.get("projection_f_hz") or self.rw.get("f_band_hz") or self.gc["f_target_hz"]) / self.f0
+            r_lim = (e.get("projection_rocof_hz_s") or self.gc["rocof_limit_hz_s"]) / self.f0
+            a, b = 2.0 * H * r_lim, D * f_lim
+            need = a + b if self.projection == "sum_scale" else max(a, b)
+            if need > h and need > 0.0:
+                s = h / need
+                return H * s, D * s
+            return H, D
+        h_ub, d_ub = self.param_bounds()
+        return min(H, h_ub), min(D, d_ub)
 
     def action_to_params(self, a):
         """Map a ∈ [-1,1]^k to (H, D, alpha).
@@ -194,8 +225,7 @@ class VSGEnv(gym.Env):
             H0, D0, A0 = self._applied
             H, D, alpha = H0 + k * (H - H0), D0 + k * (D - D0), A0 + k * (alpha - A0)
         if enforce_bounds:
-            h_ub, d_ub = self.param_bounds()
-            H, D = min(H, h_ub), min(D, d_ub)
+            H, D = self.project_params(H, D)
         self._applied = (H, D, alpha)
         st = self.mg.advance(H, D, alpha, self.n_sub, mode=mode, trace=self._trace)
         self._k += 1

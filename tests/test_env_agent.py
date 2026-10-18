@@ -95,3 +95,22 @@ def test_infeasible_commitment_metric(cfg, df):
     proj.H0, proj.D0 = 8.0, 50.0
     m_proj, _ = run_episode(env, proj, sc)
     assert m_proj["infeasible_commit_s"] < 0.5          # only the 0.25 s rate-limit lag remains
+
+
+def test_joint_projection_rules(cfg, df):
+    """sum_scale / max_scale scale (H, D) by one factor so the reserved power equals the headroom."""
+    import copy
+    for rule in ("sum_scale", "max_scale"):
+        c = copy.deepcopy(cfg)
+        c["env"]["projection"] = rule
+        env = VSGEnv(c, df, split="train")
+        env.reset(seed=3)
+        h = env.mg.headroom_up()
+        f_lim = c["env"]["reward"]["f_band_hz"] / env.f0
+        r_lim = c["system"]["grid_code"]["rocof_limit_hz_s"] / env.f0
+        H, D = env.project_params(50.0, 500.0)              # far beyond any headroom
+        a, b = 2 * H * r_lim, D * f_lim
+        need = a + b if rule == "sum_scale" else max(a, b)
+        assert abs(need - h) < 1e-9
+        assert abs(H / D - 50.0 / 500.0) < 1e-12           # ratio preserved
+        assert env.project_params(0.2, 0.0) == (0.2, 0.0)   # feasible pair unchanged

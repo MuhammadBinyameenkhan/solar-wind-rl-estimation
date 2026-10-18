@@ -5,7 +5,10 @@ import numpy as np
 import pandas as pd
 
 
-def _infeasible_s(tr: pd.DataFrame, cfg: dict, dt: float) -> float:
+def _infeasible_s(tr: pd.DataFrame, cfg: dict, dt: float, rule: str = "max") -> float:
+    """Time during which the applied (H, D) needs more power than the available headroom.
+    rule "max": max(D·Δf_band, 2H·RoCoF_lim) (band-power projection);
+    rule "sum": D·Δf_band + 2H·RoCoF_lim (worst deviation and worst RoCoF at the same time)."""
     if "headroom_mw" not in tr:
         return float("nan")
     s = cfg["system"]
@@ -13,7 +16,8 @@ def _infeasible_s(tr: pd.DataFrame, cfg: dict, dt: float) -> float:
     band = (cfg["env"]["reward"].get("f_band_hz") or s["grid_code"]["f_target_hz"]) / f0
     rocof = s["grid_code"]["rocof_limit_hz_s"] / f0
     h = tr["headroom_mw"].to_numpy() / sb
-    need = np.maximum(tr["D_v"].to_numpy() * band, 2.0 * tr["H_v"].to_numpy() * rocof)
+    a, b = tr["D_v"].to_numpy() * band, 2.0 * tr["H_v"].to_numpy() * rocof
+    need = a + b if rule == "sum" else np.maximum(a, b)
     return float(np.sum(need > h + 1e-6) * dt)
 
 
@@ -69,6 +73,7 @@ def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
         # Infeasible commitment: the scheduled D (damping power at the band edge) or H (inertial
         # power at the RoCoF limit) needs more power than the direction-aware headroom.
         "infeasible_commit_s": _infeasible_s(tr, cfg, dt),
+        "infeasible_sum_s": _infeasible_s(tr, cfg, dt, rule="sum"),
         "soc_drop": float(tr["soc"].iloc[0] - tr["soc"].iloc[-1]),
         "f_violation": bool(np.max(np.abs(df)) > gc["f_dev_limit_hz"]),
         "rocof_violation": bool(np.max(np.abs(rocof_w)) > gc["rocof_limit_hz_s"]),
@@ -79,5 +84,5 @@ def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
 
 METRIC_COLUMNS = ["nadir_hz", "rocof_max_hz_s", "qss_dev_hz", "settling_time_s", "time_outside_band_s",
                   "bess_energy_kwh", "bess_rms_mw",
-                  "bess_peak_mw", "pv_headroom_energy_kwh", "saturation_s", "infeasible_commit_s", "f_violation",
+                  "bess_peak_mw", "pv_headroom_energy_kwh", "saturation_s", "infeasible_commit_s", "infeasible_sum_s", "f_violation",
                   "rocof_violation", "return", "collapsed"]

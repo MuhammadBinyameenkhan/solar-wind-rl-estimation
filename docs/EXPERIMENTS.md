@@ -237,3 +237,37 @@ Setup as in the previous section, at the full budget: TD3, DDPG and TD3 **withou
 * It is non-dominated against the fixed-VSG family (fast energy, band time, nadir, RoCoF): a different trade-off, not a better one.
 * DDPG's learned policy is dominated by the tuned fixed VSG and is worse than TD3 on nadir, RoCoF and return (all p_Holm < 10⁻⁹).
 * In all 15 runs the best validation checkpoint is the untrained base controller. More training (600 → 1000 episodes) does not change this.
+
+## Headroom-rule ablation (links this study to the earlier fully-converter studies)
+
+```bash
+python scripts/headroom_ablation.py --n 200 --workers 4      # ≈ 6 min on 4 cores, no training needed
+```
+Fixed VSG settings on the 200 test scenarios, with the hybrid plant, under five feasibility treatments. The settings are: tuned H = 3 s, D = 15; standard 3/20; and the earlier studies' "Fixed low" 1/10 and "Fixed high" 4/30. Range-max 8/50 is the largest setting the ranges allow.
+
+| Treatment | Rule | Derating |
+|---|---|---|
+| `none` | — | — (the plant's current limit still clips) |
+| `max_clip` | max(D·Δf_band, 2H·RoCoF_lim) ≤ h | H and D clipped separately (this study's projection so far) |
+| `max_scale` | same | H and D scaled by one factor |
+| `sum_scale` | D·Δf_band + 2H·RoCoF_lim ≤ h (earlier studies) | one factor |
+| `sum_scale_wide` | same, with the earlier limits 0.5 Hz, 2 Hz/s | one factor |
+
+Results (means over 200 scenarios; paired Wilcoxon tests):
+
+* **Without a constraint, high-gain settings are physically impossible for much of the time:**
+  * "Fixed high" for 5.3 s of every 30 s episode; range-max for 17.6 s (max rule).
+  * The tuned VSG for 2.3 s.
+  * This reproduces, in a plant with a diesel generator, the earlier finding that literature-style gains are derated almost continuously.
+* **Scaling both parameters (the earlier studies' method) beats clipping each one:**
+  * Converter saturation is lower for every setting (p < 10⁻⁴).
+  * The objective return is higher for every setting except the tuned one: +1.4 (standard), +2.0 (high), +8.8 (range-max), all p < 10⁻³.
+  * For the tuned VSG, return changes by +1.0 (n.s.).
+* **Sum vs max with the same limits:**
+  * The sum rule is more conservative: less saturation and BESS energy, but a slightly deeper nadir (+0.016 Hz for the tuned VSG, +0.04 to +0.08 Hz for high gains).
+  * Its return is equal for the tuned VSG and better for high gains.
+* **The earlier, wider limits (0.5 Hz, 2 Hz/s) are too conservative for this plant:**
+  * Every setting is scaled to about H ≈ 2 s, D ≈ 11–15.
+  * Return falls to −119 to −123, against −105 for the tuned VSG.
+  * Higher declared gains then buy nothing, the non-monotonicity seen in the earlier studies.
+* **For the tuned VSG, all rules with this study's limits change the return by less than 1.** The rule matters most for aggressive settings, which is exactly what an unconstrained learner tends to command.
