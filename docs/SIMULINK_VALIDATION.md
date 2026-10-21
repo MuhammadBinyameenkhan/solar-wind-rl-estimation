@@ -46,18 +46,21 @@ run_simscape_validation        % builds vsgrl_emt.slx on the first run, then sim
 * **Controller code:** all control code is in `vsgrl_emt_ctrl.m`, called from one MATLAB Function block.
 * **Without Simulink:** `vsgrl_emt_bench.m` solves the identical circuit as a script (`USE_SIMULINK = false`, also works in Octave). It is the cross-check for the Simulink model.
 
-**First result** (script-only solver, test scenario 1; to be confirmed in Simulink on all 12 scenarios):
+**Results** (script-only solver of the same circuit, 12 test scenarios × 3 controllers; `python scripts/plot_emt_validation.py`):
 
-| Metric | RMS | EMT |
-|---|---|---|
-| Δf RMSE | — | 0.025–0.028 Hz |
-| Nadir | | +7–8 % deeper |
-| RoCoF, 500 ms window | | +13 % |
-| BESS energy | | within 2 % |
-| Infeasible commitments with the projection | | ≤ 0.03 s per episode |
+| Metric | EMT vs RMS |
+|---|---|
+| Δf RMSE | 0.014–0.018 Hz |
+| Nadir, fixed controllers | within 0.2 % |
+| Nadir, TD3 | 4 % deeper (0.521 vs 0.502 Hz) |
+| BESS energy | within 0.8 % |
+| RoCoF, 100 ms window | ×2.5 (phase-jump spikes in the PLL) |
+| RoCoF, 500 ms window | +3 to +11 % |
+| Converter saturation time | ×2.3–2.7 (the limiter acts on measured power, including first-cycle transients) |
+| Infeasible commitments, projected controllers | ≤ 0.03 s |
 
-* **RoCoF over 100 ms is about twice the RMS value.** At each load step, the bus-voltage phase jumps by about 3°, and the PLL turns that into a short frequency spike. RMS models can't represent this effect; it is why grid codes measure RoCoF over longer (500 ms) windows.
-* **The ranking of the controllers is unchanged.**
+* **The controller ordering is the same in both models for every metric.**
+* **Simscape confirmation is pending:** run `run_simscape_validation` (with `USE_SIMULINK = true`) in MATLAB R2021a.
 
 Sections 1–4 below are the original manual-build notes, kept for reference.
 
