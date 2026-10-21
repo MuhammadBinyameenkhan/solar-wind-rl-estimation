@@ -117,7 +117,7 @@ def responses(cfg, out):
         axs[1].axhline(-lim["rocof_limit_hz_s"], color=MUTED, lw=0.8, ls="--")
         axs[1].axhline(lim["rocof_limit_hz_s"], color=MUTED, lw=0.8, ls="--")
         axs[2].set_ylabel("VSG power (MW)")
-        axs[3].set_ylabel("Virtual inertia H (s)")
+        axs[3].set_ylabel("Virtual inertia J (s)")
         axs[3].set_xlabel("Time (s)")
         if True:   # zoom on the shown responses
             dev = max(pd.read_csv(sorted(ctrls[c])[0]).df_hz.abs().max() for c in show if c in ctrls)

@@ -18,6 +18,8 @@
 clear; close all;
 SCENARIOS = 1;            % test scenarios to simulate (1..12); start small, then use 1:12
 USE_SIMULINK = true;      % false: script-only EMT solver (vsgrl_emt_bench.m)
+tag = getenv('VSGRL_EMT_TAG');              % optional: parallel batches (scenario list + file suffix)
+if ~isempty(getenv('VSGRL_EMT_SCEN')), SCENARIOS = str2num(getenv('VSGRL_EMT_SCEN')); end %#ok<ST2NM>
 
 here = fileparts(mfilename('fullpath'));  if isempty(here), here = pwd; end
 cd(here);                                  % Simulink writes compiled code (slprj/) to the current folder
@@ -112,13 +114,13 @@ for i = SCENARIOS
 end
 
 % ---------------- summary ----------------
-fid = fopen(fullfile(outdir, 'simscape_metrics.csv'), 'w');
+fid = fopen(fullfile(outdir, ['simscape_metrics' tag '.csv']), 'w');
 fprintf(fid, 'controller,scenario,metric,rms,emt\n');
 for r = 1:size(rows, 1)
     fprintf(fid, '%s,%d,%s,%.6f,%.6f\n', rows{r, :});
 end
 fclose(fid);
-fid = fopen(fullfile(outdir, 'simscape_summary.txt'), 'w');
+fid = fopen(fullfile(outdir, ['simscape_summary' tag '.txt']), 'w');
 allm = [mnames, {'rmse_df_hz'}];
 if USE_SIMULINK, solver_name = 'Simulink/Simscape Electrical'; else, solver_name = 'script-only EMT bench'; end
 for out = [1, fid]
