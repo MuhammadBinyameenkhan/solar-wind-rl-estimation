@@ -108,7 +108,7 @@ C.push(P("The synchronverter reproduces the machine equations inside the convert
 // ===== III. SYSTEM =====
 C.push(H1("III. Hybrid Microgrid Model"));
 C.push(P("The test system (Fig. 1, Table II) is an isolated 50 Hz microgrid on a 2 MVA base. A 0.5 MW diesel synchronous generator (SG) with an inertia constant of 2 s on its own rating provides the only physical inertia, 0.5 s on the system base. A 0.5 MW / 2 MWh BESS is connected through a grid-forming converter controlled as a VSG; a 0.8 MW PV plant is operated 15 % below its maximum power point, so that this margin can be released as fast reserve; and a 1.0 MW IEC class III wind turbine and the load are represented as grid-following injections."));
-C.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 120, after: 160 }, children: runs([TODO("insert Fig. 1 — single-line diagram: diesel SG, wind (grid-following), de-loaded PV and BESS behind the VSG converter, load bus, EMS and the scheduler of (J, D, α)"), { t: "  Fig. 1. Hybrid microgrid and control structure.", size: 18 }]) }));
+C.push(...FIGURE("../../paper/proposal_figs/fig_single_line.png", 0, 0, 5.6, "Fig. 1. Hybrid microgrid and control structure."));
 C.push(...TABLE("TABLE II. Plant parameters",
   ["Component", "Parameter", "Value"],
   [["System", "Base power; frequency", "2.0 MVA; 50 Hz"],
