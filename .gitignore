@@ -23,3 +23,5 @@ matlab/simscape/vsgrl_emt.slx
 matlab/simscape/slprj/
 matlab/simscape/*.slxc
 matlab/simscape/*_sfun.*
+octave-workspace
+matlab/simscape/results/
