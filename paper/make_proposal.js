@@ -152,7 +152,23 @@ C.push(P("The main objectives of this thesis are as follows,"));
   C.push(L("To evaluate the learned controllers fairly, against constant and rule-based VSGs tuned on the same data and objective, over several training seeds with statistical tests, and to bound in advance the gain that any adaptive scheduler can achieve."));
   C.push(L("To validate the models and controllers beyond the averaged model by an independent MATLAB implementation and a three-phase electromagnetic-transient (EMT) model in MATLAB/Simscape Electrical.")); }
 
-C.push(H2("1.4", "Scope and Limitations"));
+C.push(H2("1.4", "Research Questions"));
+C.push(P("The thesis answers one main question: ", I("can deep reinforcement learning schedule the virtual inertia and damping of a BESS-based VSG so that the synthetic inertia is physically feasible, and does it then improve frequency control over a properly tuned conventional VSG?"), " The main question is divided into four research questions, each answered by one of the objectives in Section 1.3:"));
+{ const L = newList();
+  C.push(L(B("RQ1 (feasibility). "), "How much converter headroom do virtual inertia and damping require, and how should a controller be limited when that headroom is not available: by a summed or a time-separated requirement, and by clipping each parameter or by scaling both? (Objective 1)"));
+  C.push(L(B("RQ2 (learning). "), "Can DDPG and TD3 agents learn to schedule the virtual inertia and damping in real time within this constraint, both in a converter-only microgrid and in a hybrid microgrid with a diesel generator? (Objective 2)"));
+  C.push(L(B("RQ3 (benefit). "), "When compared fairly, against tuned constant and rule-based VSGs, over several seeds and with statistical tests, does learning improve on a tuned VSG, and how much can any adaptive scheduler gain at most? (Objective 3)"));
+  C.push(L(B("RQ4 (fidelity). "), "Do the conclusions drawn from the averaged model hold in an independent implementation and in a three-phase electromagnetic-transient model? (Objective 4)")); }
+C.push(P("RQ1 to RQ3 correspond directly to the three parts of the main question (feasibility, learning, improvement); RQ4 checks that their answers are not artefacts of the averaged model. Table 1.1 links each question to the methods of Chapter 3 and to the preliminary results of Chapter 4."));
+C.push(...TABLE("Table 1.1 Research questions, methods and preliminary evidence",
+  ["Question", "Methods (Chapter 3)", "Preliminary evidence (Chapter 4)"],
+  [["RQ1 Feasibility", "Headroom requirement and derating, Eqs. (3.17)–(3.21), Section 3.6", "Sections 4.2.3 and 4.3.3; Table 4.3"],
+   ["RQ2 Learning", "Plant models, MDP, DDPG and TD3, Sections 3.5, 3.7, 3.8", "Sections 4.2.2 and 4.3.4; Table 4.4"],
+   ["RQ3 Benefit", "Tuned baselines, statistics and oracle bound, Section 3.9, Eq. (3.26)", "Sections 4.2.3, 4.3.2 and 4.3.4; Tables 4.1 and 4.4"],
+   ["RQ4 Fidelity", "MATLAB re-implementation and EMT model, Section 3.10", "Section 4.3.5; Table 4.5"]],
+  [1700, 3600, 3006], { leftAll: true }));
+
+C.push(H2("1.5", "Scope and Limitations"));
 C.push(P("The thesis is carried out in simulation within the following scope:"));
 { const L = newList();
   C.push(L("Two 50 Hz test systems are studied. Study 1 is a fully converter-interfaced microgrid with a 500 kW PV plant, a 500 kW Type-4 wind turbine, a 2500 kVA grid-forming BESS and an 1800 kW load. Study 2 is a hybrid microgrid on a 2 MVA base with a 0.5 MW diesel generator, a 1.0 MW wind turbine, a 0.8 MW de-loaded PV plant and a 0.5 MW / 2 MWh BESS operated as a VSG."));
@@ -162,11 +178,11 @@ C.push(P("The thesis is carried out in simulation within the following scope:"))
   C.push(L("The learning algorithms are DDPG and TD3, implemented in Python with PyTorch. The benchmarks are no virtual inertia, BESS droop, literature-style fixed VSGs, a validation-tuned fixed VSG and rule-based adaptive VSGs."));
   C.push(L("The network is represented as a single bus. Multi-bus power flow, protection coordination, converter switching and hardware-in-the-loop experiments are outside the scope; the EMT model uses an average converter model and a classical diesel machine model.")); }
 
-C.push(H2("1.5", "Conception"));
+C.push(H2("1.6", "Conception"));
 C.push(P("The main idea of the thesis is that synthetic inertia must be feasible before it can be optimal. Fig. 1.1 shows the conceptual framework. Weather data, load events and grid-code limits drive two microgrid models. A DRL agent proposes the VSG parameters, but every proposal passes a rate limiter and then a headroom feasibility layer before it reaches the converter, so that the converter is never asked for more than it can deliver. The resulting controllers are evaluated against tuned conventional VSGs over several seeds, compared with an oracle that bounds the best achievable adaptation, and validated in MATLAB and in a three-phase EMT model."));
 C.push(...FIG(PF("fig_concept.png"), 6.0, "Fig. 1.1 Conceptual framework of the thesis"));
 
-C.push(H2("1.6", "Research Benefits"));
+C.push(H2("1.7", "Research Benefits"));
 C.push(P("The thesis is expected to provide the following benefits:"));
 { const L = newList();
   C.push(L("A simple, deployable feasibility check that any adaptive VSG controller, learned or rule-based, can use to avoid committing inertia and damping that the converter cannot deliver."));
@@ -259,6 +275,7 @@ NOTE("–: not reported in the cited formulation (as summarised in Khan et al., 
 C.push(CHAP(3, "METHODOLOGY"));
 C.push(H2("3.1", "Introduction"));
 C.push(P("This chapter presents the models, the feasibility constraint, the learning formulation and the evaluation and validation methods. The thesis is organised as two connected studies (Fig. 1.1). Study 1 develops and tests the headroom-feasible learning framework in a fully converter-interfaced microgrid. Study 2 transfers it to a hybrid microgrid that contains a synchronous diesel generator, adds real site data for Thailand, refines the feasibility constraint, bounds the benefit of adaptation and validates the results at circuit level. Common elements are described once; differences between the studies are stated where they occur."));
+C.push(P("The two studies are deliberately not identical, and their numbers should not be compared directly. Study 1 follows the limits of the authors' earlier work (RoCoF limit 2 Hz/s, operational band ±0.5 Hz, decisions every 20 ms) and measures regulation by IAE, ISE, ITAE and the reserved headroom, whereas Study 2 uses tighter limits suited to a small diesel-based system (RoCoF limit 1 Hz/s, frequency band ±0.2 Hz, decisions every 50 ms) and measures controllers by an objective return, BESS energy, saturation and infeasible-commitment time. Comparisons across the studies are therefore qualitative. The two are linked quantitatively in one place: the feasibility-rule comparison of Study 2 also applies the Study 1 limits to the Study 2 plant (Section 4.3.3)."));
 
 C.push(H2("3.2", "Weather Data and Operating Points"));
 C.push(P("Study 1 uses measured high-resolution records at their recorded levels: 1-Hz global horizontal irradiance (GHI) from the Cabauw Baseline Surface Radiation Network station in the Netherlands on 31 March, 17 July and 22 July 2015 (259,065 samples; Mol et al., 2023), and 80 m sonic-anemometer wind speed from the FINO1 offshore platform, 21–23 January 2007, averaged to 1-s means (255,599 samples; Cheynet, 2025). The records are split chronologically into training (70 %), validation (15 %) and test (15 %) segments, and each 30 s episode is a window cut from them according to the scenario (clear day, cloud shadow, wind gust drop, night, combined stress)."));
@@ -268,13 +285,13 @@ C.push(H2("3.3", "Photovoltaic Model"));
 C.push(P("Because the frequency dynamics are much slower than the electrical response of the panels, the PV plant is represented by an algebraic irradiance–temperature model (Skoplaki and Palyvos, 2009):"));
 C.push(EQ("T_cell = T_amb + k_NOCT · G", "3.1"));
 C.push(EQ("P_pv = η_deg · P_pv,rated · (G / G_ref) · [1 − C_T (T_cell − T_ref)],     0 ≤ P_pv ≤ P_pv,rated", "3.2"));
-C.push(P("with G_ref = 1000 W/m², C_T = 0.0045 °C⁻¹, T_ref = 25 °C, k_NOCT = 0.030 °C·m²/W and η_deg = 0.995 in Study 1. In Study 2 the plant is operated 15 % below its maximum power point (de-loaded MPPT), so that it delivers P_pv,0 = (1 − d)·P_MPP and holds a reserve d·P_MPP that can be released within 80 ms as fast frequency support."));
+C.push(P("with G_ref = 1000 W/m², C_T = 0.0045 °C⁻¹, T_ref = 25 °C, k_NOCT = 0.030 °C·m²/W and η_deg = 0.995 in Study 1. In Study 2 the plant is operated 15 % below its maximum power point (de-loaded MPPT), so that it delivers P_pv,0 = (1 − d)·P_MPP and holds a reserve d·P_MPP that can be released within 80 ms as fast frequency support. The same equations are used with the hourly NASA POWER irradiance and temperature, but with parameters typical of crystalline-silicon modules: k_NOCT = (NOCT − 20)/800 = 0.031 °C·m²/W for NOCT = 45 °C, C_T = 0.004 °C⁻¹ and a system derating of 0.90 in place of η_deg."));
 
 C.push(H2("3.4", "Wind Turbine Model"));
 C.push(P("In Study 1 the Type-4 PMSG turbine extracts the mechanical power (Slootweg et al., 2003)"));
 C.push(EQ("P_m = ½ ρ π R² C_p(λ, β) v_w³", "3.3"));
 C.push(EQ("C_p = 0.5176 (116/λ_i − 0.4β − 5) e^(−21/λ_i) + 0.0068 λ,     1/λ_i = 1/(λ + 0.08β) − 0.035/(β³ + 1)", "3.4"));
-C.push(P("with ρ = 1.225 kg/m³ and R = 18.9 m, which gives 500 kW at the rated speed of 11.5 m/s, an optimal tip-speed ratio of 8.10 and cut-in and cut-out speeds of 3 and 25 m/s. In Study 2, where the wind is hourly, a pitch-regulated IEC class III power curve with density correction is used (IEC 61400-12-1),"));
+C.push(P("with ρ = 1.225 kg/m³ and R = 18.9 m, which gives 500 kW at the rated speed of 11.5 m/s, an optimal tip-speed ratio of 8.10 and cut-in and cut-out speeds of 3 and 25 m/s. The turbine also includes rotor inertia, an optimal-torque controller, a pitch controller that limits rotor over-speed and a converter lag, so that the measured 1-s wind is smoothed as in a real machine. In Study 2, where the wind is hourly, a pitch-regulated IEC class III power curve with density correction is used (IEC 61400-12-1),"));
 C.push(EQ("P_w = P_r (v'³ − v_ci³) / (v_r³ − v_ci³) for v_ci ≤ v' < v_r,   P_w = P_r for v_r ≤ v' < v_co,   v' = v (ρ/1.225)^(1/3)", "3.5"));
 C.push(P("with P_r = 1.0 MW, v_ci = 2.5 m/s, v_r = 10 m/s, v_co = 25 m/s and a 100 m hub, chosen because the site is a low-wind site (mean 4.2 m/s at 100 m)."));
 
@@ -298,7 +315,9 @@ C.push(EQ("2 H_d dΔω_d/dt = ΔP_m − ΔP_e,d − D_d (Δω_d − Δω_b)", "3
 C.push(EQ("2 J_v dΔω_v/dt = P_set − P_v − D_v Δω_v,     dδ/dt = ω_0 (Δω_v − Δω_d)", "3.15"));
 C.push(P("Here δ is the angle of the virtual rotor relative to the SG rotor, ΔP_m follows a droop governor (5 %) with governor and engine lags (0.2 s, 0.5 s) and automatic generation control, and P_set is moved by an integral BESS secondary control. With K_d = 0.8 pu and K_s = 2.0 pu the VSG takes about 71 % of every load step at the instant it occurs, whatever J_v and D_v are. The VSG power is limited to the band the BESS and PV can deliver,"));
 C.push(EQ("−(P_ch,max(SoC) + P_b0) + P_pv,s ≤ P_v ≤ P_dis,max(SoC) − P_b0 + P_pv,s", "3.16"));
-C.push(P("where P_b0 is the BESS power dispatched by a rule-based energy management system (EMS) that keeps the diesel near 60 % of its rating, the SoC-dependent limits taper linearly near the SoC bounds (0.10–0.95), and P_pv,s = α P_v is the PV share of the support. The model is integrated at 2 ms and frequency is measured through a 20 ms filter."));
+C.push(P("where P_b0 is the BESS power dispatched by a rule-based energy management system (EMS) that keeps the diesel near 60 % of its rating, the SoC-dependent limits taper linearly near the SoC bounds (0.10–0.95), and P_pv,s is the PV share of the support. The PV share follows the VSG power request through a first-order lag and is bounded by the de-loaded reserve and by the PV base output,"));
+C.push(EQ("T_pv dP_pv,s/dt = clip(α · P_v,req, −P_pv,0, d·P_MPP) − P_pv,s,     T_pv = 80 ms", "3.16a"));
+C.push(P("so that the BESS supplies the remainder, P_b = P_b0 + P_v − P_pv,s. The model is integrated at 2 ms and frequency is measured through a 20 ms filter."));
 
 C.push(H2("3.6", "Converter Headroom Feasibility"));
 C.push(P("Sustaining (3.6) or (3.15) requires active-power headroom that the converter may not possess. Study 1 uses the worst case admitted by the grid code, in which the frequency reaches the RoCoF limit and the deviation limit at the same time:"));
@@ -346,6 +365,23 @@ C.push(P("compares a scheduler that picks the best setting for each scenario wit
 
 C.push(H2("3.10", "Validation"));
 C.push(P("Two validation stages are used. First, the complete Study 2 model, including the EMS, the feasibility layer and the exported actor network, is re-implemented independently in MATLAB and compared with the Python results on identical scenarios and noise sequences. Second, a three-phase 400 V EMT model is built with Simscape Electrical (Specialized Power Systems) and an equivalent script solver: an average-model VSG converter behind its coupling impedance, the diesel SG as an internal voltage behind its reactance with swing equation, governor and AGC, the load and renewable base power as a PLL-synchronised grid-following injection, and the same controller code. The coupling reactances equal the inverse synchronising coefficients of the averaged model, so that any difference comes from what the averaged model neglects: network electromagnetics, the nonlinear power–angle relation, voltage and reactive power, the PLL and a converter power limiter acting on measured power."));
+
+C.push(H2("3.11", "Implementation and Reproducibility"));
+C.push(P("Both studies are implemented in Python with PyTorch and are version-controlled in the repository github.com/MuhammadBinyameenkhan/solar-wind-rl-estimation: Study 1 in the package vsg_rl (branch claude/funny-wright-4vhwhz) and Study 2, with the MATLAB and EMT validation, in the package vsgrl and the folder matlab (branch claude/determined-ptolemy-8ggnob). Table 3.2 maps each equation of this chapter to the code that implements it, so that every reported number can be traced and reproduced; both packages include unit tests of the models, the feasibility constraint and the agents."));
+C.push(...TABLE("Table 3.2 Equations and their implementation",
+  ["Equations", "Study", "Implementation"],
+  [["(3.1)–(3.2) PV", "1 / 2", "vsg_rl/models.py (SolarPV) / vsgrl/components/resources.py (pv_power_mw)"],
+   ["(3.3)–(3.4) wind turbine with rotor and pitch dynamics", "1", "vsg_rl/models.py (WindTurbine)"],
+   ["(3.5) wind power curve", "2", "vsgrl/components/resources.py (WindPowerCurve)"],
+   ["(3.6)–(3.11) VSG, droop, scheduling, voltage, PLL", "1", "vsg_rl/env.py (step, _substep)"],
+   ["(3.12)–(3.16a) two-machine model, limits, PV share", "2", "vsgrl/microgrid.py (reset, advance)"],
+   ["(3.17)–(3.19) headroom and proportional derating", "1", "vsg_rl/env.py (_substep)"],
+   ["(3.20)–(3.21) direction-aware headroom, max rule, clip / scale", "2", "vsgrl/microgrid.py (headroom_up/down); vsgrl/envs/vsg_env.py (param_bounds, project_params)"],
+   ["(3.22)–(3.23) residual action and cost", "2", "vsgrl/envs/vsg_env.py (action_to_params, step_params)"],
+   ["(3.24) DDPG and TD3", "1 / 2", "vsg_rl/agents.py / vsgrl/agents/td3.py"],
+   ["(3.25)–(3.26) metrics, statistics, oracle", "1 / 2", "vsg_rl/evaluate.py / vsgrl/metrics.py, scripts/analyze.py, scripts/oracle_test.py"],
+   ["Validation (Section 3.10)", "2", "matlab/sim (MATLAB model); matlab/simscape (EMT model)"]],
+  [3000, 800, 4506], { leftAll: true, size: 20 }));
 
 // Abbreviations and symbols (template style)
 C.push(new Paragraph({ alignment: AlignmentType.CENTER, pageBreakBefore: true, spacing: { after: 240 },
