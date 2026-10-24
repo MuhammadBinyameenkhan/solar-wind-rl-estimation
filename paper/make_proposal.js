@@ -102,6 +102,19 @@ const C = [];       // body (chapters)
 // FRONT MATTER
 // =====================================================================================
 const TITLE = "TOWARD FEASIBLE SYNTHETIC INERTIA: REINFORCEMENT-LEARNING-DRIVEN VIRTUAL SYNCHRONOUS GENERATOR CONTROL FOR LOW-INERTIA PV–WIND–BESS MICROGRIDS";
+const CHECK = [
+  new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: runs([{ t: "CHECKLIST OF MISSING ITEMS (delete this page before submission)", b: true, hl: true }]) }),
+  ...["Run the four PRISMA searches (Table 2.1): record the date and the hits per database, then fill every n = ____ in Fig. 2.1 and Section 2.2.",
+      "Confirm the degree title (Master of Engineering or M.Sc.) on the abstract page.",
+      "Add a citation for the Thailand renewable-energy statement in Section 1.2.",
+      "Cite the source of the 1 Hz/s and 0.2 Hz limits used in Study 2 (Section 3.6), or state that they are design choices.",
+      "Confirm the circuit-level (EMT) results with the Simscape Electrical model in MATLAB R2021a (Section 4.3.5).",
+      "Map months 1–12 of Table 5.1 to the academic calendar.",
+      "Update the status of the three manuscripts (Section 5.4 and Appendix) and attach them in the Appendix.",
+      "Check every reference against its DOI (docs/PROPOSAL_REFERENCES.md).",
+      "In Word, update the table of contents (click Yes when asked, or press F9 in the table)."].map((t, i) =>
+    new Paragraph({ spacing: { after: 100, line: 300 }, indent: { left: 360, hanging: 360 }, children: runs([{ t: `${i + 1}. ${t}`, hl: true }], 24) })),
+];
 const cover = [
   new Paragraph({ spacing: { before: 600 }, children: [] }),
   new Paragraph({ alignment: AlignmentType.CENTER, spacing: { line: 360 }, children: [new TextRun({ text: TITLE, font: FONT, size: 36, bold: true })] }),
@@ -138,7 +151,7 @@ C.push(P("Power systems are moving away from large synchronous generators toward
 C.push(P("A battery energy storage system (BESS) whose converter is controlled as a virtual synchronous generator (VSG) can restore part of the missing behaviour. The VSG reproduces the swing equation of a synchronous machine in software, with a virtual inertia J and a virtual damping D that the designer can choose (Zhong and Weiss, 2011; Bevrani et al., 2014). Because J and D are only numbers in a controller, they can also be changed while the system runs, by rules or by learning, and deep reinforcement learning (DRL) has become a popular way to do so. This thesis studies when such adaptive, learned VSG control is physically feasible and when it is actually worth having."));
 
 C.push(H2("1.2", "Problem Statement"));
-C.push(P("Thailand, like many countries, is adding solar and wind capacity to reduce fuel imports and emissions, and remote communities, islands and industrial sites increasingly operate as hybrid microgrids in which a diesel generator, PV, wind and a BESS share the load. In such systems the frequency is set by very little rotating mass. A virtual synchronous generator on the BESS converter is the natural remedy, but three practical problems limit how it is designed today."));
+C.push(P("Thailand, like many countries, is adding solar and wind capacity to reduce fuel imports and emissions, and remote communities, islands and industrial sites increasingly operate as hybrid microgrids in which a diesel generator, PV, wind and a BESS share the load. ", TODO("AUTHOR: add a citation with figures, e.g. Thailand's Power Development Plan or ERC/EGAT renewable statistics"), " In such systems the frequency is set by very little rotating mass. A virtual synchronous generator on the BESS converter is the natural remedy, but three practical problems limit how it is designed today."));
 C.push(P("First, virtual inertia and damping are not free. Every second of virtual inertia and every unit of damping commits the converter to inject power in proportion to the RoCoF and to the frequency deviation. A battery that is already discharging to cover the evening peak, or one whose state of charge (SoC) is close to its limit, may not be able to deliver that power. Most adaptive VSG schemes in the literature, rule-based or learned, bound J and D only by fixed ranges and never check them against the power the converter has left (Alipoor et al., 2015; Li et al., 2017; Oboreh-Snapps et al., 2024). A controller that promises inertia it cannot deliver gives a false sense of security and saturates the converter exactly when it is needed."));
 C.push(P("Second, the benefit of learning is often overstated. DRL results vary strongly between training runs and depend on which checkpoint is kept (Henderson et al., 2018; Agarwal et al., 2021), yet learned VSG controllers are frequently compared with hand-picked fixed gains from a single training run. Whether a learned controller really improves on a properly tuned conventional VSG, and by how much it could improve at most, usually remains unanswered."));
 C.push(P("Third, most learning studies rely on averaged (RMS) frequency models. It is not obvious that the conclusions survive in a three-phase circuit with a phase-locked loop (PLL) and a converter that limits its output on measured current and power."));
@@ -199,7 +212,8 @@ C.push(P("Research on virtual synchronous generators has moved from emulating a 
 
 C.push(H2("2.2", "Systematic Search and Selection (PRISMA)"));
 C.push(P("The search covers peer-reviewed literature published from 2015 to 2026 in four databases: Scopus, IEEE Xplore, ScienceDirect and Web of Science. The search strings combine two concept blocks, the VSG or virtual-inertia block and the adaptation or learning block, and are adapted to the syntax of each database as listed in Table 2.1. Reference lists of the included studies were also screened (citation searching)."));
-C.push(...TABLE("Table 2.1 Databases and search strings (searched on " + "____" + ")",
+C.push(new Paragraph({ spacing: { before: 120 }, children: runs([TODO("AUTHOR: write the search date in the caption of Table 2.1")], 24) }));
+C.push(...TABLE("Table 2.1 Databases and search strings (searched on ____)",
   ["Database", "Search string (title, abstract and keywords)"],
   [["Scopus", "TITLE-ABS-KEY ( ( \"virtual synchronous generator\" OR \"virtual synchronous machine\" OR \"virtual inertia\" OR \"synthetic inertia\" ) AND ( adaptive OR \"reinforcement learning\" OR DDPG OR TD3 OR \"actor-critic\" ) ) AND PUBYEAR > 2014 AND PUBYEAR < 2027 AND ( DOCTYPE ( ar ) OR DOCTYPE ( cp ) ) AND LANGUAGE ( english )"],
    ["IEEE Xplore", "(\"virtual synchronous generator\" OR \"virtual synchronous machine\" OR \"virtual inertia\" OR \"synthetic inertia\") AND (adaptive OR \"reinforcement learning\" OR DDPG OR TD3 OR \"actor-critic\"); All Metadata; 2015–2026; journals and conferences"],
@@ -326,7 +340,7 @@ C.push(EQ("h_avail = (S_rated − |P_sch + p_dr S_base|) / S_base", "3.18"));
 C.push(EQ("(J_eff, D_eff) = (J, D) · min(1, h_avail / h_req)", "3.19"));
 C.push(P("One second of virtual inertia therefore commits as much headroom as 8 pu of damping. The parameters are also slew-limited to a full traverse in T_slew = 0.30 s, and (3.19) is applied identically to every controller. Study 2 refines the constraint in three ways. First, the headroom is direction-aware: upward headroom applies while the frequency is at or below nominal and downward headroom during an over-frequency event,"));
 C.push(EQ("h_up = max(P_dis,max(SoC) − P_b0, 0) + d·P_MPP,     h_dn = max(P_ch,max(SoC) + P_b0, 0) + P_pv,0", "3.20"));
-C.push(P("Second, because the RoCoF peaks immediately after a step, when the deviation is still near zero, and the deviation peaks at the nadir, when the RoCoF is zero, each mechanism is sized at its own peak (time-separated requirement), with Δf_band = 0.2 Hz and RoCoF_lim = 1 Hz/s:"));
+C.push(P("Second, because the RoCoF peaks immediately after a step, when the deviation is still near zero, and the deviation peaks at the nadir, when the RoCoF is zero, each mechanism is sized at its own peak (time-separated requirement), with Δf_band = 0.2 Hz and RoCoF_lim = 1 Hz/s ", TODO("AUTHOR: cite the grid-code or utility source for these limits (e.g. PEA/EGAT grid code) or state that they are design choices"), ":"));
 C.push(EQ("h_req,max = max(2 J_v · RoCoF_lim, D_v · Δf_band) ≤ h", "3.21"));
 C.push(P("Third, two derating methods are compared: clipping each parameter to its own bound (J_v ≤ h/(2 RoCoF_lim), D_v ≤ h/Δf_band), and scaling both by one factor as in (3.19). In all cases the commanded parameters pass a 0.25 s rate limiter before the feasibility step, so that feasibility takes priority over smoothness. The time during which the applied pair violates the requirement (infeasible commitment) measures what the constraint prevents."));
 
@@ -546,6 +560,7 @@ C.push(...TABLE("Table 5.1 Research schedule", ["Task", "Status", ...Array.from(
   [2706, 900, ...Array(12).fill(475)], { size: 20 }));
 NOTE("Green: completed before the proposal; blue: planned. " + "Map months to the academic calendar: [AUTHOR]");
 C.push(H2("5.4", "Expected Publications"));
+C.push(PN(TODO("AUTHOR: update the status of each manuscript (submitted / under review / accepted) before submission")));
 { const L = newList();
   C.push(L("M. B. Khan, A. Srikaew, T. Ratniyomchai, J. Polprasert and A. Oonsivilai, “Reinforcement learning based virtual synchronous generator control for a low inertia solar–wind–BESS microgrid: A converter headroom-feasible approach,” under review (TREC)."));
   C.push(L("M. B. Khan, P. Pao-La-Or, A. Srikaew, T. Ratniyomchai, J. Polprasert and A. Oonsivilai, “Headroom-feasible adaptive virtual synchronous generator control with deep reinforcement learning: A multi-seed comparison with tuned controllers,” to be submitted to the International Review on Modelling and Simulations (IREMOS)."));
@@ -627,6 +642,7 @@ const doc = new Document({
     ...numRefs.map((r) => ({ reference: r, levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1)", alignment: AlignmentType.LEFT,
       style: { paragraph: { indent: { left: 1080, hanging: 360 } } } }] }))] },
   sections: [
+    { properties: { page: PAGE }, headers: { default: new Header({ children: [new Paragraph({ children: [] })] }) }, children: CHECK },
     { properties: { page: PAGE }, headers: { default: new Header({ children: [new Paragraph({ children: [] })] }) }, children: cover },
     { properties: { page: { ...PAGE, pageNumbers: { start: 1, formatType: NumberFormat.UPPER_ROMAN } } },
       headers: { default: pageHeader },
