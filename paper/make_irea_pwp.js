@@ -63,18 +63,19 @@ function FIGURE(file, _w, _h, widthIn, caption) {
 }
 const border = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
 const borders = { top: border, bottom: border, left: border, right: border };
-function TABLE(caption, header, rows, widths) {
+function TABLE(caption, header, rows, widths, hl = false) {
   tabN += 1;
   const tot = widths.reduce((a, b) => a + b, 0);
   const scale = Math.min(1, FULL_W / tot);
   const ws = widths.map((w) => Math.floor(w * scale));
   const title = caption.replace(/^TABLE\s+[IVX]+\.\s*/, "").toUpperCase();
+  const shade = hl ? { type: ShadingType.CLEAR, fill: "FFFF00", color: "auto" } : undefined;   // yellow: added, awaiting review
   const cell = (txt, j, head) => new TableCell({ borders, width: { size: ws[j], type: WidthType.DXA },
-    margins: { top: 30, bottom: 30, left: 60, right: 60 },
+    margins: { top: 30, bottom: 30, left: 60, right: 60 }, shading: head ? undefined : shade,
     children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: String(txt), font: FONT, size: 16, bold: head })] })] });
   return [{ wide: [
     new Paragraph({ keepNext: true, keepLines: true, alignment: AlignmentType.CENTER, spacing: { before: 200, after: 80 },
-      children: [new TextRun({ text: `TABLE ${roman(tabN)}`, font: FONT, size: 16 }), new TextRun({ text: title, font: FONT, size: 16, break: 1 })] }),
+      children: [new TextRun({ text: `TABLE ${roman(tabN)}`, font: FONT, size: 16, shading: shade }), new TextRun({ text: title, font: FONT, size: 16, break: 1, shading: shade })] }),
     new Table({ width: { size: ws.reduce((a, b) => a + b, 0), type: WidthType.DXA }, columnWidths: ws,
       rows: [header, ...rows].map((r, i) => new TableRow({ tableHeader: i === 0, cantSplit: true, children: r.map((c, j) => cell(c, j, i === 0)) })) }),
     new Paragraph({ spacing: { after: 120 }, children: [] }),
@@ -93,6 +94,7 @@ const CHECKLIST = [
       "Add the public GitHub URL or Zenodo DOI (Data and Code Availability).",
       "Confirm the funding statement (Acknowledgements).",
       "Check the year, volume and pages of every reference against its DOI.",
+      "Review the literature comparison added in yellow (end of Section II, Discussion paragraph, Table VIII, reference [32]) and remove the highlight from what you accept.",
       "Check the IREA author guidelines for the page limit, figure resolution and reference style before submission."].map((t, i) =>
     new Paragraph({ spacing: { after: 60 }, indent: { left: 340, hanging: 340 }, children: runs([{ t: `${i + 1}. ${t}`, hl: true }], 18) })),
   new Paragraph({ spacing: { after: 400 }, children: [] }),
@@ -132,7 +134,7 @@ C.push(...TABLE("TABLE I. Scope of this study compared with the authors' earlier
 
 // ===== II. RELATED WORK =====
 C.push(H1("II. Related Work"));
-C.push(P("The synchronverter reproduces the machine equations inside the converter controller [3], and VSG variants are reviewed in [4]. Rule-based schemes alternate the inertia according to the direction of the rotor swing [5], adapt inertia and damping together [6], [7] or respect SoC limits [8]. Learning-based schemes tune droop, inertia and damping with DDPG [9], soft actor–critic [10] or TD3 [11], [12], including real-time simulator validation [12], and recent comparisons cover several algorithms and benchmark controllers [13], [14]; a broader review of RL in power-system control is given in [31]. Converter current limiting bounds what a grid-forming controller can deliver [29], [30], but most adaptive formulations bound the parameters only by fixed ranges. The studies in [15], [16] add a headroom requirement for converter-only microgrids; none of the cited works bounds the achievable gain of adaptation in advance or validates a learned VSG schedule in a circuit-level model of a hybrid diesel–VSG system."));
+C.push(P("The synchronverter reproduces the machine equations inside the converter controller [3], and VSG variants are reviewed in [4]. Rule-based schemes alternate the inertia according to the direction of the rotor swing [5], adapt inertia and damping together [6], [7] or respect SoC limits [8]. Learning-based schemes tune droop, inertia and damping with DDPG [9], soft actor–critic [10] or TD3 [11], [12], including real-time simulator validation [12], and recent comparisons cover several algorithms and benchmark controllers [13], [14]; a broader review of RL in power-system control is given in [31]. Converter current limiting bounds what a grid-forming controller can deliver [29], [30], but most adaptive formulations bound the parameters only by fixed ranges. The studies in [15], [16] add a headroom requirement for converter-only microgrids; none of the cited works bounds the achievable gain of adaptation in advance or validates a learned VSG schedule in a circuit-level model of a hybrid diesel–VSG system.", { t: " The limits that do appear are fixed at design time: a bound on the inertia from the rated power [7], a region of inertia and damping derived from a damping-ratio range [10], fixed bounds on the inertia power in a predictive safety filter [32] and SoC-dependent inertia [8]. None of them follows the power that the converter has already committed to the energy-management dispatch.", hl: true }));
 
 // ===== III. SYSTEM =====
 C.push(H1("III. Hybrid Microgrid Model"));
@@ -285,6 +287,21 @@ C.push(H1("VIII. Discussion"));
 C.push(P({ t: "Consistency with the converter-only studies. ", b: true }, "Three findings of [16] carry over to a system with physical inertia: a well-tuned constant setting is hard to beat, damping buys more regulation per unit of headroom than inertia, and literature-style high gains are often undeliverable. What changes is the reason the margin is small. In a converter-only system the learned controllers could still reduce the reserved headroom by about one fifth [16]; here the synchronous coupling fixes the initial share of each step and secondary control shortens the transient, so the oracle leaves only about 2 % to gain."));
 C.push(P({ t: "When to train an agent. ", b: true }, "The oracle bound costs a few hundred simulations and no training. It answers whether a given plant offers enough room for adaptation to justify RL. Larger margins are expected with weaker grid-forming coupling, slow or absent secondary control, events that are large relative to the headroom, or uncertain plant parameters; this study suggests running the bound first in such cases."));
 C.push(P({ t: "Designing the feasibility layer. ", b: true }, "The time-separated requirement keeps the authority of moderate settings, while the summed requirement, particularly with wide limits, removes most of it. Proportional derating, as introduced in [16], is preferable to clipping because it lowers saturation for every setting tested. A combination of the time-separated requirement (8) with proportional derating (9) is therefore recommended for deployment; retraining the agents with it is left for future work."));
+C.push(P({ t: "Comparison with published studies. ", b: true, hl: true }, { t: "Table VIII lists the test conditions and reported results of the closest studies, each against its own reference. The published improvements in frequency deviation, 33–60 %, are measured against fixed-parameter VSGs or PI controllers, with one trained agent or rule design per study and one to three disturbances; only [13] tunes a baseline, its rule-based controller, by grid search. Against a validation-tuned fixed VSG over 200 test scenarios and five seeds, TD3 lowers the nadir in this study by 9 %, and the oracle shows that no scheduler could improve the objective by more than 2.1 %. Because systems, disturbances and baselines differ, the table cannot rank the controllers; it shows how strongly a reported gain depends on its reference. None of the listed studies measures whether the scheduled inertia and damping are deliverable, so the feasibility result of Table VI has no published counterpart. Two studies validate beyond software simulation, with hardware-in-the-loop [8] or a real-time digital simulator [12], which remains to be done for the present controllers.", hl: true }));
+C.push(...TABLE("TABLE VIII. Test conditions and reported results of related studies (each against its own reference)",
+  ["Ref.", "Test system", "Validation", "Reference controller", "Reported result", "Capability check"],
+  [["[6] rule", "Single VSG, 50 kW load shedding", "Simulink", "Constant parameters", "Δf 0.75 → 0.45 Hz (Fig. 2)", "–"],
+   ["[7] rule", "Grid-connected VSG, 15 kW step", "Simulink", "Fixed J, D", "Δf 0.5 → 0.2 Hz", "Static J bound"],
+   ["[8] rule", "PV–storage microgrid, 60 kW", "PLECS + HIL", "Constant inertia", "Frequency dip −13 to −55 % (Table 3)", "SoC bands"],
+   ["[10] SAC", "100 kW VSG, 0 → 20 kW step", "Simulink", "Fixed VSG", "Δf 0.35 → 0.21 Hz (Table 2)", "Fixed J–D region"],
+   ["[11] TD3", "IEEE 34-node feeder, 3 DGs", "Simulink", "PI", "Mean abs. Δf error −56.6 %", "–"],
+   ["[12] TD3", "Banshee feeder (PV, BESS), MW", "Simulink + RTDS", "Fixed, fuzzy, DDPG", "Graphical only", "–"],
+   ["[32] PINN+TD3", "IEEE 34/39-bus, 4 × 2 MW DGs", "Simulink", "PI, MPC", "max |Δf| 0.062 → 0.006 Hz", "Fixed power bounds"],
+   ["[14] SAC", "Two-area model, PV–wind–diesel", "Simulink (low order)", "PID", "RoCoF −37.23 %", "–"],
+   ["[13] TD3", "380 V VSG, 0 → 50 kW step", "Simulink", "Fixed; grid-searched rule", "Δf 1.00 → 0.67 Hz (Table 3)", "–"],
+   ["This study", "2 MVA diesel–PV–wind–BESS, 200 scenarios", "MATLAB + Simscape EMT", "Tuned fixed VSG, 5 seeds", "Nadir 0.573 → 0.522 Hz; infeasible 5.07 → 0.02 s", "Direction-aware headroom"]],
+  [1000, 2150, 1300, 1500, 2100, 1589], true));
+C.push(P({ t: "Values are quoted from the cited works; 50 Hz and 60 Hz systems of different size are included, so rows are not directly comparable. –: not reported.", size: 17, hl: true }));
 C.push(P({ t: "Averaged versus circuit-level models. ", b: true }, "The averaged model reproduces the frequency trajectories and the energy metrics closely enough to train and rank controllers, but it underestimates the RoCoF that a PLL-based measurement reports immediately after a step and the time a converter spends at its power limit. Studies that set RoCoF limits from averaged models should evaluate RoCoF over windows long enough to exclude phase-jump spikes, or include the phase jump explicitly."));
 C.push(P({ t: "Limitations. ", b: true }, "The network is a single bus, the load profile is synthetic, and one site and one year are used. The EMT model represents the converter by its average model and the diesel unit by a classical machine model; switching effects, inner current loops, the excitation system and protection are not modelled; hardware-in-the-loop tests remain to be carried out."));
 
@@ -331,6 +348,7 @@ const REFS = [
   "A. D. Paquette and D. M. Divan, “Virtual impedance current limiting for inverters in microgrids with synchronous generators,” IEEE Trans. Ind. Appl., vol. 51, no. 2, pp. 1630–1638, 2015.",
   "T. Qoria et al., “Current limiting algorithms and transient stability analysis of grid-forming VSCs,” Electr. Power Syst. Res., vol. 189, 106726, 2020.",
   "M. Glavic, “(Deep) reinforcement learning for electric power system control and related problems: A short review and perspectives,” Annu. Rev. Control, vol. 48, pp. 22–35, 2019.",
+  "O. E. Egbomwan, S. Liu, H. Chaoui and X. Wang, “Learning-based predictive virtual inertia control for frequency regulation in low inertia power grids,” IEEE Open J. Circuits Syst., vol. 6, pp. 504–519, 2025. [AUTHOR: new reference added with the comparison table; review]",
 ];
 REFS.forEach((r, i) => {
   const m = r.match(/^(.*?)( \[AUTHOR: [^\]]*\])?$/);
