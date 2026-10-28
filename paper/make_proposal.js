@@ -108,7 +108,6 @@ const CHECK = [
       "Confirm the degree title (Master of Engineering or M.Sc.) on the abstract page.",
       "Add a citation for the Thailand renewable-energy statement in Section 1.2.",
       "Cite the source of the 1 Hz/s and 0.2 Hz limits used in Study 2 (Section 3.6), or state that they are design choices.",
-      "Confirm the circuit-level (EMT) results with the Simscape Electrical model in MATLAB R2021a (Section 4.3.5).",
       "Map months 1–12 of Table 5.1 to the academic calendar.",
       "Update the status of the three manuscripts (Section 5.4 and Appendix) and attach them in the Appendix.",
       "Check every reference against its DOI (docs/PROPOSAL_REFERENCES.md).",
@@ -511,18 +510,18 @@ NOTE("*97.5 % of the episodes collapse. Nadir is the worst-event frequency devia
 C.push(...FIG(RF("fig_response_sc32.png"), 4.6, "Fig. 4.8 Test scenario 32 of Study 2: frequency, RoCoF, VSG power and scheduled virtual inertia"));
 C.push(...FIG(RF("fig_pareto.png"), 6.0, "Fig. 4.9 Controllers against the family of fixed settings and its attainable front (Study 2)"));
 C.push(H3("4.3.5", "Validation"));
-C.push(P("The MATLAB re-implementation reproduces the Python results exactly for the fixed controllers and within 1.1 × 10⁻⁷ Hz for the TD3 policy, a difference caused by single-precision arithmetic in the network (Table 4.5). In the three-phase EMT model, the frequency follows the averaged model with an RMS difference of 0.014–0.018 Hz over twelve scenarios and three controllers, the nadir agrees within 0.2 % for the fixed controllers and is 4 % deeper for TD3, and the BESS energy agrees within 0.8 % (Fig. 4.10). Two differences are physical. At each load step the bus-voltage phase jumps by about 3°, which a PLL reads as a brief frequency spike, so the 100 ms RoCoF is about 2.5 times higher than in the averaged model, while the 500 ms RoCoF differs by only 3–11 %; and the converter limiter, acting on measured power, is active 2.3–2.7 times longer. The ranking of the controllers is the same in both models. ", TODO("AUTHOR: confirm the EMT results with the Simscape Electrical model in MATLAB R2021a")));
+C.push(P("The MATLAB re-implementation reproduces the Python results exactly for the fixed controllers and within 1.1 × 10⁻⁷ Hz for the TD3 policy, a difference caused by single-precision arithmetic in the network (Table 4.5). In the three-phase EMT model, built and solved in Simscape Electrical (MATLAB R2021a), the frequency follows the averaged model with an RMS difference of 0.013–0.017 Hz over twelve scenarios and three controllers, the nadir agrees within 2 % and the BESS energy within 1.1 % (Fig. 4.10); an independent script solver of the same circuit agrees with Simscape within about 2 %. Two differences are physical. At each load step the bus-voltage phase jumps by about 3°, which a PLL reads as a brief frequency spike, so the 100 ms RoCoF is about 2.5 times higher than in the averaged model, while the 500 ms RoCoF differs by only −0.5 % to +9 %; and the converter limiter, acting on measured power, is active 2.2–2.8 times longer. The ranking of the controllers is the same in both models."));
 C.push(...TABLE("Table 4.5 Validation summary (12 test scenarios × 3 controllers)",
   ["Check", "Quantity", "Result"],
   [["MATLAB vs Python", "max |ΔΔf|, fixed / constrained / TD3", "0 / 0 / 1.1 × 10⁻⁷ Hz"],
    ["EMT vs averaged model", "RMS difference of Δf", "0.014–0.018 Hz"],
-   ["EMT vs averaged model", "Worst-event nadir", "fixed: within 0.2 %; TD3: 4 % deeper"],
-   ["EMT vs averaged model", "BESS energy", "within 0.8 %"],
-   ["EMT vs averaged model", "RoCoF over 100 ms / 500 ms", "× 2.5 / +3 to +11 %"],
-   ["EMT vs averaged model", "Converter saturation time", "× 2.3–2.7 (same ordering)"],
+   ["EMT vs averaged model", "Worst-event nadir", "within 2 % (fixed and TD3)"],
+   ["EMT vs averaged model", "BESS energy", "within 1.1 %"],
+   ["EMT vs averaged model", "RoCoF over 100 ms / 500 ms", "× 2.5 / −0.5 to +9 %"],
+   ["EMT vs averaged model", "Converter saturation time", "× 2.2–2.8 (same ordering)"],
    ["EMT, constrained controllers", "Infeasible commitments", "≤ 0.03 s per episode"]],
   [2500, 3200, 2606]));
-C.push(...FIG(RF("fig_emt_validation.png"), 6.0, "Fig. 4.10 Averaged (RMS) and three-phase EMT models for test scenario 1"));
+C.push(...FIG(RF("fig_simscape_sc1.png"), 6.0, "Fig. 4.10 Averaged (RMS) model and three-phase Simscape Electrical model for test scenario 1 (MATLAB R2021a)"));
 
 C.push(H2("4.4", "Discussion of Preliminary Results"));
 C.push(P("The two studies point in the same direction. The feasibility constraint is the robust contribution: in both systems, high-gain VSG settings and unconstrained learned policies commit inertia and damping that the converter cannot deliver, and the constraint removes these commitments at negligible cost for a well-tuned VSG. The benefit of learning depends on the system. In the converter-only microgrid, learning buys about one fifth less reserved headroom at equal regulation on unseen stress episodes; in the hybrid microgrid, where a synchronous machine shares every step and secondary control is fast, the oracle shows that there is little to gain, and the learned agents do not beat the tuned VSG on the objective. Across the studies, damping matters more than inertia, proportional derating is preferable to clipping, and averaged models are adequate for training and ranking controllers but underestimate PLL-measured RoCoF and limiter activity."));
@@ -537,7 +536,7 @@ C.push(H2("5.2", "Future Work"));
 C.push(P("The remaining work will complete the four objectives of the thesis:"));
 { const L = newList();
   C.push(L("Retrain the Study 2 agents with the time-separated requirement and proportional derating, which the rule comparison identified as the best feasibility layer, and repeat the evaluation."));
-  C.push(L("Confirm the EMT results with the Simscape Electrical model in MATLAB R2021a and extend the circuit-level validation to the converter-only system of Study 1."));
+  C.push(L("Extend the circuit-level (Simscape) validation to the converter-only system of Study 1 and, if facilities allow, test the controllers in hardware-in-the-loop."));
   C.push(L("Study the sensitivity of the conclusions to the reward weights and apply the oracle bound to systems with weaker grid-forming coupling and slower secondary control, where adaptive control is expected to pay off more."));
   C.push(L("Replace the synthetic load profile with measured Thai load data if available, and complete the systematic literature search (Section 2.2) with the database counts."));
   C.push(L("Prepare the journal publications and write the thesis.")); }
@@ -552,7 +551,7 @@ C.push(...TABLE("Table 5.1 Research schedule", ["Task", "Status", ...Array.from(
    gantt("Feasibility-rule comparison; MATLAB and EMT validation", "Done", [], DONE),
    gantt("PRISMA search counts and literature update", "Planned", [1, 2], PLAN),
    gantt("Retraining with proportional derating", "Planned", [1, 2, 3], PLAN),
-   gantt("Simscape Electrical confirmation", "Planned", [1, 2, 3], PLAN),
+   gantt("Simscape Electrical confirmation (Study 2)", "Done", [], DONE),
    gantt("Sensitivity and weak-coupling studies", "Planned", [3, 4, 5, 6], PLAN),
    gantt("Journal publications", "Ongoing", [1, 2, 3, 4, 5, 6, 7, 8], PLAN),
    gantt("Thesis writing", "Planned", [6, 7, 8, 9, 10, 11], PLAN),

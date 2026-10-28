@@ -1,10 +1,10 @@
 {
  "n_scenarios": 12,
- "rmse_range": "0.014–0.018",
+ "rmse_range": "0.013–0.017",
  "nadir_diff": "+1 % deeper",
  "bess_diff": "+0.2 %",
  "rocof100_factor": "2.5",
- "rocof500_diff": "+6 %",
+ "rocof500_diff": "−0.5 % to +9 %",
  "infeasible_emt": "≤ 0.03 s",
- "solver_note": "The results below were obtained with a fixed-step script solver of the same three-phase circuit; the Simscape Electrical model built from the same files is provided for confirmation in MATLAB R2021a."
+ "solver_note": "The model was built and solved in Simscape Electrical (Specialized Power Systems, discrete 100 µs) in MATLAB R2021a; an independent fixed-step script solver of the same circuit agrees with it within about 2 % on every metric."
 }
