@@ -103,6 +103,11 @@ set_mlfb([mdl '/Controller'], ...
 add_line(mdl, 'VI_load/1', 'MeasMux/1', 'autorouting', 'on');      % bus voltage (load side = bus)
 add_line(mdl, 'VI_vsg/2', 'MeasMux/2', 'autorouting', 'on');
 add_line(mdl, 'VI_diesel/2', 'MeasMux/3', 'autorouting', 'on');
+% voltage outputs of the VSG and diesel branches are not needed (bus voltage comes from VI_load)
+add_block('simulink/Sinks/Terminator', [mdl '/Term_vsg_V'], 'Position', [640 120 660 140]);
+add_block('simulink/Sinks/Terminator', [mdl '/Term_diesel_V'], 'Position', [640 520 660 540]);
+add_line(mdl, 'VI_vsg/1', 'Term_vsg_V/1', 'autorouting', 'on');
+add_line(mdl, 'VI_diesel/1', 'Term_diesel_V/1', 'autorouting', 'on');
 add_line(mdl, 'VI_load/2', 'MeasMux/4', 'autorouting', 'on');
 add_line(mdl, 'MeasMux/1', 'MeasDelay/1', 'autorouting', 'on');
 add_line(mdl, 'MeasDelay/1', 'Controller/1', 'autorouting', 'on');
