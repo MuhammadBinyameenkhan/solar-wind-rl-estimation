@@ -25,6 +25,8 @@ function runs(parts, size = SZ) {
   });
 }
 const TODO = (t) => ({ t: `[${t}]`, hl: true });
+const NEW = (t) => ({ t, hl: true });            // added text awaiting the author's review (yellow)
+const YC = (t) => ({ t, fill: "FFFF00" });       // added table cell awaiting review (yellow)
 const SUP = (t) => ({ t, sup: true });
 const SUB = (t) => ({ t, sub: true });
 const I = (t) => ({ t, i: true });
@@ -111,6 +113,7 @@ const CHECK = [
       "Map months 1–12 of Table 5.1 to the academic calendar.",
       "Update the status of the three manuscripts (Section 5.4 and Appendix) and attach them in the Appendix.",
       "Check every reference against its DOI (docs/PROPOSAL_REFERENCES.md).",
+      "Review the literature-comparison additions highlighted in yellow (Sections 1.2, 2.4, 2.5, 2.6, 2.7, 4.4; Tables 2.4, 2.5 and 4.6; reference Liyanage et al.) and remove the highlight from what you accept.",
       "In Word, update the table of contents (click Yes when asked, or press F9 in the table)."].map((t, i) =>
     new Paragraph({ spacing: { after: 100, line: 300 }, indent: { left: 360, hanging: 360 }, children: runs([{ t: `${i + 1}. ${t}`, hl: true }], 24) })),
 ];
@@ -152,6 +155,7 @@ C.push(P("A battery energy storage system (BESS) whose converter is controlled a
 C.push(H2("1.2", "Problem Statement"));
 C.push(P("Thailand, like many countries, is adding solar and wind capacity to reduce fuel imports and emissions, and remote communities, islands and industrial sites increasingly operate as hybrid microgrids in which a diesel generator, PV, wind and a BESS share the load. ", TODO("AUTHOR: add a citation with figures, e.g. Thailand's Power Development Plan or ERC/EGAT renewable statistics"), " In such systems the frequency is set by very little rotating mass. A virtual synchronous generator on the BESS converter is the natural remedy, but three practical problems limit how it is designed today."));
 C.push(P("First, virtual inertia and damping are not free. Every second of virtual inertia and every unit of damping commits the converter to inject power in proportion to the RoCoF and to the frequency deviation. A battery that is already discharging to cover the evening peak, or one whose state of charge (SoC) is close to its limit, may not be able to deliver that power. Most adaptive VSG schemes in the literature, rule-based or learned, bound J and D only by fixed ranges and never check them against the power the converter has left (Alipoor et al., 2015; Li et al., 2017; Oboreh-Snapps et al., 2024). A controller that promises inertia it cannot deliver gives a false sense of security and saturates the converter exactly when it is needed."));
+C.push(P(NEW("The margin is narrow in practice. Power converters tolerate only about 20–40 % overcurrent, whereas a synchronous generator can supply up to seven times its rated current (Qoria et al., 2020), and in the laboratory tests of Alipoor et al. (2015) a VSG with a fixed inertia exceeded its current limit after a 3.6 kW step in its power reference and was tripped at t = 1.43 s.")));
 C.push(P("Second, the benefit of learning is often overstated. DRL results vary strongly between training runs and depend on which checkpoint is kept (Henderson et al., 2018; Agarwal et al., 2021), yet learned VSG controllers are frequently compared with hand-picked fixed gains from a single training run. Whether a learned controller really improves on a properly tuned conventional VSG, and by how much it could improve at most, usually remains unanswered."));
 C.push(P("Third, most learning studies rely on averaged (RMS) frequency models. It is not obvious that the conclusions survive in a three-phase circuit with a phase-locked loop (PLL) and a converter that limits its output on measured current and power."));
 C.push(P("This thesis therefore addresses adaptive VSG control as a feasibility problem first and a learning problem second. It develops a converter-headroom constraint that keeps virtual inertia and damping within what the BESS and a de-loaded PV plant can deliver, trains DDPG and TD3 agents to schedule the VSG parameters under that constraint, evaluates them fairly against tuned alternatives, bounds the achievable benefit, and validates the results beyond the averaged model."));
@@ -251,29 +255,34 @@ C.push(...TABLE("Table 2.3 Learning-based VSG and virtual-inertia studies",
 
 C.push(H2("2.4", "VSG and Adaptive Inertia Control"));
 C.push(P("The synchronverter of Zhong and Weiss (2011) showed that a converter can reproduce the equations of a synchronous machine inside its controller, so that it responds to frequency changes with an inertial and a damping power. Bevrani et al. (2014) reviewed the many VSG variants that followed. In these designs the virtual inertia and damping are constants, normally sized for the worst expected event. Large constants occupy converter capacity during long quiet periods, while small constants may fail to arrest a severe event, and this motivated adaptive schemes. Alipoor et al. (2015) switch the inertia between two values depending on whether the virtual rotor is accelerating or decelerating. Li et al. (2017) adapt inertia and damping together, Shi et al. (2024) coordinate them through the power–angle characteristic, and Han et al. (2023) add limits based on the battery state of charge. Rule-based schemes are transparent and cheap to implement, but their thresholds are tuned for the disturbances considered in design, and none of them checks the commanded inertia and damping against the power that the converter has left."));
+C.push(P(NEW("The reported benefits of these rules are measured against constant-parameter VSGs. Li et al. (2017) reduce the frequency deviation after a 50 kW load shedding from about 0.75 Hz to 0.45 Hz, Shi et al. (2024) from 0.5 Hz to 0.2 Hz after a 15 kW power step, and Han et al. (2023) reduce the frequency dip after a 40 kW load step by 54.67 %. Han et al. (2023) confirm their scheme in a hardware-in-the-loop test and Alipoor et al. (2015) on a laboratory inverter; the other rule-based studies are simulation only (Table 2.5).")));
 
 C.push(H2("2.5", "Learning-Based VSG and Virtual Inertia Control"));
 C.push(P("Deep reinforcement learning is attractive for VSG tuning because the mapping from the system state to good parameters is nonlinear and the actions are continuous (Glavic, 2019). DDPG (Lillicrap et al., 2016) and TD3 (Fujimoto et al., 2018), which corrects the value overestimation of DDPG, are the usual choices. Afifi et al. (2023) use DDPG to regulate droop, inertia and damping in an islanded microgrid; Lu and Zhuan (2024) tune inertia and damping with soft actor–critic and a settling-time reward; Egbomwan et al. (2023, 2025) apply TD3 and a learning-based predictive scheme to virtual inertia control; and Oboreh-Snapps et al. (2024) validate a TD3-based VSG on a real-time digital simulator. Criollo et al. (2026) compare DDPG, TD3 and soft actor–critic for microgrid clusters, and Li et al. (2026) benchmark a TD3-based adaptive VSG against fixed, rule-based, DDPG and RBF controllers. Comparisons between DDPG and TD3 therefore already exist; what is still missing is a check of the learned parameters against converter capability and an evaluation protocol that makes the reported gains trustworthy."));
+C.push(P(NEW("The reported gains of the learning studies are large, but they are measured against weak references. Against a fixed VSG with default parameters, Lu and Zhuan (2024) report a 40 % lower maximum frequency deviation (0.35 Hz to 0.21 Hz) and Li et al. (2026) a 33 % lower one (1.00 Hz to 0.67 Hz) after a step in the active-power reference. Against PI or PID control, Egbomwan et al. (2023) report a 56.6 % lower mean absolute frequency error and Criollo et al. (2026) a 37.23 % lower RoCoF. Each result comes from a single trained agent evaluated on one to three disturbances, and only Li et al. (2026) tune a baseline, their rule-based controller, by grid search. Oboreh-Snapps et al. (2024) present their real-time results graphically, without numerical metrics (Table 2.5).")));
 C.push(P("The two earlier studies of this thesis addressed the first part of that gap for a fully converter-interfaced microgrid. Khan et al. (TREC, under review) introduced a headroom requirement derived from the grid-code limits and derated the VSG parameters proportionally when the requirement exceeded the available headroom. Khan et al. (IREMOS, submitted) repeated the comparison over ten seeds with tuned constant and rule-based baselines and measured weather, and found that the learned controllers match the regulation of the tuned constant VSG with about one fifth less reserved headroom, rather than dominating it."));
 
 C.push(H2("2.6", "Converter Capability and Evaluation Practice"));
 C.push(P("Studies of grid-forming converters show that current limiting changes what the controller can deliver and even its transient stability (Paquette and Divan, 2015; Qoria et al., 2020). Yet adaptive VSG formulations rarely translate the converter rating into limits on the virtual inertia and damping. On the evaluation side, Henderson et al. (2018) and Agarwal et al. (2021) show that DRL results depend strongly on the random seed and on checkpoint selection, so that a single run, or a comparison against untuned baselines, can overstate the benefit of learning. Finally, most learning studies use averaged frequency models, and only a few, such as Oboreh-Snapps et al. (2024), test a learned VSG in a more detailed simulator."));
+C.push(P(NEW("Among the reviewed adaptive schemes, the closest to a capability check are fixed bounds. Shi et al. (2024) limit the inertia by the rated power, J ≤ P_max / max(ω dω/dt); Lu and Zhuan (2024) restrict J and D to a region derived from a damping-ratio range, with 20 ≤ D ≤ 50 for a 100 kW inverter; Egbomwan et al. (2025) pass the agent's action through a predictive safety filter with fixed lower and upper limits on the inertia power; and Han et al. (2023) reduce the inertia when the state of charge leaves the 20–90 % band. None of these limits changes with the power that the converter has already committed to the energy-management dispatch, which is the quantity tracked by the headroom constraint of this thesis.")));
 
 C.push(H2("2.7", "Research Gaps"));
 C.push(P("Table 2.4 compares the reviewed studies on the aspects that matter for feasible synthetic inertia. Five gaps stand out: (i) the commanded inertia and damping are almost never checked against converter headroom; (ii) learned controllers are rarely compared with tuned baselines over several seeds; (iii) no study bounds in advance how much adaptation can gain; (iv) systems in which a synchronous machine shares the transient with the VSG are rarely considered together with learning; and (v) learned VSG schedules are seldom validated at circuit level. The proposed framework addresses all five."));
+C.push(P(NEW("A full-text check of the eleven external studies in Table 2.4 quantifies these gaps (Table 2.5). None reports results over several training seeds or a significance test; none drives its tests with measured or reanalysis weather data; and none bounds the attainable gain before training. Four model a synchronous generator in at least one test case (Alipoor et al., 2015; Afifi et al., 2023; Egbomwan et al., 2025; Criollo et al., 2026), and three go beyond software simulation, with a laboratory inverter (Alipoor et al., 2015), hardware-in-the-loop (Han et al., 2023) or a real-time digital simulator (Oboreh-Snapps et al., 2024). A recent review of RL-based virtual-inertia control likewise notes that few studies integrate classical stability analysis into reinforcement learning (Liyanage et al., 2026).")));
 const Y = "✓", N = "–";
 C.push(...TABLE("Table 2.4 Comparison of previous research and the proposed framework",
   ["Reference", "Method", "Adapted parameters", "Headroom constraint on J, D", "Tuned baselines, multi-seed statistics", "Circuit-level / real-time validation"],
-  [["Alipoor et al. (2015)", "Bang-bang rule", "J", N, N, N],
+  [["Alipoor et al. (2015)", "Bang-bang rule", "J", N, N, YC(Y + " (lab inverter)")],
    ["Li et al. (2017)", "Adaptive rule", "J, D", N, N, N],
-   ["Han et al. (2023)", "Rule with SoC limits", "J, D", "SoC limits only", N, N],
-   ["Shi et al. (2024)", "Adaptive optimal rule", "J, D", N, N, N],
+   ["Han et al. (2023)", "Rule with SoC limits", "J, D", "SoC limits only", N, YC(Y + " (HIL)")],
+   ["Shi et al. (2024)", "Adaptive optimal rule", "J, D", YC("static J bound (rated power)"), N, N],
    ["Afifi et al. (2023)", "DDPG", "droop, J, D", N, N, N],
-   ["Lu and Zhuan (2024)", "SAC", "J, D", N, N, N],
+   ["Lu and Zhuan (2024)", "SAC", "J, D", YC("fixed J–D region"), N, N],
    ["Egbomwan et al. (2023)", "TD3", "virtual inertia", N, N, N],
    ["Oboreh-Snapps et al. (2024)", "TD3", "J, D", N, N, Y + " (RTDS)"],
+   [YC("Egbomwan et al. (2025)"), YC("PINN + TD3 + safety filter"), YC("inertia power"), YC("fixed power bounds"), YC(N), YC(N)],
    ["Criollo et al. (2026)", "DDPG, TD3, SAC", "J, D", N, N, N],
-   ["Li et al. (2026)", "TD3 vs DDPG, rule, RBF", "J, D", N, "baselines only", N],
+   ["Li et al. (2026)", "TD3 vs DDPG, rule, RBF", "J, D", N, YC("rule baseline grid-searched; single run"), N],
    ["Khan et al. (TREC)", "DDPG vs TD3", "J, D, Kq", Y + " (sum rule)", N, N],
    ["Khan et al. (IREMOS)", "DDPG vs TD3", "J, D, Kq", Y + " (sum rule)", Y + " (10 seeds)", N],
    [{ t: "Proposed framework", fill: "E2EFDA" }, { t: "Residual DDPG / TD3 + oracle bound", fill: "E2EFDA" },
@@ -281,6 +290,25 @@ C.push(...TABLE("Table 2.4 Comparison of previous research and the proposed fram
     { t: Y + " (5–10 seeds, Holm)", fill: "E2EFDA" }, { t: Y + " MATLAB + EMT", fill: "E2EFDA" }]],
   [1650, 1450, 1250, 1350, 1300, 1306], { size: 21 }));
 NOTE("–: not reported in the cited formulation (as summarised in Khan et al., IREMOS). RTDS: real-time digital simulator.");
+C.push(new Paragraph({ spacing: { after: 160, line: 276 }, children: runs([NEW("Yellow cells were checked against the full texts of the cited papers. HIL: hardware-in-the-loop; PINN: physics-informed neural network.")], 22) }));
+const YT = (rows) => rows.map((r) => r.map((c) => YC(c)));
+C.push(...TABLE(NEW("Table 2.5 Test conditions and reported results of the compared studies (each against its own baseline)"),
+  ["Reference", "Test system", "Sync. machine", "Tool / validation", "Baseline", "Reported result (source)"],
+  YT([["Alipoor et al. (2015)", "50 kW VSG (simulation); laboratory inverter", "in one case", "Simulation + lab inverter", "Fixed J", "Fixed J tripped after a 3.6 kW step; alternating J followed a 4.5 kW step (Figs. 19–21)"],
+   ["Li et al. (2017)", "Single VSG, 50 kW load shedding", "no", "Simulink", "Constant parameters", "Δf 0.75 → 0.45 Hz; settling ≈ 0.2 s (Fig. 2)"],
+   ["Han et al. (2023)", "PV–storage microgrid, 60 kW; 20–60 kW load steps", "no", "PLECS + HIL", "Constant inertia", "Frequency dip −54.67 % at 40 kW (Table 3)"],
+   ["Shi et al. (2024)", "Grid-connected VSG, 15 kW step", "no", "Simulink", "Fixed J and D", "Δf 0.5 → 0.2 Hz; overshoot 12.7 → 1.3 % (Sec. 5.2)"],
+   ["Afifi et al. (2023)", "Islanded VSG; second case with SG and RES", "in one case", "Simulink", "Tuned PI", "Nadir 49.992 → 49.998 Hz (Fig. 7)"],
+   ["Lu and Zhuan (2024)", "100 kW grid-connected VSG, 0 → 20 kW step", "no", "Simulink", "Fixed, rule, fuzzy, DDPG", "Δf 0.35 → 0.21 Hz; t_s 0.30 → 0.12 s (Table 2)"],
+   ["Egbomwan et al. (2023)", "IEEE 34-node feeder, three DGs", "no", "Simulink", "PI", "Mean absolute Δf error −56.6 % (Sec. V)"],
+   ["Oboreh-Snapps et al. (2024)", "Banshee microgrid feeder (PV, BESS), MW scale", "no", "Simulink + RTDS", "Fixed, fuzzy, DDPG", "Graphical results only (Figs. 10–15)"],
+   ["Egbomwan et al. (2025)", "IEEE 34- and 39-bus, 4 × 2 MW DGs", "yes", "Simulink", "PI, MPC", "max |Δf| 0.062 → 0.006 Hz, two-phase fault (Case 1)"],
+   ["Criollo et al. (2026)", "Two-area frequency model of a PV–wind–diesel laboratory microgrid", "yes", "Simulink (low-order model)", "PID", "RoCoF −37.23 %; nadir +6.78 % (Abstract)"],
+   ["Li et al. (2026)", "Single 380 V VSG, 0 → 50 kW step", "no", "Simulink", "Fixed, grid-searched rule, RBF, DDPG", "Δf 1.00 → 0.67 Hz; t_s 0.4 → 0.2 s (Table 3)"],
+   ["This thesis, Study 1", "2.5 MVA converter-only microgrid, measured 1-Hz weather", "no", "Python", "Tuned VSG, 10 seeds", "Comparable IAE with 19–21 % less reserved headroom (Table 4.1)"],
+   ["This thesis, Study 2", "2 MVA diesel–PV–wind–BESS, ERA5 + NASA POWER, 200 test scenarios", "yes (diesel)", "Python, MATLAB, Simscape EMT", "Tuned VSG, 5 seeds", "Nadir 0.573 → 0.522 Hz (−9 %); infeasible time 5.07 → 0.02 s (Table 4.4)"]]),
+  [1350, 1700, 850, 1250, 1250, 1906], { size: 19 }));
+C.push(new Paragraph({ spacing: { after: 160, line: 276 }, children: runs([NEW("Values are quoted from the cited sections. Systems, disturbances, frequencies (50 or 60 Hz) and baselines differ, so the values show each study's improvement over its own reference and are not directly comparable between rows.")], 22) }));
 
 // =====================================================================================
 // CHAPTER 3  METHODOLOGY
@@ -525,6 +553,19 @@ C.push(...FIG(RF("fig_simscape_sc1.png"), 6.0, "Fig. 4.10 Averaged (RMS) model a
 
 C.push(H2("4.4", "Discussion of Preliminary Results"));
 C.push(P("The two studies point in the same direction. The feasibility constraint is the robust contribution: in both systems, high-gain VSG settings and unconstrained learned policies commit inertia and damping that the converter cannot deliver, and the constraint removes these commitments at negligible cost for a well-tuned VSG. The benefit of learning depends on the system. In the converter-only microgrid, learning buys about one fifth less reserved headroom at equal regulation on unseen stress episodes; in the hybrid microgrid, where a synchronous machine shares every step and secondary control is fast, the oracle shows that there is little to gain, and the learned agents do not beat the tuned VSG on the objective. Across the studies, damping matters more than inertia, proportional derating is preferable to clipping, and averaged models are adequate for training and ranking controllers but underestimate PLL-measured RoCoF and limiter activity."));
+C.push(P(NEW("Table 4.6 places these preliminary results beside the published studies of Table 2.5. The published gains of 33–60 % in frequency deviation are measured against fixed-parameter or PI references, each from one trained agent or controller design. Against a tuned fixed VSG, over 200 test scenarios and five seeds, the nadir gain of TD3 in Study 2 is 9 %, and the oracle bound shows that no scheduler could improve the objective by more than 2.1 % in this system. Because the systems differ, the comparison cannot rank the controllers; it shows how much of a reported gain depends on the reference it is measured against. The feasibility result has no counterpart in the reviewed studies, none of which measures whether the scheduled inertia and damping can be delivered.")));
+C.push(...TABLE(NEW("Table 4.6 Preliminary results positioned against published studies"),
+  ["Study", "Reference controller", "Reported change"],
+  YT([["Li et al. (2026), TD3", "Fixed VSG, default parameters", "Δf −33 % (power step), −57 % (load step)"],
+   ["Lu and Zhuan (2024), SAC", "Fixed VSG, default parameters", "Δf −40 % (power step), −39 % (load step)"],
+   ["Shi et al. (2024), rule", "Fixed J and D", "Δf −60 %"],
+   ["Han et al. (2023), rule", "Constant inertia", "Frequency dip −13 % to −55 %"],
+   ["Egbomwan et al. (2023), TD3", "PI", "Mean absolute Δf error −56.6 %"],
+   ["Criollo et al. (2026), SAC", "PID", "RoCoF −37.23 %"],
+   ["This thesis, Study 2, TD3", "Tuned fixed VSG, 5 seeds, 200 scenarios", "Nadir −9 % (p_Holm ≈ 7 × 10⁻²¹); RoCoF not significant"],
+   ["This thesis, Study 2, oracle", "Best single fixed VSG", "At most 2.1 % gain in objective"],
+   ["This thesis, Study 2, constraint", "TD3 without constraint", "Infeasible time 5.07 → 0.02 s per episode (−99.6 %)"]]),
+  [2500, 2700, 3106], { size: 21 }));
 
 // =====================================================================================
 // CHAPTER 5  CONCLUSION AND FUTURE WORK PLAN
@@ -590,6 +631,7 @@ const REFS = [
   "D. Li et al., A self-adaptive inertia and damping combination control of VSG to support frequency stability, IEEE Transactions on Energy Conversion, vol. 32, no. 1, pp. 397-398, 2017.",
   "J. Li et al., Adaptive VSG control method based on reinforcement learning strategy optimization, Electric Power Systems Research, vol. 257, p. 112997, 2026.",
   "T. P. Lillicrap et al., Continuous control with deep reinforcement learning, in International Conference on Learning Representations (ICLR), 2016.",
+  NEW("M. H. N. Liyanage, H. S. Wickramadara and K. G. C. Perera, Reinforcement learning control strategies for virtual-inertia grid-connected inverters and stability, J. Res. Technol. Eng., vol. 7, no. 2, pp. 73-88, 2026."),
   "C. Lu and X. Zhuan, Adaptive control for virtual synchronous generator parameters based on soft actor critic, Sensors, vol. 24, no. 7, p. 2035, 2024.",
   "F. Milano, F. Dörfler, G. Hug, D. J. Hill and G. Verbič, Foundations and challenges of low-inertia systems, in 2018 Power Systems Computation Conference (PSCC), 2018.",
   "W. B. Mol, W. H. Knap and C. C. van Heerwaarden, Ten years of 1 Hz solar irradiance observations at Cabauw, the Netherlands, with cloud observations, variability classifications, and statistics, Earth System Science Data, vol. 15, no. 5, pp. 2139-2151, 2023.",
