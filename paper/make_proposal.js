@@ -50,9 +50,8 @@ const H3 = (num, t) => new Paragraph({ heading: HeadingLevel.HEADING_3, spacing:
   keepNext: true, indent: { left: 360 },
   children: [new TextRun({ text: `${num}\t${t}`, font: FONT, size: SZ, bold: true, italics: true })],
   tabStops: [{ type: "left", position: 1300 }] });
-const EQ = (txt, n) => new Paragraph({ alignment: AlignmentType.LEFT, spacing: { before: 80, after: 80, line: 300 },
-  indent: { left: 720 }, tabStops: [{ type: "right", position: TEXT_W }],
-  children: [new TextRun({ text: txt, font: FONT, size: 26, italics: true }), new TextRun({ text: `\t(${n})`, font: FONT, size: 26 })] });
+// Equation placeholder; insert_equations.py replaces it with the Word equation of paper/equations (txt is the plain-text record).
+const EQ = (txt, n) => new Paragraph({ children: [new TextRun({ text: `@@EQ|P${n}|${n}@@`, font: FONT, size: 26 })] });
 const NUM = (ref) => (...parts) => new Paragraph({ children: runs(parts), numbering: { reference: ref, level: 0 },
   alignment: AlignmentType.JUSTIFIED, spacing: { line: 360, after: 60 } });
 let numCount = 0;
@@ -696,4 +695,5 @@ const doc = new Document({
       headers: { default: pageHeader }, children: C },
   ],
 });
-Packer.toBuffer(doc).then((b) => { const out = path.join(__dirname, "Thesis_Proposal_MB_Khan.docx"); fs.writeFileSync(out, b); console.log("wrote", out); });
+Packer.toBuffer(doc).then((b) => { const out = path.join(__dirname, "Thesis_Proposal_MB_Khan.docx"); fs.writeFileSync(out, b); console.log("wrote", out);
+  require("child_process").execFileSync("python3", [path.join(__dirname, "insert_equations.py"), out, String(TEXT_W), "26"], { stdio: "inherit" }); });

@@ -41,9 +41,8 @@ const H2 = (t) => {
   return new Paragraph({ keepNext: true, keepLines: true, alignment: AlignmentType.CENTER, spacing: { before: 360, after: 120 },
     children: [new TextRun({ text: `${SEC}.${sub}. ${title}`, font: FONT, size: BODY, italics: true })] });
 };
-const EQ = (txt, n) => new Paragraph({ spacing: { before: 80, after: 80 },
-  tabStops: [{ type: TabStopType.CENTER, position: 2268 }, { type: TabStopType.RIGHT, position: COL_W }],
-  children: [new TextRun({ text: "\t" + txt, font: FONT, size: 18, italics: true }), new TextRun({ text: `\t(${n})`, font: FONT, size: BODY })] });
+// Equation placeholder; insert_equations.py replaces it with the Word equation of paper/equations (txt is the plain-text record).
+const EQ = (txt, n) => new Paragraph({ children: [new TextRun({ text: `@@EQ|I${n}|${n}@@`, font: FONT, size: BODY })] });
 const BUL = (...parts) => new Paragraph({ children: runs(parts), numbering: { reference: "bul", level: 0 },
   alignment: AlignmentType.JUSTIFIED, spacing: { after: 40 } });
 const roman = (n) => ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][n - 1];
@@ -392,4 +391,5 @@ const doc = new Document({
     style: { paragraph: { indent: { left: 340, hanging: 227 } } } }] }] },
   sections,
 });
-Packer.toBuffer(doc).then((b) => { const out = path.join(__dirname, "IREA_manuscript_PWP.docx"); fs.writeFileSync(out, b); console.log("wrote", out); });
+Packer.toBuffer(doc).then((b) => { const out = path.join(__dirname, "IREA_manuscript_PWP.docx"); fs.writeFileSync(out, b); console.log("wrote", out);
+  require("child_process").execFileSync("python3", [path.join(__dirname, "insert_equations.py"), out, String(COL_W), String(BODY)], { stdio: "inherit" }); });

@@ -254,7 +254,70 @@ def times_reference(path):
     tmp.rename(path)
 
 
+# Line-broken forms used inside the documents, where a column or page is narrower than a long equation.
+DOC_FORM = {
+ "3.16": r"\begin{gathered} P_v \ge -\left(P_{\mathrm{ch,max}}(\mathrm{SoC}) + P_{b0}\right) + P_{\mathrm{pv},s}, \\ P_v \le P_{\mathrm{dis,max}}(\mathrm{SoC}) - P_{b0} + P_{\mathrm{pv},s} \end{gathered}",
+ "3.23": r"\begin{gathered} c = w_f\,\frac{\left\langle\left(|\Delta f| - 0.2\right)_{+}^{2}\right\rangle}{0.5^{2}} + w_{\mathrm{in}}\,\frac{\left\langle\Delta f^{2}\right\rangle}{0.5^{2}} \\ + w_r\left\langle\left(|\mathrm{RoCoF}| - 1\right)_{+}^{2}\right\rangle + w_{\mathrm{fast}}\,\frac{\left\langle\left(P_v - P_{\mathrm{set}}\right)^{2}\right\rangle}{P_{b,\max}^{2}} \\ + w_b\,\frac{\left\langle\Delta P_b^{2}\right\rangle}{P_{b,\max}^{2}} + w_s\,\frac{\langle\mathrm{sat}\rangle}{0.05} + w_v\,\mathrm{viol} \end{gathered}",
+}
+
+
+# Narrower forms for the two-column IREA layout.
+DOC_FORM_IREA = {
+ "I3": r"\begin{gathered} 2H_d\,\frac{d\Delta\omega_d}{dt} = \Delta P_m - \Delta P_{e,d} \\ - D_d\left(\Delta\omega_d - \Delta\omega_b\right) \end{gathered}",
+ "I6": r"\begin{gathered} h_{\mathrm{up}} = \max\!\left(P_{\mathrm{dis,max}}(\mathrm{SoC}) - P_{b0},\ 0\right) \\ +\, d\,P_{\mathrm{MPP}}, \\ h_{\mathrm{dn}} = \max\!\left(P_{\mathrm{ch,max}}(\mathrm{SoC}) + P_{b0},\ 0\right) \\ +\, P_{\mathrm{pv},0} \end{gathered}",
+ "I8": r"\begin{gathered} h_{\mathrm{req,max}} = \\ \max\!\left(2J_v\,\mathrm{RoCoF}_{\mathrm{lim}},\ D_v\,\Delta f_{\mathrm{band}}\right) \end{gathered}",
+}
+
+
+def fix_omml(xml):
+    """Make pandoc's OMML schema-valid: m:count before m:mcJc, and no m:sty next to m:nor."""
+    xml = re.sub(r"<m:mcPr>(<m:mcJc[^>]*/>)(<m:count[^>]*/>)</m:mcPr>", r"<m:mcPr>\2\1</m:mcPr>", xml)
+    return re.sub(r"(<m:nor ?/>)<m:sty[^>]*/>", r"\1", xml)
+
+
+def fix_docx(path):
+    tmp = path.with_suffix(".tmp")
+    with zipfile.ZipFile(path) as zi, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zo:
+        for it in zi.infolist():
+            data = zi.read(it.filename)
+            zo.writestr(it, fix_omml(data.decode("utf8")).encode("utf8") if it.filename == "word/document.xml" else data)
+    tmp.replace(path)
+
+
+def doc_form(key, tex):
+    """Equation as placed in the documents: explicit line breaks instead of side-by-side parts."""
+    if key in DOC_FORM:
+        return DOC_FORM[key]
+    if r"\qquad" in tex:
+        return r"\begin{gathered} " + r" \\ ".join(p.strip() for p in tex.split(r"\qquad")) + r" \end{gathered}"
+    return tex
+
+
+def export_omml():
+    """Word (OMML) form of every equation, keyed 'P3.1' (proposal) and 'I1' (IREA), for insert_equations.py."""
+    import json
+    import tempfile
+    items = []
+    for _, eqs in PARTS:
+        for pn, irn, _t, tex, *_ in eqs:
+            if pn:
+                items.append(("P" + pn, doc_form(pn, tex)))
+            if irn:
+                t = DOC_FORM_IREA.get("I" + irn) or doc_form(pn or "I" + irn, tex)
+                items.append(("I" + irn, t.replace(r"\Delta P_b^{2}", r"\Delta P_{\mathrm{bess}}^{2}")))
+    md = "\n\n".join(f"$$ {t} $$" for _, t in items)
+    f = tempfile.mktemp(suffix=".docx")
+    pypandoc.convert_text(md, "docx", format="markdown", outputfile=f)
+    xml = zipfile.ZipFile(f).read("word/document.xml").decode("utf8")
+    Path(f).unlink()
+    paras = re.findall(r"<m:oMathPara>.*?</m:oMathPara>", fix_omml(xml), flags=re.S)
+    assert len(paras) == len(items), (len(paras), len(items))
+    (OUT / "omml.json").write_text(json.dumps({k: p for (k, _), p in zip(items, paras)}, ensure_ascii=False, indent=0), encoding="utf8")
+    return len(items)
+
+
 if __name__ == "__main__":
+    print("exported", export_omml(), "document equations")
     md = build_md()
     (OUT / "Equations_Handbook.md").write_text(md, encoding="utf8")
     (OUT / "equations.tex").write_text(build_tex(), encoding="utf8")
@@ -263,5 +326,6 @@ if __name__ == "__main__":
     pypandoc.convert_text(md, "docx", format="markdown", outputfile=str(OUT / "Equations_Handbook.docx"),
                           extra_args=[f"--reference-doc={ref}"])
     ref.unlink()
+    fix_docx(OUT / "Equations_Handbook.docx")
     n = sum(len(e) for _, e in PARTS)
     print(f"wrote {n} numbered equations + {len(INLINE)} inline expressions to {OUT}")
