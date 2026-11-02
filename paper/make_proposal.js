@@ -45,7 +45,7 @@ const UNNUM = (title, toc = true) => new Paragraph({ heading: toc ? HeadingLevel
   children: [new TextRun({ text: title, font: FONT, size: 32, bold: true })] });
 const H2 = (num, t) => new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 240, after: 120, line: 360 },
   keepNext: true, children: [new TextRun({ text: `${num}\t${typeof t === "object" ? t.t : t}`, font: FONT, size: SZ, bold: true,
-    ...(typeof t === "object" && t.hl ? { highlight: "yellow" } : {}) })],
+    ...(typeof t === "object" && t.hl ? { shading: { type: ShadingType.CLEAR, fill: "FFFF00", color: "auto" } } : {}) })],
   tabStops: [{ type: "left", position: 900 }] });
 const H3 = (num, t) => new Paragraph({ heading: HeadingLevel.HEADING_3, spacing: { before: 180, after: 100, line: 360 },
   keepNext: true, indent: { left: 360 },
