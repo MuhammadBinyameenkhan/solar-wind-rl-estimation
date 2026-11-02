@@ -112,6 +112,7 @@ const CHECK = [
       "Map months 1–12 of Table 5.1 to the academic calendar.",
       "Update the status of the three manuscripts (Section 5.4 and Appendix) and attach them in the Appendix.",
       "Check every reference against its DOI (docs/PROPOSAL_REFERENCES.md).",
+      "Review the new Section 1.8 Expected Outcomes (Table 1.2), the extra row in Table 5.1 and the fourth paper in Section 5.4 (all in yellow).",
       "Review the critical amendments in yellow (Sections 3.6, 4.3.4, 4.3.5, 4.4, 5.1 and Table 4.5) and remove the highlight from what you accept.",
       "Review the literature-comparison additions highlighted in yellow (Sections 1.2, 2.4, 2.5, 2.6, 2.7, 4.4; Tables 2.4, 2.5 and 4.6; reference Liyanage et al.) and remove the highlight from what you accept.",
       "In Word, update the table of contents (click Yes when asked, or press F9 in the table)."].map((t, i) =>
@@ -205,6 +206,19 @@ C.push(P("The thesis is expected to provide the following benefits:"));
   C.push(L("Evidence, under a fair and statistically sound protocol, of when DRL-based VSG scheduling improves on a well-tuned conventional VSG and when it does not, together with a cheap pre-training test (the oracle bound) that tells a designer whether training an agent is worthwhile."));
   C.push(L("A reusable modelling and data pipeline for Thai microgrids based on freely available ERA5 and NASA POWER data, with open code in Python and MATLAB."));
   C.push(L("Validated models, from the averaged model to a three-phase EMT model, that show which conclusions of averaged-model studies hold at circuit level and which, such as PLL-measured RoCoF, do not.")); }
+
+C.push(H2("1.8", NEW("Expected Outcomes")));
+C.push(P(NEW("The thesis is expected to deliver the outcomes in Table 1.2. Each outcome is stated as a hypothesis together with the test that will confirm or reject it, so that either result is informative; the last column lists the preliminary evidence from Chapter 4. No final values are claimed before the remaining studies are completed.")));
+C.push(...TABLE(NEW("Table 1.2 Expected outcomes, hypotheses and preliminary evidence"),
+  ["Expected outcome", "RQ", "Hypothesis and test", "Preliminary evidence"],
+  [[YC("E1 A feasibility layer with a recommended design (time-separated rule with joint scaling) that keeps learned schedules deliverable"), YC("RQ1"), YC("H1: agents retrained with joint scaling remove the slight saturation increase seen with clipping; paired Wilcoxon over 200 test scenarios"), YC("Infeasible time 5.07 → 0.02 s; joint scaling below clipping for all fixed settings (p < 10⁻⁴); saturation 0.103 → 0.123 s with clipping")],
+   [YC("E2 Learned VSG scheduling under the constraint in three microgrids: converter-only, hybrid with diesel, weak coupling"), YC("RQ2"), YC("H2: TD3 at least matches DDPG on nadir, RoCoF and return in each system; Wilcoxon with Holm correction over seeds and scenarios"), YC("Study 1: both reserve 19–21 % less headroom, IAE 2.148 (TD3) vs 2.204 Hz·s (DDPG); Study 2: TD3 better than DDPG on nadir and RoCoF (p_Holm < 10⁻⁹)")],
+   [YC("E3 The oracle bound as a decision rule that maps when learning pays off"), YC("RQ3"), YC("H3: the oracle gain exceeds about 5 % for weaker coupling, slower secondary control or larger events, and there TD3 significantly beats a tuned VSG; otherwise a tuned VSG with the feasibility layer suffices"), YC("Oracle gain 2.1 % in the hybrid microgrid; Study 1: equal IAE with 19–21 % less headroom")],
+   [YC("E4 Conclusions that do not depend on the reward weights"), YC("RQ3"), YC("H4: rankings unchanged in a reward-weight sensitivity study and in the weight-free Pareto (dominance) comparison"), YC("Fig. 4.9: learned and fixed controllers lie on the same energy–nadir trade-off; sensitivity study not yet run")],
+   [YC("E5 Circuit-level confirmation with statistics"), YC("RQ4"), YC("H5: averaged-model conclusions hold in the EMT model over at least 40 scenarios and all seeds; the size of small gains tested by Wilcoxon on EMT results"), YC("12 scenarios: Δf within 0.013–0.017 Hz RMS; ordering kept except RoCoF; TD3 nadir advantage 0.038 → 0.019 Hz")],
+   [YC("E6 Practical guidance and open tools: deployable architecture with fallback to the tuned VSG, RoCoF-window guidance, open Python/MATLAB/Simscape code and Thai-site data pipeline"), YC("All"), YC("Documented code release and a deployment chapter in the thesis"), YC("Code, MATLAB re-implementation and Simscape model available")],
+   [YC("E7 Publications"), YC("All"), YC("TREC, IREMOS and IREA, plus one paper from the weak-coupling study"), YC("Two manuscripts under review or ready to submit; IREA in preparation")]],
+  [2350, 700, 2850, 2406], { size: 20 }));
 
 // =====================================================================================
 // CHAPTER 2  LITERATURE REVIEW
@@ -578,7 +592,7 @@ C.push(CHAP(5, "CONCLUSION AND FUTURE WORK PLAN"));
 C.push(H2("5.1", "Conclusion"));
 C.push(P("This proposal presents a thesis on feasible synthetic inertia for low-inertia PV–wind–BESS microgrids. A converter-headroom feasibility constraint has been formulated that limits the virtual inertia and damping of a VSG to the power the BESS and a de-loaded PV plant can deliver, and DDPG and TD3 agents have been trained to schedule the VSG parameters under it in two systems. The preliminary results show that (i) literature-style high-gain VSG settings require far more headroom than the converter can reserve and are derated almost continuously; (ii) in a converter-only microgrid, learned controllers match the regulation of a tuned constant VSG on unseen stress episodes while reserving 19–21 % less headroom, and DDPG and TD3 perform alike once checkpoints are selected on validation data; (iii) in a hybrid microgrid with physical inertia, the oracle bound limits the gain of any adaptive scheduler to 2.1 %, the learned agents do not exceed a tuned VSG on the objective, and the constraint cuts the undeliverable commitments of a learned policy from 5.07 s to 0.02 s per 30 s episode", NEW(", although physical converter saturation rises slightly"), "; and (iv) an independent MATLAB implementation reproduces the Python results exactly, and a three-phase EMT model ", NEW("reproduces the averaged-model frequency trajectories and the nadir ordering of the controllers, although the nadir advantage of TD3 halves,"), " apart from PLL-measured RoCoF spikes and longer limiter activity at circuit level."));
 C.push(H2("5.2", "Future Work"));
-C.push(P("The remaining work will complete the four objectives of the thesis:"));
+C.push(P("The remaining work will complete the four objectives of the thesis", NEW(" and test the hypotheses H1–H5 of Section 1.8 (Table 1.2)"), ":"));
 { const L = newList();
   C.push(L("Retrain the Study 2 agents with the time-separated requirement and proportional derating, which the rule comparison identified as the best feasibility layer, and repeat the evaluation."));
   C.push(L("Extend the circuit-level (Simscape) validation to the converter-only system of Study 1 and, if facilities allow, test the controllers in hardware-in-the-loop.", NEW(" For Study 2, repeat the circuit-level check on more scenarios and all five seeds, with a significance test on the TD3 nadir advantage, which halved in the twelve-scenario check.")));
@@ -597,6 +611,7 @@ C.push(...TABLE("Table 5.1 Research schedule", ["Task", "Status", ...Array.from(
    gantt("PRISMA search counts and literature update", "Planned", [1, 2], PLAN),
    gantt("Retraining with proportional derating", "Planned", [1, 2, 3], PLAN),
    gantt("Simscape Electrical confirmation (Study 2)", "Done", [], DONE),
+   gantt(YC("Extended EMT validation: more scenarios, all seeds, Study 1; HIL if available"), "Planned", [2, 3, 4], PLAN),
    gantt("Sensitivity and weak-coupling studies", "Planned", [3, 4, 5, 6], PLAN),
    gantt("Journal publications", "Ongoing", [1, 2, 3, 4, 5, 6, 7, 8], PLAN),
    gantt("Thesis writing", "Planned", [6, 7, 8, 9, 10, 11], PLAN),
@@ -608,7 +623,8 @@ C.push(PN(TODO("AUTHOR: update the status of each manuscript (submitted / under 
 { const L = newList();
   C.push(L("M. B. Khan, A. Srikaew, T. Ratniyomchai, J. Polprasert and A. Oonsivilai, “Reinforcement learning based virtual synchronous generator control for a low inertia solar–wind–BESS microgrid: A converter headroom-feasible approach,” under review (TREC)."));
   C.push(L("M. B. Khan, P. Pao-La-Or, A. Srikaew, T. Ratniyomchai, J. Polprasert and A. Oonsivilai, “Headroom-feasible adaptive virtual synchronous generator control with deep reinforcement learning: A multi-seed comparison with tuned controllers,” to be submitted to the International Review on Modelling and Simulations (IREMOS)."));
-  C.push(L("M. B. Khan et al., “Bounding the benefit of learned virtual-inertia scheduling in a hybrid diesel–PV–wind–BESS microgrid: Oracle analysis, headroom projection and circuit-level validation,” in preparation for the International Journal on Engineering Applications (IREA).")); }
+  C.push(L("M. B. Khan et al., “Bounding the benefit of learned virtual-inertia scheduling in a hybrid diesel–PV–wind–BESS microgrid: Oracle analysis, headroom projection and circuit-level validation,” in preparation for the International Journal on Engineering Applications (IREA)."));
+  C.push(L(NEW("A further journal paper on where learned virtual-inertia scheduling pays off, from the weak-coupling and sensitivity studies (planned; title and journal to be decided)."))); }
 
 // =====================================================================================
 // REFERENCES
