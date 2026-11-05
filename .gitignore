@@ -26,3 +26,5 @@ matlab/simscape/*_sfun.*
 octave-workspace
 matlab/simscape/results/
 results_g*/
+results_robust_*/
+results_robust_logs/
