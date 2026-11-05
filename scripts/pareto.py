@@ -13,6 +13,7 @@ Example
   python scripts/evaluate.py && python scripts/pareto.py
 """
 import itertools
+import multiprocessing as mp
 
 import matplotlib
 
@@ -20,6 +21,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
+import torch  # noqa: E402
 from _common import base_parser, setup  # noqa: E402
 from plot import LABEL, MUTED, RESULT_SET, color, save, style  # noqa: E402
 
@@ -38,6 +40,23 @@ YS = [("time_outside_band_s", "Time outside ±0.2 Hz band (s / episode)"),
       ("rocof_max_hz_s", "Max RoCoF, 100 ms window (Hz/s)")]
 
 
+_W = {}
+
+
+def _init(cfg, scs, alpha):
+    torch.set_num_threads(1)
+    _W.update(cfg=cfg, scs=scs, alpha=alpha, env=VSGEnv(cfg, load_processed(cfg), split="test", record_trace=True))
+
+
+def _fixed_point(job):
+    H, D = job
+    env = _W["env"]
+    ctrl = FixedTunedVSG(_W["cfg"], env, h=H, d=D, alpha=_W["alpha"])
+    ms = [run_episode(env, ctrl, sc)[0] for sc in _W["scs"]]
+    return {"H": H, "D": D, **{k: float(np.mean([m[k] for m in ms])) for k in
+                               [X, "time_outside_band_s", "nadir_hz", "rocof_max_hz_s", "return", "saturation_s"]}}
+
+
 def front(df, x, y):
     """Lower-left Pareto front (minimise both)."""
     pts = df.sort_values([x, y])
@@ -52,6 +71,7 @@ def front(df, x, y):
 if __name__ == "__main__":
     p = base_parser(__doc__)
     p.add_argument("--alpha", type=float, default=0.7)
+    p.add_argument("--workers", type=int, default=1, help="parallel processes (results are identical)")
     p.add_argument("--reuse", action="store_true", help="reuse pareto_fixed.csv if present")
     a = p.parse_args()
     cfg = setup(a)
@@ -65,16 +85,15 @@ if __name__ == "__main__":
     if a.reuse and fixed_file.exists():
         fixed = pd.read_csv(fixed_file)
     else:
-        env = VSGEnv(cfg, load_processed(cfg), split="test", record_trace=True)
-        rows = []
-        for H, D in itertools.product(H_GRID, D_GRID):
-            ctrl = FixedTunedVSG(cfg, env, h=H, d=D, alpha=a.alpha)
-            ms = [run_episode(env, ctrl, sc)[0] for sc in scs]
-            r = {"H": H, "D": D, **{k: float(np.mean([m[k] for m in ms])) for k in
-                                     [X, "time_outside_band_s", "nadir_hz", "rocof_max_hz_s", "return",
-                                      "saturation_s"]}}
-            rows.append(r)
-            print(f"fixed H={H:3.0f} D={D:4.0f}: fast {r[X]:.3f} kWh  out-of-band {r['time_outside_band_s']:.2f} s"
+        jobs = list(itertools.product(H_GRID, D_GRID))
+        if a.workers > 1:
+            with mp.get_context("spawn").Pool(a.workers, initializer=_init, initargs=(cfg, scs, a.alpha)) as pool:
+                rows = pool.map(_fixed_point, jobs, chunksize=1)
+        else:
+            _init(cfg, scs, a.alpha)
+            rows = [_fixed_point(j) for j in jobs]
+        for r in rows:
+            print(f"fixed H={r['H']:3.0f} D={r['D']:4.0f}: fast {r[X]:.3f} kWh  out-of-band {r['time_outside_band_s']:.2f} s"
                   f"  nadir {r['nadir_hz']:.3f} Hz  return {r['return']:.2f}")
         fixed = pd.DataFrame(rows)
         fixed.to_csv(fixed_file, index=False)
