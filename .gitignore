@@ -25,3 +25,4 @@ matlab/simscape/*.slxc
 matlab/simscape/*_sfun.*
 octave-workspace
 matlab/simscape/results/
+results_g*/
