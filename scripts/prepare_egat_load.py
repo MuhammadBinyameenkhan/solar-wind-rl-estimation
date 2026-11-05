@@ -50,12 +50,16 @@ def main():
     ap.add_argument("--year", type=int, default=2024)
     a = ap.parse_args()
 
-    df = pd.read_csv(a.input)
+    df = pd.read_csv(a.input, encoding="utf-8-sig")           # EGAT file starts with a byte-order mark
     tcol = a.time_col or pick(df.columns, TIME_HINTS, "time")
     rcol = a.region_col or pick(df.columns, REGION_HINTS, "Northeast demand", exclude=(tcol,))
     print(f"time column: {tcol!r}; demand column: {rcol!r}")
 
-    t = pd.to_datetime(df[tcol])
+    # EGAT writes DD/MM/YYYY; detect it so that 01/02 is read as 1 February, not 2 January
+    first = pd.to_numeric(df[tcol].astype(str).str.extract(r"^(\d{1,2})/")[0], errors="coerce")
+    dayfirst = bool((first > 12).any())
+    t = pd.to_datetime(df[tcol], dayfirst=dayfirst)
+    print(f"date format: {'DD/MM/YYYY' if dayfirst else 'ISO or MM/DD/YYYY'}")
     if t.dt.tz is None:
         t = (t - pd.Timedelta(hours=a.tz_offset)).dt.tz_localize("UTC")
     else:

@@ -20,7 +20,7 @@ data:
   # --- your real data (put the CSV files here, or edit the paths) ----------
   era5_csv: data/raw/era5_wind_2024.nc       # ERA5 single levels, u100/v100, 2×2 grid, 2024 (NetCDF or CSV)
   nasa_power_csv: data/raw/nasa_power_solar_2024.csv   # NASA POWER hourly, LST, 2024
-  load_csv: null                            # optional: columns time,load_mw
+  load_csv: data/raw/egat_northeast_2024_load.csv   # EGAT 2024 Northeast demand, peak-scaled to 0.8 MW (scripts/prepare_egat_load.py)
   processed_csv: data/processed/hourly_resource.csv
 
   # Column-name overrides if auto-detection fails (see `python scripts/inspect_data.py`).
