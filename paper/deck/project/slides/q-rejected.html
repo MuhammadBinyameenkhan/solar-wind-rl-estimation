@@ -1,0 +1,18 @@
+<section id="q-rejected" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Plan</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: What if your hypotheses are rejected?</h2>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:32%">Hypothesis</th><th style="width:28%">If confirmed</th><th style="width:40%">If rejected, the thesis still concludes</th></tr>
+<tr><td>H1 joint scaling lowers saturation vs clipping</td><td>Recommend time-separated rule + scaling</td><td>The constraint bounds commitments only; a saturation-aware term is needed</td></tr>
+<tr><td>H2 TD3 ≥ DDPG in every plant</td><td>TD3 recommended</td><td>Algorithm choice is plant-dependent; report where each wins</td></tr>
+<tr><td>H3 oracle &gt; 5 % → TD3 beats tuned VSG</td><td>Oracle is a validated go / no-go rule</td><td>Tuned VSG + feasibility layer suffices; the oracle saved the training effort</td></tr>
+<tr><td>H4 rankings robust to weights</td><td>Conclusions are weight-free</td><td>Report the weight ranges where rankings change (Pareto view)</td></tr>
+<tr><td>H5 conclusions hold in EMT (≥ 40 scenarios, all seeds)</td><td>Averaged-model training is adequate</td><td>Specify which metrics need EMT-level checks (RoCoF, saturation, small gains)</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Each hypothesis is set up so that either answer is a publishable, useful result (Table 1.2).</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B31</p>
+<aside>Each hypothesis was chosen so that either outcome is informative. If joint scaling does not remove the saturation increase, the conclusion is that feasibility of commitments is not enough and a saturation-aware constraint is needed. If the weak-coupling plants do not show an oracle gain above about 5 percent, or TD3 still does not beat the tuned VSG there, then the result is that a tuned VSG with the feasibility layer is sufficient, and the oracle has done its job by saving the training effort. If EMT contradicts the averaged model on small gains, the thesis will specify which metrics need circuit-level checks. Source: Section 1.8, Table 1.2.</aside>
+</section>

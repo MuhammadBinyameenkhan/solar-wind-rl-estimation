@@ -1,0 +1,17 @@
+<section id="q-matlab" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Validation</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: How do you know the Python model is implemented correctly?</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start"><div style="flex:1;display:flex;flex-direction:column;gap:16px"><table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:960px;background:#FFFDF8">
+<tr><th style="width:34%">Controller</th><th style="width:24%">max |ΔΔf| (Hz)</th><th style="width:21%">max |ΔJ| (s)</th><th style="width:21%">max |ΔD| (pu)</th></tr>
+<tr><td>Fixed tuned</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>Fixed + constraint</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>TD3 policy</td><td>1.06 × 10⁻⁷</td><td>1.5 × 10⁻⁵</td><td>2.2 × 10⁻⁵</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">12 test scenarios, 30 s, 2–3 events each, identical noise sequences; EMS dispatch difference 0 MW. Nadir, RoCoF, BESS energy, infeasible time, saturation and return agree to 0.00 %.</p>
+</div><div style="width:640px;display:flex;flex-direction:column;gap:16px"><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Independent re-implementation</p><p style="font-size:24px;line-height:1.4;color:#13233A">The complete Study 2 model, EMS, feasibility layer and the exported actor network, re-written in MATLAB (matlab/sim) and run on the same scenarios.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">The 10⁻⁷ Hz</p><p style="font-size:24px;line-height:1.4;color:#13233A">Single-precision arithmetic in the exported network; the fixed controllers agree exactly.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Plus unit tests</p><p style="font-size:24px;line-height:1.4;color:#13233A">Both Python packages test the models, the feasibility constraint and the agents.</p></div></div></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B25</p>
+<aside>The first validation stage answers the question 'is the code right?'. The full Study 2 model, including the energy management, the feasibility layer and the trained actor exported as matrices, was re-implemented in MATLAB and run on the same twelve scenarios with identical noise. The fixed controllers agree to the last digit, the policy within 1.1 times 10 to the minus 7 hertz, caused by single-precision arithmetic in the network; all metrics agree to 0.00 percent. Source: matlab/results/validation_summary.txt; Table 4.5.</aside>
+</section>

@@ -1,0 +1,17 @@
+<section id="q-generalise" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Plan</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: Will the results generalise beyond this plant?</h2>
+</div>
+<div style="display:flex;gap:24px"><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Two plants already</p><p style="font-size:24px;line-height:1.4;color:#13233A">Converter-only (H<sub>sys</sub> = 0.5 s) and diesel-hybrid (K<sub>d</sub> = 0.8, K<sub>s</sub> = 2.0); the feasibility result holds in both, the learning benefit differs.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Weak-coupling study</p><p style="font-size:24px;line-height:1.4;color:#13233A">Lower K<sub>s</sub>, slower or no secondary control, smaller BESS, larger events: where the oracle predicts more room to adapt.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#9A5B0C">Transfer test</p><p style="font-size:24px;line-height:1.4;color:#13233A">The oracle is cheap to run on any plant before training, so the decision rule itself generalises.</p></div></div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:24%">Factor</th><th style="width:40%">Covered now</th><th style="width:36%">To be covered</th></tr>
+<tr><td>Seasons and weather</td><td>All seasons via weekly blocks; 200 test scenarios</td><td>Measured Thai load if available</td></tr>
+<tr><td>Events</td><td>2–3 load steps of 0.2–0.4 MW, both signs</td><td>Larger events in the weak-coupling study</td></tr>
+<tr><td>Seeds</td><td>5 (Study 2), 10 (Study 1)</td><td>All seeds in EMT</td></tr>
+<tr><td>Reward weights</td><td>One weight set + Pareto view</td><td>Sensitivity study (H4)</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B32</p>
+<aside>Generality is addressed in three ways. The two existing plants already differ in the way that matters, converter-only versus a synchronous machine sharing the transient, and the feasibility result holds in both while the learning benefit does not; that contrast is itself a finding. The weak-coupling study varies exactly the factors the oracle says control the benefit. And the oracle bound is a procedure, not a number, so a designer can apply it to a new plant before training. Source: Sections 4.4, 5.2.</aside>
+</section>

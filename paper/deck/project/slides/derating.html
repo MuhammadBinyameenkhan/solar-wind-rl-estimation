@@ -1,0 +1,33 @@
+<section id="derating" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">3 · Methodology · feasibility (RQ1)</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">Two ways back into the feasible set</h2>
+</div>
+<div style="display:flex;gap:48px;align-items:center">
+<div style="position:relative;width:700px;height:500px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px">
+<svg aria-label="J–D plane: feasible rectangle under the time-separated rule, a commanded point outside it, clipping moves it horizontally to the J bound, joint scaling moves it along the ray to the origin" style="position:absolute;left:0;top:0;width:700px;height:500px" width="700" height="500" viewBox="0 0 700 500"><rect x="100" y="160" width="300" height="260" fill="#DCEBEC" stroke="#0E6E78" stroke-width="3"/><line x1="100" y1="420" x2="660" y2="420" stroke="#13233A" stroke-width="3"/><line x1="100" y1="420" x2="100" y2="50" stroke="#13233A" stroke-width="3"/><line x1="100" y1="420" x2="560" y2="250" stroke="#9AA5B1" stroke-width="2" stroke-dasharray="8 8"/><line x1="560" y1="250" x2="400" y2="250" stroke="#9A5B0C" stroke-width="4"/><circle cx="560" cy="250" r="13" fill="#13233A"/><circle cx="400" cy="250" r="12" fill="#E3A13B"/><circle cx="400" cy="309" r="12" fill="#0E6E78"/></svg>
+<p style="position:absolute;left:584px;top:226px;width:110px;font-size:24px;font-weight:600">asked</p>
+<p style="position:absolute;left:250px;top:200px;width:140px;font-size:24px;font-weight:600;color:#9A5B0C;text-align:right">clipped</p>
+<p style="position:absolute;left:250px;top:300px;width:140px;font-size:24px;font-weight:600;color:#0E6E78;text-align:right">scaled</p>
+<p style="position:absolute;left:120px;top:370px;width:260px;font-size:24px;color:#0E6E78">feasible</p>
+<p style="position:absolute;left:580px;top:432px;width:100px;font-size:26px;font-style:italic">J</p>
+<p style="position:absolute;left:60px;top:48px;width:40px;font-size:26px;font-style:italic">D</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;border:1px solid #DDD8CC;border-left:8px solid #E3A13B;border-radius:12px;padding:24px 28px">
+<h3 style="font-size:28px;font-weight:600">Clip each parameter</h3>
+<img src="/_blob/94d4a50c653e1ec22048acc2c508fc1f" alt="J_v ≤ h/(2 RoCoF_lim), D_v ≤ h/Δf_band" style="width:593px;height:99px;object-fit:contain">
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;border:1px solid #DDD8CC;border-left:8px solid #0E6E78;border-radius:12px;padding:24px 28px">
+<h3 style="font-size:28px;font-weight:600">Scale both (proportional derating)</h3>
+<img src="/_blob/1110585375745027309c8e74b932a3cb" alt="(J_eff, D_eff) = (J, D) · min(1, h / h_req)" style="width:592px;height:102px;object-fit:contain">
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5568">Every command passes a 0.25 s rate limiter first, so feasibility takes priority over smoothness.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">19</p>
+<aside>Third, when the requirement exceeds the headroom, the command must be brought back. Under the time-separated rule the feasible set is a rectangle in the J–D plane. Clipping moves only the violating parameter to its bound and keeps the other. Proportional derating, the method of Study 1, scales both by one factor along the ray to the origin and keeps their ratio. Both are compared in the results. The RL agents in Study 2 were trained with clipping; the comparison shows scaling is better, so retraining with it is part of the remaining work.
+LaTeX clip: J_v \le \frac{h}{2\,\mathrm{RoCoF}_{\mathrm{lim}}}, \quad D_v \le \frac{h}{\Delta f_{\mathrm{band}}}
+LaTeX (3.19): (J_{\mathrm{eff}}, D_{\mathrm{eff}}) = (J, D)\cdot\min\left(1, \frac{h}{h_{\mathrm{req}}}\right)</aside>
+</section>

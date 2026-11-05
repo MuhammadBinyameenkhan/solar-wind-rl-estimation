@@ -1,0 +1,24 @@
+<section id="lit-gaps" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">2 · Literature review · gaps</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">Five gaps, checked against the full texts</h2>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:19%">Study</th><th style="width:17%">Capability check</th><th style="width:14%">Tuned baseline</th><th style="width:14%">Seeds + tests</th><th style="width:11%">Sync. gen.</th><th style="width:13%">Real weather</th><th style="width:12%">Beyond sim.</th></tr>
+<tr><td>Alipoor 2015</td><td>–</td><td>–</td><td>–</td><td>partly</td><td>–</td><td>lab test</td></tr>
+<tr><td>Li 2017</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>Han 2023</td><td>SoC bands</td><td>–</td><td>–</td><td>–</td><td>–</td><td>HIL</td></tr>
+<tr><td>Shi 2024</td><td>static J bound</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>Afifi 2023</td><td>–</td><td>tuned PI</td><td>–</td><td>partly</td><td>–</td><td>–</td></tr>
+<tr><td>Lu &amp; Zhuan 2024</td><td>fixed J–D region</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>Egbomwan 2023</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>Oboreh-Snapps 2024</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>RTDS</td></tr>
+<tr><td>Egbomwan 2025</td><td>fixed bounds</td><td>–</td><td>–</td><td>yes</td><td>–</td><td>–</td></tr>
+<tr><td>Criollo 2026</td><td>–</td><td>–</td><td>–</td><td>yes</td><td>–</td><td>–</td></tr>
+<tr><td>Li 2026</td><td>–</td><td>rule only</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+<tr style="background:#13233A"><td style="color:#E3A13B">This thesis</td><td style="color:#F6F4EE">dispatch-aware</td><td style="color:#F6F4EE">yes</td><td style="color:#F6F4EE">5–10 seeds</td><td style="color:#F6F4EE">diesel</td><td style="color:#F6F4EE">ERA5, NASA</td><td style="color:#F6F4EE">EMT only</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">12</p>
+<aside>This matrix turns the review into gaps, each checked against the full texts. One: no study checks the commanded inertia and damping against dispatch-dependent headroom. Two: tuned baselines are rare. Three: none of the eleven reports results over several training seeds with significance tests. Four: only four model a synchronous machine. Five: three go beyond software simulation, with a lab inverter, hardware-in-the-loop or a real-time simulator. My work closes the first four. On the fifth, I am honest: my validation is an EMT model, not hardware, and Han and Oboreh-Snapps go further there. HIL is future work.</aside>
+</section>

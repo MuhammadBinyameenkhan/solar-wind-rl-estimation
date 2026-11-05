@@ -1,0 +1,36 @@
+<section id="problem" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">1 · Problem statement</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">Three problems in how adaptive VSGs are designed today</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:40px 36px">
+<div style="display:flex;align-items:center;gap:16px">
+<x-icon name="Warning" style="color:#9A5B0C;width:48px;height:48px"></x-icon>
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Feasibility</h3>
+</div>
+<p style="font-size:28px;line-height:1.45;color:#13233A">J and D are bounded by fixed ranges, never by the power the converter has left after dispatch.</p>
+<p style="font-size:26px;line-height:1.4;color:#4A5568">A promise of inertia that cannot be delivered saturates the converter exactly when it is needed.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:40px 36px">
+<div style="display:flex;align-items:center;gap:16px">
+<x-icon name="Chart" style="color:#9A5B0C;width:48px;height:48px"></x-icon>
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Evaluation</h3>
+</div>
+<p style="font-size:28px;line-height:1.45;color:#13233A">Learned VSGs are compared with untuned baselines, from one training run.</p>
+<p style="font-size:26px;line-height:1.4;color:#4A5568">DRL results vary with seed and checkpoint (Henderson 2018; Agarwal 2021); the true benefit stays unknown.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:40px 36px">
+<div style="display:flex;align-items:center;gap:16px">
+<x-icon name="Search" style="color:#9A5B0C;width:48px;height:48px"></x-icon>
+<h3 style="font-size:34px;font-weight:600;line-height:1.2">Fidelity</h3>
+</div>
+<p style="font-size:28px;line-height:1.45;color:#13233A">Most studies stop at averaged (RMS) frequency models.</p>
+<p style="font-size:26px;line-height:1.4;color:#4A5568">Will the conclusions survive a three-phase circuit with a PLL and a current-limited converter?</p>
+</div>
+</div>
+<p style="font-size:30px;line-height:1.45;width:1600px">This thesis treats adaptive VSG control as a <b>feasibility problem first</b> and a learning problem second.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">5</p>
+<aside>Three problems. First, feasibility: adaptive schemes limit J and D to fixed ranges, but never check them against the power the converter still has after the energy management system has dispatched it. Second, evaluation: learned controllers are usually compared against hand-picked fixed gains from a single training run, which can overstate the benefit. Third, fidelity: almost all studies use averaged models. My thesis puts feasibility first, then asks whether learning helps.</aside>
+</section>
