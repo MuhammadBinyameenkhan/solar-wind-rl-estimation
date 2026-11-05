@@ -1,0 +1,28 @@
+
+MATLAB vs Python cross-validation (12 test scenarios, 30 s, 2-3 events each)
+Operating-point dispatch: max |difference| = 0.00e+00 MW
+
+controller       max|dDf| Hz max|dPvsg| MW max|dPbess| MW  max|dH| s max|dD| pu
+fixed_tuned         0.00e+00     0.00e+00     0.00e+00   0.00e+00   0.00e+00
+fixed_feasible      0.00e+00     0.00e+00     0.00e+00   0.00e+00   0.00e+00
+policy              1.24e-07     4.65e-08     8.62e-08   4.92e-06   6.13e-05
+
+controller      metric (mean)              Python       MATLAB    rel. diff
+fixed_tuned     nadir_hz                   0.5155       0.5155        0.00%
+fixed_tuned     rocof_max_hz_s             1.3340       1.3340        0.00%
+fixed_tuned     bess_energy_kwh            0.7859       0.7859        0.00%
+fixed_tuned     infeasible_commit_s        1.3575       1.3575        0.00%
+fixed_tuned     saturation_s               0.0342       0.0342        0.00%
+fixed_tuned     return                   -86.2254     -86.2254        0.00%
+fixed_feasible  nadir_hz                   0.5155       0.5155        0.00%
+fixed_feasible  rocof_max_hz_s             1.3381       1.3381        0.00%
+fixed_feasible  bess_energy_kwh            0.7859       0.7859        0.00%
+fixed_feasible  infeasible_commit_s        0.0025       0.0025        0.00%
+fixed_feasible  saturation_s               0.0325       0.0325        0.00%
+fixed_feasible  return                   -86.2155     -86.2155        0.00%
+policy          nadir_hz                   0.4915       0.4915        0.00%
+policy          rocof_max_hz_s             1.4076       1.4076        0.00%
+policy          bess_energy_kwh            0.8373       0.8373        0.00%
+policy          infeasible_commit_s        0.0158       0.0158        0.00%
+policy          saturation_s               0.0375       0.0375        0.00%
+policy          return                  -100.7814    -100.7814        0.00%
