@@ -17,6 +17,9 @@ from vsgrl.microgrid import Microgrid
 from .network import DynamicNetwork, Feeder
 
 
+SAT_TOL = 1e-6      # pu; exceedances below this are numerical, not saturation
+
+
 def _wrap(a):
     return (a + math.pi) % (2.0 * math.pi) - math.pi
 
@@ -113,13 +116,18 @@ class Ieee33Microgrid(Microgrid):
                 pv_req = P_vnet - self.pb0 + self.p_pv_s   # total fast support asked by the network
                 P_lim = min(max(P_vnet, -ch), dis)
                 sat = abs(P_vnet - P_lim)
-                if sat > 0.0:                          # current limit: move the virtual rotor to the limit
-                    vt = V[iv]
-                    s = P_lim * self.X_v / (self.Ev_mag * abs(vt))
-                    self.th_v = math.atan2(vt.imag, vt.real) + math.asin(min(max(s, -1.0), 1.0))
-                    E[1] = self.Ev_mag * np.exp(1j * self.th_v)
-                    V, S_m = net.solve(E, I_inj)
-                    P_vnet = S_m[1].real
+                if sat > SAT_TOL:                      # current limit: move the virtual rotor to the limit
+                    for _ in range(4):                 # P = E V sin(th_E - th_V) / X_v, re-solved until on the limit
+                        vt = V[iv]
+                        s = P_lim * self.X_v / (self.Ev_mag * abs(vt))
+                        self.th_v = math.atan2(vt.imag, vt.real) + math.asin(min(max(s, -1.0), 1.0))
+                        E[1] = self.Ev_mag * np.exp(1j * self.th_v)
+                        V, S_m = net.solve(E, I_inj)
+                        P_vnet = S_m[1].real
+                        if abs(P_vnet - P_lim) < SAT_TOL:
+                            break
+                else:
+                    sat = 0.0
                 pb_fast = P_vnet - self.pb0
             pv = pb_fast + self.p_pv_s                 # total fast support (BESS + PV share)
             Pe_d = S_m[0].real
