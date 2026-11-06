@@ -1,0 +1,29 @@
+# Study 3: islanded IEEE 33-bus feeder (Baran & Wu 1989) with the Study 2 plant scaled by
+# k = 3.715 / 0.8 = 4.64375. Everything not listed here is inherited from Study 2.
+# S_base is scaled by k as well, so every per-unit parameter of Study 2 stays the same.
+base: ../../configs/default.yaml
+data:
+  load_csv: study3_ieee33/data/egat_load_ieee33.csv     # EGAT 2024 Northeast demand, peak = 3.715 MW (published total)
+  processed_csv: study3_ieee33/data/hourly_resource_ieee33.csv
+system:
+  s_base_mva: 9.2875                  # 2 MVA x k
+  wind: {rated_mw: 4.64375}            # 1.0 MW x k
+  pv: {rated_mw: 3.715}                # 0.8 MW x k
+  bess: {power_mw: 2.321875, energy_mwh: 9.2875}     # 0.5 MW / 2 MWh x k
+  diesel: {rated_mw: 2.321875}         # 0.5 MW x k
+  load: {peak_mw: 3.715, min_mw: 1.393125}
+  disturbance:
+    step_mw_range: [0.92875, 1.8575]   # 0.2-0.4 MW x k
+    max_cumulative_mw: 1.8575
+    design_step_mw: 1.8575
+  network:
+    model: ieee33
+    v_base_kv: 12.66
+    bus_diesel: 1
+    bus_vsg: 18
+    bus_res: 33                        # PV and wind
+    load_model: constant_power         # as in the published case; constant_impedance is an option
+eval:
+  out_dir: study3_ieee33/results
+train:
+  out_dir: study3_ieee33/runs
