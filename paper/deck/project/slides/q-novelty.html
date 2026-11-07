@@ -1,0 +1,18 @@
+<section id="q-novelty" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Literature</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: What exactly is new compared with the closest work?</h2>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:22%">Study</th><th style="width:60%">Limit placed on the VSG parameters</th><th style="width:18%">Changes with EMS dispatch?</th></tr>
+<tr><td>Shi et al. (2024)</td><td>J ≤ P<sub>max</sub> / max(ω dω/dt), from the rated power</td><td>No</td></tr>
+<tr><td>Lu and Zhuan (2024)</td><td>Fixed J–D region from a damping-ratio range; 20 ≤ D ≤ 50 for 100 kW</td><td>No</td></tr>
+<tr><td>Egbomwan et al. (2025)</td><td>Predictive safety filter with fixed bounds on the inertia power</td><td>No</td></tr>
+<tr><td>Han et al. (2023)</td><td>Inertia reduced when SoC leaves 20–90 %</td><td>No (SoC only)</td></tr>
+<tr style="background:#F2E6CF"><td><b>This thesis</b></td><td><b>h<sub>up</sub>, h<sub>dn</sub> from SoC limits, EMS dispatch P<sub>b0</sub> and PV reserve, every 50 ms; rules compared</b></td><td><b>Yes, and direction-aware</b></td></tr>
+</table>
+<div style="display:flex;gap:24px"><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">1 · Feasibility</p><p style="font-size:24px;line-height:1.4;color:#13233A">Headroom constraint tied to the dispatch; summed vs time-separated rule; clip vs scale</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">2 · Honest benefit</p><p style="font-size:24px;line-height:1.4;color:#13233A">Oracle bound before training; tuned baselines; 5–10 seeds; Wilcoxon + Holm</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">3 · Circuit-level</p><p style="font-size:24px;line-height:1.4;color:#13233A">Independent MATLAB model and three-phase Simscape EMT model</p></div></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B5</p>
+<aside>The closest works do put limits on J and D, but all are fixed: a static bound from the rated power in Shi, a fixed J–D region in Lu and Zhuan, fixed power bounds in Egbomwan's safety filter, an SoC band in Han. None of them changes with the power the converter has already committed to the energy-management dispatch. That is the quantity my constraint tracks, separately upward and downward, every 50 ms. The other two contributions are the evaluation protocol, with an oracle bound, tuned baselines and multi-seed statistics, which none of the eleven external studies used, and circuit-level validation. Source: Section 2.6, Tables 2.4 and 2.5.</aside>
+</section>

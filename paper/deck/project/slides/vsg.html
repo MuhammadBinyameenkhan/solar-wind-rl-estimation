@@ -1,0 +1,42 @@
+<section id="vsg" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">1 · The virtual synchronous generator</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">Inertia becomes a number in software — and a power commitment</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:center">
+<div style="display:flex;align-items:center;gap:16px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;background:#13233A;border-radius:12px;padding:28px 24px;width:200px">
+<x-icon name="Lightning" style="color:#E3A13B;width:56px;height:56px"></x-icon>
+<p style="font-size:26px;color:#F6F4EE;font-weight:600;text-align:center">BESS</p>
+</div>
+<x-shape kind="arrow-right" style="background:#9AA5B1;width:64px;height:32px"></x-shape>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;background:#FFFDF8;border:2px solid #0E6E78;border-radius:12px;padding:28px 24px;width:260px">
+<x-icon name="Settings" style="color:#0E6E78;width:56px;height:56px"></x-icon>
+<p style="font-size:26px;font-weight:600;text-align:center">Converter + virtual rotor</p>
+<p style="font-size:24px;color:#0E6E78;text-align:center">J, D scheduled</p>
+</div>
+<x-shape kind="arrow-right" style="background:#9AA5B1;width:64px;height:32px"></x-shape>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:28px 24px;width:200px">
+<x-icon name="Globe" style="color:#13233A;width:56px;height:56px"></x-icon>
+<p style="font-size:26px;font-weight:600;text-align:center">Microgrid</p>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:32px 36px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0E6E78">VSG power injection</p>
+<img src="/_blob/94722e218566fd45b59adee79e291edc" alt="p_vsg equals minus 2 J_eff dΔω/dt minus D_eff Δω_m" style="width:532px;height:93px;object-fit:contain">
+<p style="font-size:26px;line-height:1.4;color:#4A5568">Inertial power ∝ RoCoF; damping power ∝ frequency deviation.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:32px 36px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#9A5B0C">What it commits</p>
+<img src="/_blob/e808349acf6ec2f5ffa7c3f42f325d1c" alt="h_req equals 2J RoCoF_max over f0 plus D Δf_max over f0 equals 0.08 J plus 0.01 D" style="width:742px;height:88px;object-fit:contain">
+<p style="font-size:26px;line-height:1.4;color:#4A5568">1 s of inertia commits as much headroom as 8 pu of damping.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">4</p>
+<aside>A VSG makes the battery converter emulate the swing equation of a synchronous machine. Because J and D are just numbers in the controller, they can be changed online, by rules or by learning. But they are not free: the inertial term commits power proportional to RoCoF and the damping term commits power proportional to the deviation. At the grid-code limits of Study 1, 2 Hz/s and 0.5 Hz on a 50 Hz base, one second of inertia commits the same headroom as eight per-unit of damping.
+LaTeX: p_{\mathrm{vsg}} = -2J_{\mathrm{eff}}\frac{d\Delta\omega}{dt} - D_{\mathrm{eff}}\Delta\omega_m
+LaTeX: h_{\mathrm{req}} = 2J\frac{\mathrm{RoCoF}_{\max}}{f_0} + D\frac{\Delta f_{\max}}{f_0} = 0.08J + 0.01D</aside>
+</section>

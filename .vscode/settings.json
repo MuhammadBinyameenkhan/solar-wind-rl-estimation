@@ -1,0 +1,19 @@
+{
+  // Python interpreter: VS Code auto-detects the project .venv (docs/VSCODE.md step 2);
+  // if not, run "Python: Select Interpreter" and pick .venv.
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.extraPaths": ["${workspaceFolder}", "${workspaceFolder}/scripts"],
+  "python.envFile": "${workspaceFolder}/.vscode/.env",
+
+  // Test explorer (beaker icon) runs the pytest suite in tests/
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["tests", "-q"],
+
+  // "# %%" cells in scripts/walkthrough.py run in the Interactive Window
+  "jupyter.interactiveWindow.textEditor.executeSelection": true,
+  "jupyter.notebookFileRoot": "${workspaceFolder}",
+
+  "files.exclude": {"**/__pycache__": true, "**/.pytest_cache": true},
+  "[python]": {"editor.rulers": [110]}
+}

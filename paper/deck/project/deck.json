@@ -1,0 +1,116 @@
+{
+  "v": 4,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-02T09:00:00Z"
+  },
+  "lists": "css",
+  "title": "Feasible Synthetic Inertia — Thesis Proposal Defence",
+  "cover": "cover",
+  "order": [
+    "cover",
+    "outline",
+    "context",
+    "vsg",
+    "problem",
+    "rq",
+    "objectives",
+    "lit-prisma",
+    "lit-timeline",
+    "lit-map",
+    "lit-reported",
+    "lit-gaps",
+    "framework",
+    "studies",
+    "system",
+    "model",
+    "headroom",
+    "summax",
+    "derating",
+    "learning",
+    "evaluation",
+    "s1-results",
+    "oracle",
+    "rules",
+    "learned",
+    "projection",
+    "emt",
+    "answers",
+    "expected",
+    "contrib",
+    "plan",
+    "closing",
+    "q-index",
+    "q-lowinertia",
+    "q-whyvsg",
+    "q-scope",
+    "q-site",
+    "q-novelty",
+    "q-smallgain",
+    "q-prisma",
+    "q-hreq1",
+    "q-hreq2",
+    "q-whymax",
+    "q-saturation",
+    "q-rocofwindow",
+    "q-pvdeload",
+    "q-mdp",
+    "q-residual",
+    "q-ddpgtd3",
+    "q-training",
+    "q-baselines",
+    "q-stats",
+    "q-oracle",
+    "q-pareto",
+    "q-damping",
+    "q-s1full",
+    "q-s2full",
+    "q-matlab",
+    "q-emtmodel",
+    "q-emtdiff",
+    "q-halving",
+    "q-deploy",
+    "q-safety",
+    "q-rejected",
+    "q-generalise",
+    "q-papers",
+    "q-equations"
+  ],
+  "sections": {
+    "intro": {
+      "description": "Why feasible synthetic inertia matters, the problem and the research questions.",
+      "start": "cover"
+    },
+    "lit": {
+      "description": "Systematic review: how adaptive VSG control evolved and what it still misses.",
+      "start": "lit-prisma"
+    },
+    "method": {
+      "description": "Models, headroom feasibility, learning formulation and evaluation protocol.",
+      "start": "framework"
+    },
+    "results": {
+      "description": "Preliminary results of Study 1 and Study 2, including circuit-level validation.",
+      "start": "s1-results"
+    },
+    "close": {
+      "description": "Answers so far, contributions, limitations and the plan to completion.",
+      "start": "answers"
+    },
+    "backup": {
+      "description": "Backup slides for questions and answers, each titled by the question it answers.",
+      "start": "q-index"
+    }
+  },
+  "faces": {
+    "source-serif-4": {
+      "family": "Source Serif 4",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400..700&display=swap"
+    },
+    "ibm-plex-sans": {
+      "family": "IBM Plex Sans",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    }
+  },
+  "designSystems": []
+}

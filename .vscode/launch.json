@@ -1,0 +1,200 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "0. Walkthrough (whole file)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/walkthrough.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "1. Inspect raw data (ERA5 + NASA POWER)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/inspect_data.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "2. Prepare hybrid dataset",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/prepare_data.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "3. Oracle test (go/no-go before training)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/oracle_test.py",
+      "args": [
+        "--n",
+        "20"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "4. Tune baselines on validation",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/tune_baselines.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "5a. Train TD3 \u2014 quick (1 seed, 30 episodes)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train.py",
+      "args": [
+        "--algo",
+        "td3",
+        "--seeds",
+        "0",
+        "--episodes",
+        "30",
+        "--tag",
+        "td3_quick"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "5b. Train TD3 \u2014 paper (5 seeds \u00d7 1000 ep, parallel)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train.py",
+      "args": [
+        "--algo",
+        "td3",
+        "--workers",
+        "4"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "5c. Train DDPG \u2014 paper (5 seeds \u00d7 1000 ep, parallel)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train.py",
+      "args": [
+        "--algo",
+        "ddpg",
+        "--workers",
+        "4"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "6. Evaluate all controllers on the test set",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/evaluate.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "7. Statistics (tables, Wilcoxon + Holm)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/analyze.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "8. Pareto comparison vs fixed-VSG family",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/pareto.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "9. Paper figures",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/plot.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "10. Export policy + scenarios to MATLAB",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/export_matlab.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "Smoke test on synthetic data (train)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/train.py",
+      "args": [
+        "--config",
+        "configs/smoke.yaml",
+        "--algo",
+        "td3",
+        "--seeds",
+        "0",
+        "--episodes",
+        "20"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    },
+    {
+      "name": "Debug current file",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.vscode/.env"
+    }
+  ]
+}

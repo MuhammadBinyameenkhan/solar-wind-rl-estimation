@@ -1,0 +1,6 @@
+test adequacy-screen rejection rate: 0.0%
+fixed_tuned      seed 0: nadir 0.482 Hz  RoCoF 1.301 Hz/s  BESS 0.795 kWh  return -85.74
+fixed_feasible   seed 0: nadir 0.482 Hz  RoCoF 1.300 Hz/s  BESS 0.795 kWh  return -85.76
+fixed            seed 0: nadir 0.410 Hz  RoCoF 1.277 Hz/s  BESS 0.949 kWh  return -94.60
+bang_bang        seed 0: nadir 0.407 Hz  RoCoF 1.251 Hz/s  BESS 0.951 kWh  return -95.19
+wrote /home/user/solar-wind-rl-estimation/results_robust_egat_minmax/per_scenario.csv

@@ -1,0 +1,26 @@
+<section id="headroom" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">3 · Methodology · feasibility (RQ1)</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">Headroom depends on the dispatch and on the direction</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:32px 40px">
+<p style="font-size:24px;color:#5A6270">Illustration · BESS rated ±0.5 MW, dispatched by the EMS to discharge 0.3 MW</p>
+<div style="display:flex;align-items:center">
+<p style="width:200px;font-size:24px;color:#4A5568">charge −0.5</p>
+<div style="width:928px;height:56px;background:#9CC6CC;border-radius:6px 0 0 6px;display:flex;align-items:center;justify-content:center"><p style="font-size:26px;font-weight:600;color:#13233A">downward 0.8 MW (+ PV base)</p></div>
+<div style="width:8px;height:96px;background:#13233A"></div>
+<div style="width:232px;height:56px;background:#E3A13B;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#13233A">up 0.2</p></div>
+<div style="width:116px;height:56px;background:#F2D3A2;border:2px dashed #9A5B0C;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#13233A">+ PV</p></div>
+<p style="font-size:24px;color:#4A5568;padding:0 0 0 16px">+0.5</p>
+</div>
+<div style="display:flex"><p style="width:1150px;font-size:24px;text-align:right;color:#13233A">EMS dispatch P_b0 = +0.3 MW ▲</p></div>
+</div>
+<div style="display:flex;gap:40px;align-items:center">
+<img src="/_blob/c1cdc3fdee7f3d08cc98a22dfed409b7" alt="h_up = max(P_dis,max(SoC) − P_b0, 0) + d P_MPP; h_dn = max(P_ch,max(SoC) + P_b0, 0) + P_pv,0" style="width:747px;height:117px;object-fit:contain">
+<p style="font-size:28px;line-height:1.45;width:860px">Under-frequency events draw on <b>h_up</b>, over-frequency events on <b>h_dn</b>. A battery already discharging for the EMS has little room upward and much room downward.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">17</p>
+<aside>The first refinement in Study 2 is direction. Headroom is what is left between the EMS dispatch and the battery's limits. In this illustration the battery is rated plus or minus 0.5 megawatts and is already discharging 0.3 for the evening peak. It has only 0.2 megawatts upward, plus the PV reserve, but 0.8 downward. An under-frequency event uses the upward headroom, an over-frequency event the downward. The limits taper with state of charge. This is why the feasible inertia changes hour by hour over the year.
+LaTeX (3.20): h_{\mathrm{up}} = \max(P_{\mathrm{dis,max}}(\mathrm{SoC}) - P_{b0}, 0) + d\,P_{\mathrm{MPP}}, \quad h_{\mathrm{dn}} = \max(P_{\mathrm{ch,max}}(\mathrm{SoC}) + P_{b0}, 0) + P_{\mathrm{pv},0}</aside>
+</section>

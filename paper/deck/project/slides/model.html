@@ -1,0 +1,24 @@
+<section id="model" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">3 · Methodology · two-machine model</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">The diesel and the VSG share every step</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:32px 40px">
+<div style="display:flex;align-items:center;gap:32px"><p style="width:300px;font-size:26px;font-weight:600;color:#0E6E78">Network sharing</p><img src="/_blob/940cc3d8581806984252bf3f7eb46bc4" alt="P_v equals K_s times (K_d delta plus delta P_net) over (K_d plus K_s); bus frequency is the K-weighted mean of rotor speeds" style="width:908px;height:99px;object-fit:contain"><p style="font-size:26px;color:#4A5568">(3.12–13)</p></div>
+<div style="display:flex;align-items:center;gap:32px"><p style="width:300px;font-size:26px;font-weight:600;color:#0E6E78">Diesel rotor</p><img src="/_blob/28c528ad1f75bf196b8909310ab91d58" alt="2 H_d dΔω_d/dt = ΔP_m − ΔP_e,d − D_d (Δω_d − Δω_b)" style="width:766px;height:93px;object-fit:contain"><p style="font-size:26px;color:#4A5568">(3.14)</p></div>
+<div style="display:flex;align-items:center;gap:32px"><p style="width:300px;font-size:26px;font-weight:600;color:#0E6E78">Virtual rotor</p><img src="/_blob/f5b6d51832b788a404c71392fa05677c" alt="2 J_v dΔω_v/dt = P_set − P_v − D_v Δω_v; dδ/dt = ω0 (Δω_v − Δω_d)" style="width:974px;height:93px;object-fit:contain"><p style="font-size:26px;color:#4A5568">(3.15)</p></div>
+<div style="display:flex;align-items:center;gap:32px"><p style="width:300px;font-size:26px;font-weight:600;color:#0E6E78">Deliverable band</p><img src="/_blob/6200fe7bb630aa94a30eb7952304ab7f" alt="−(P_ch,max(SoC) + P_b0) + P_pv,s ≤ P_v ≤ P_dis,max(SoC) − P_b0 + P_pv,s" style="width:1138px;height:51px;object-fit:contain"></div>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#13233A;border-radius:12px;padding:24px 40px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;color:#E3A13B;line-height:1;min-width:max-content">≈ 71 %</p>
+<p style="font-size:28px;line-height:1.4;color:#F6F4EE">of every load step lands on the VSG at the instant it occurs, K_s/(K_s + K_d) = 2.0/2.8, <b>whatever J_v and D_v are</b>.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">16</p>
+<aside>The diesel generator and the VSG are voltage sources behind reactances meeting at the load bus. Linearised, the network shares any imbalance in proportion to their synchronising coefficients, and the bus frequency is their weighted mean speed. Each machine then follows its own swing equation; the VSG's virtual inertia and damping are the parameters the agent schedules. The VSG power is limited to what the battery has left after the EMS dispatch plus the PV share. One consequence matters for everything later: with K_d of 0.8 and K_s of 2.0, about 71 percent of every load step lands on the VSG instantly, regardless of J_v and D_v.
+LaTeX (3.12): P_v = \frac{K_s(K_d\delta + \Delta P_{\mathrm{net}})}{K_d+K_s}, \quad \Delta P_{\mathrm{net}} = \Delta P_L - \Delta P_w + D_L P_{L0}\Delta\omega_b
+LaTeX (3.13): \Delta\omega_b = \frac{K_d\Delta\omega_d + K_s\Delta\omega_v}{K_d+K_s}
+LaTeX (3.14): 2H_d\frac{d\Delta\omega_d}{dt} = \Delta P_m - \Delta P_{e,d} - D_d(\Delta\omega_d - \Delta\omega_b)
+LaTeX (3.15): 2J_v\frac{d\Delta\omega_v}{dt} = P_{\mathrm{set}} - P_v - D_v\Delta\omega_v, \quad \frac{d\delta}{dt} = \omega_0(\Delta\omega_v - \Delta\omega_d)
+LaTeX (3.16): -(P_{\mathrm{ch,max}}(\mathrm{SoC}) + P_{b0}) + P_{\mathrm{pv},s} \le P_v \le P_{\mathrm{dis,max}}(\mathrm{SoC}) - P_{b0} + P_{\mathrm{pv},s}</aside>
+</section>
