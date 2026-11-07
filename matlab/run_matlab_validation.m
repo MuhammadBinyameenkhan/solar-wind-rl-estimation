@@ -28,7 +28,7 @@ nS = numel(V.sc_ws_hub_ms);
 fixed = struct('type', 'fixed', 'H', pol.nominal_h, 'D', pol.nominal_d, 'alpha', pol.nominal_alpha);
 feas  = fixed;  feas.type = 'feasible';
 ctrls = {'fixed_tuned', fixed;  'fixed_feasible', feas;  'policy', struct('type', 'policy')};
-mnames = {'nadir_hz', 'rocof_max_hz_s', 'bess_energy_kwh', 'infeasible_commit_s', 'saturation_s', 'return'};
+mnames = {'nadir_hz', 'rocof_max_hz_s', 'bess_energy_kwh', 'infeasible_commit_s', 'saturation_s', 'limit_s', 'return'};
 tcols = struct('df_hz', 2, 'p_vsg_mw', 4, 'p_bess_mw', 5, 'H_v', 8, 'D_v', 9);   % MATLAB trace columns
 
 rows = {};  err = struct();  dispatch_err = 0;  tic;

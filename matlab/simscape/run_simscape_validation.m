@@ -39,7 +39,7 @@ feas = fixed;  feas.type = 'feasible';
 ctrls = {'fixed_tuned', fixed;  'fixed_feasible', feas;  'policy', struct('type', 'policy')};
 labels = {'Fixed VSG (tuned)', 'Fixed VSG + projection', 'TD3 policy'};
 mnames = {'nadir_hz', 'rocof_max_hz_s', 'rocof_500ms_hz_s', 'rotor_rocof_hz_s', 'bess_energy_kwh', ...
-          'infeasible_commit_s', 'saturation_s'};
+          'infeasible_commit_s', 'saturation_s', 'limit_s'};
 rows = {};  built = false;  tic;
 for i = SCENARIOS
     sc = struct('ws_hub_ms', V.sc_ws_hub_ms(i), 'rho_kgm3', V.sc_rho_kgm3(i), ...

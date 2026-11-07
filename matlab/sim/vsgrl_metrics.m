@@ -23,4 +23,10 @@ M.rocof_max_hz_s = max(abs(rocof_w));
 M.bess_energy_kwh = sum(abs(pb - pb(1))) * dt * 1000 / 3600;
 M.infeasible_commit_s = sum(need > tr(:, 12) / C.Sb + 1e-6) * dt;
 M.saturation_s = sum(tr(:, 13) > 1e-4) * dt;
+% time the BESS power is held at its SoC-dependent limit (mirrors limit_s in vsgrl/metrics.py)
+soc = tr(:, 7);  pbmax = C.Pb_max * C.Sb;
+dis = pbmax * min(max((soc - C.soc_min) / C.soc_taper, 0), 1);
+chg = pbmax * min(max((C.soc_max - soc) / C.soc_taper, 0), 1);
+tol = 1e-3 * pbmax;
+M.limit_s = sum(pb >= dis - tol | pb <= -chg + tol) * dt;
 end
