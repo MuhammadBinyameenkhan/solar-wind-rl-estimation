@@ -21,6 +21,17 @@ def _infeasible_s(tr: pd.DataFrame, cfg: dict, dt: float, rule: str = "max") -> 
     return float(np.sum(need > h + 1e-6) * dt)
 
 
+def _limit_s(tr: pd.DataFrame, cfg: dict, dt: float, rel_tol: float = 1e-3) -> float:
+    """Seconds during which the BESS power is at its discharge or charge limit (SoC-tapered)."""
+    b = cfg["system"]["bess"]
+    soc = tr["soc"].to_numpy()
+    p_b = tr["p_bess_mw"].to_numpy()
+    dis = b["power_mw"] * np.clip((soc - b["soc_min"]) / b["soc_taper"], 0.0, 1.0)
+    ch = b["power_mw"] * np.clip((b["soc_max"] - soc) / b["soc_taper"], 0.0, 1.0)
+    tol = rel_tol * b["power_mw"]
+    return float(np.sum((p_b >= dis - tol) | (p_b <= -ch + tol)) * dt)
+
+
 def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
     """Metrics over all events of the episode. Per event (window = event time → next event):
     nadir in the event's direction and settling time; aggregated as worst / mean."""
@@ -70,6 +81,10 @@ def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
         "vsg_fast_energy_kwh": float(np.sum(np.abs(tr["p_vsg_mw"].to_numpy() - tr["p_set_mw"].to_numpy()))
                                      * dt * 1000 / 3600) if "p_set_mw" in tr else float("nan"),
         "saturation_s": float(np.sum(tr["sat_mw"].to_numpy() > 1e-4) * dt),
+        # Time the BESS power is actually held at its SoC-dependent limit. saturation_s counts only
+        # the steps at which the requested power exceeds the limit; after the angle anti-windup the
+        # request often equals the limit in the next step, so saturation_s under-counts this time.
+        "limit_s": _limit_s(tr, cfg, dt),
         # Infeasible commitment: the scheduled D (damping power at the band edge) or H (inertial
         # power at the RoCoF limit) needs more power than the direction-aware headroom.
         "infeasible_commit_s": _infeasible_s(tr, cfg, dt),
@@ -84,5 +99,5 @@ def episode_metrics(tr: pd.DataFrame, sc: dict, cfg: dict) -> dict:
 
 METRIC_COLUMNS = ["nadir_hz", "rocof_max_hz_s", "qss_dev_hz", "settling_time_s", "time_outside_band_s",
                   "bess_energy_kwh", "bess_rms_mw",
-                  "bess_peak_mw", "pv_headroom_energy_kwh", "saturation_s", "infeasible_commit_s", "infeasible_sum_s", "f_violation",
+                  "bess_peak_mw", "pv_headroom_energy_kwh", "saturation_s", "limit_s", "infeasible_commit_s", "infeasible_sum_s", "f_violation",
                   "rocof_violation", "return", "collapsed"]
