@@ -40,7 +40,7 @@ TREATMENTS = {
     "sum_scale_wide": {"env.headroom_constraint": True, "env.projection": "sum_scale",
                        "env.projection_f_hz": 0.5, "env.projection_rocof_hz_s": 2.0},
 }
-COLS = ["nadir_hz", "rocof_max_hz_s", "time_outside_band_s", "bess_energy_kwh", "saturation_s",
+COLS = ["nadir_hz", "rocof_max_hz_s", "time_outside_band_s", "bess_energy_kwh", "saturation_s", "limit_s",
         "infeasible_commit_s", "infeasible_sum_s", "return", "mean_H", "mean_D"]
 
 
