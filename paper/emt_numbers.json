@@ -1,10 +1,10 @@
 {
  "n_scenarios": 12,
- "rmse_range": "0.013–0.017",
- "nadir_diff": "+1 % deeper",
- "bess_diff": "+0.2 %",
- "rocof100_factor": "2.5",
- "rocof500_diff": "−0.5 % to +9 %",
+ "rmse_range": "0.008–0.033",
+ "nadir_diff": "+0.5 % (fixed), +6.2 % (TD3)",
+ "bess_diff": "within 0.8 %",
+ "rocof100_factor": "2.9",
+ "rocof500_diff": "+5.5 % (fixed), +15.5 % (TD3)",
  "infeasible_emt": "≤ 0.03 s",
- "solver_note": "The model was built and solved in Simscape Electrical (Specialized Power Systems, discrete 100 µs) in MATLAB R2021a; an independent fixed-step script solver of the same circuit agrees with it within about 2 % on every metric."
+ "solver_note": "The model was built and solved in Simscape Electrical (Specialized Power Systems, discrete 100 µs) in MATLAB R2021a; an independent fixed-step script solver of the same circuit agrees with it within about 4 % on every mean metric except the near-zero infeasible-commitment times."
 }

@@ -1,7 +1,7 @@
 """Figure for the headroom-rule ablation (run scripts/headroom_ablation.py first).
 
 Dot plot: one row per fixed VSG setting, one marker per feasibility treatment, three panels
-(converter saturation, worst-event nadir, objective return). Output: figures/fig_headroom_ablation.*
+(time at the converter power limit, worst-event nadir, objective return). Output: figures/fig_headroom_ablation.*
 """
 import matplotlib
 
@@ -20,7 +20,7 @@ TREAT = [("none", "No constraint", "#8a8985", "o"),
          ("sum_scale_wide", "Sum rule, joint, 0.5 Hz / 2 Hz/s", PALETTE[3], "v")]
 SETTINGS = [("tuned", "Tuned (J 3, D 15)"), ("standard", "Standard (J 3, D 20)"), ("low", "Low (J 1, D 10)"),
             ("high", "High (J 4, D 30)"), ("range_max", "Range max (J 8, D 50)")]
-PANELS = [("saturation_s", "Converter saturation (s / episode)"),
+PANELS = [("limit_s", "Time at converter power limit (s / episode)"),
           ("nadir_hz", "Worst-event nadir deviation (Hz)"),
           ("return", "Objective return (higher is better)")]
 
