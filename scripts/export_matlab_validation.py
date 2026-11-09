@@ -33,7 +33,7 @@ from vsgrl.scenarios import scenarios_from_frame
 
 TRACE_KEYS = ["df_hz", "rocof_hz_s", "p_vsg_mw", "p_bess_mw", "p_diesel_mw", "soc", "H_v", "D_v", "alpha",
               "p_set_mw", "headroom_mw"]
-METRIC_KEYS = ["nadir_hz", "rocof_max_hz_s", "bess_energy_kwh", "infeasible_commit_s", "saturation_s", "return"]
+METRIC_KEYS = ["nadir_hz", "rocof_max_hz_s", "bess_energy_kwh", "infeasible_commit_s", "saturation_s", "limit_s", "return"]
 
 if __name__ == "__main__":
     p = base_parser(__doc__)
