@@ -1,0 +1,23 @@
+<section id="emt" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">4 · Preliminary results · validation (RQ4)</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">The circuit confirms the direction, not every size</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:start">
+<img src="/_blob/745e15a8e7f7f7509b82df322784976d" alt="Averaged model and three-phase Simscape model for test scenario 1: frequency deviation and VSG power for three controllers" style="width:760px;height:541px;object-fit:contain;background:#FFFDF8;border-radius:12px">
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:864px;background:#FFFDF8">
+<tr><th style="width:52%">EMT vs averaged (12 × 3)</th><th style="width:48%">Result</th></tr>
+<tr><td>MATLAB vs Python</td><td>identical; TD3 ≤ 1.1·10⁻⁷ Hz</td></tr>
+<tr><td>RMS difference of Δf</td><td>0.013–0.017 Hz</td></tr>
+<tr><td>Nadir · BESS energy</td><td>within 2 % · 1.1 %</td></tr>
+<tr><td>RoCoF 100 ms · 500 ms</td><td>× 2.5 · −0.5 to +9 %</td></tr>
+<tr><td>Saturation time</td><td>× 2.2–2.8</td></tr>
+<tr><td>Controller ordering</td><td>same, except RoCoF</td></tr>
+<tr style="background:#F7E3C2"><td>TD3 nadir advantage</td><td>0.038 → 0.019 Hz</td></tr>
+</table>
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5568;width:1640px">Simscape Electrical, MATLAB R2021a, 100 µs. Twelve scenarios and one policy (TD3, seed 1): the direction of the TD3 effect holds, its size halves; no significance test yet.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">27</p>
+<aside>Research question four. An independent MATLAB implementation reproduces the Python results exactly for the fixed controllers and within ten to the minus seven hertz for TD3. The three-phase Simscape model, built with the same parameters, follows the averaged model within 0.013 to 0.017 hertz RMS, the nadir within 2 percent and battery energy within 1.1 percent. Two differences are physical: each load step makes the bus-voltage phase jump by about three degrees, which a PLL reads as a frequency spike, so 100 millisecond RoCoF is 2.5 times higher, while 500 millisecond RoCoF agrees within minus 0.5 to plus 9 percent; and the limiter, acting on measured power, is active two to three times longer. Critically: the ordering holds except for RoCoF, and the TD3 nadir advantage halves. With twelve scenarios and one policy this confirms the direction, not the size. This EMT model shares the averaged model's parameters; it checks the simplifications, not the plant. Hardware-in-the-loop is future work.</aside>
+</section>

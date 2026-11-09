@@ -1,0 +1,21 @@
+<section id="q-smallgain" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Literature</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: Why is your gain (10 %) so much smaller than the literature's (33–60 %)?</h2>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:30%">Study</th><th style="width:34%">Reference controller</th><th style="width:36%">Reported change</th></tr>
+<tr><td>Li et al. (2026), TD3</td><td>Fixed VSG, default parameters</td><td>Δf −33 % (power step), −57 % (load step)</td></tr>
+<tr><td>Lu and Zhuan (2024), SAC</td><td>Fixed VSG, default parameters</td><td>Δf −40 % / −39 %</td></tr>
+<tr><td>Shi et al. (2024), rule</td><td>Fixed J and D</td><td>Δf −60 %</td></tr>
+<tr><td>Han et al. (2023), rule</td><td>Constant inertia</td><td>Frequency dip −13 % to −55 %</td></tr>
+<tr><td>Egbomwan et al. (2023), TD3</td><td>PI</td><td>Mean absolute Δf error −56.6 %</td></tr>
+<tr><td>Criollo et al. (2026), SAC</td><td>PID</td><td>RoCoF −37.23 %</td></tr>
+<tr style="background:#F2E6CF"><td><b>This thesis, Study 2, TD3</b></td><td><b>Tuned fixed VSG, 5 seeds, 200 scenarios</b></td><td><b>Nadir −10 % (p<sub>Holm</sub> ≈ 8 × 10⁻²⁵); RoCoF −1 %</b></td></tr>
+<tr style="background:#F2E6CF"><td><b>This thesis, oracle</b></td><td><b>Best single fixed VSG</b></td><td><b>At most 1.3 % in the objective</b></td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">The gain depends on the reference. Each published value is one trained agent on one to three events against default or PI settings; systems and frequencies differ, so rows are not directly comparable.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B6</p>
+<aside>Because the reference is different. The published gains are measured against default fixed parameters or PI and PID control, each from a single trained agent on one to three disturbances; only Li et al. 2026 tuned a baseline. My reference is a VSG tuned on validation data with the same objective, and the gain is measured over 200 test scenarios and five seeds with a corrected significance test. Against that reference the nadir gain is 10 percent, and the oracle bound shows nothing could do better than 1.3 percent on the objective in this plant. This is the point of the comparison: the reported gain depends heavily on what it is compared with. Source: Section 4.4, Table 4.6.</aside>
+</section>

@@ -1,0 +1,9 @@
+{
+  "algo": "ddpg",
+  "seed": 2,
+  "episodes": 1000,
+  "steps": 598000,
+  "best_val_return": -82.02575272943561,
+  "wall_s": 3219.5111372470856,
+  "train_scenario_rejection_rate": 0.0
+}

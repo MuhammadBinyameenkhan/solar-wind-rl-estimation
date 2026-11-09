@@ -1,0 +1,22 @@
+<section id="q-training" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Learning</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: What were the training settings, and what did they cost?</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start"><div style="flex:1"><table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:22px;color:#13233A;width:1080px;background:#FFFDF8">
+<tr><th style="width:28%">Setting</th><th style="width:38%">Study 1</th><th style="width:34%">Study 2</th></tr>
+<tr><td>Actor / critic</td><td>14→256→256→3 / 17→256→256→1, LayerNorm</td><td>2 × 256, ReLU, zero-init actor output</td></tr>
+<tr><td>Learning rates</td><td>10⁻⁴ / 10⁻³, cosine</td><td>10⁻⁴ / 3 × 10⁻⁴</td></tr>
+<tr><td>γ; τ; batch</td><td>0.99; 0.005; 128</td><td>0.99; 0.005; 256</td></tr>
+<tr><td>Replay</td><td>prioritised, 2 × 10⁵</td><td>uniform, 10⁶</td></tr>
+<tr><td>Warm-up; updates</td><td>2000; 1 per 4 steps</td><td>10 000; 1 per 2 steps</td></tr>
+<tr><td>Exploration</td><td>0.30 → 0.03</td><td>0.10 → 0.03</td></tr>
+<tr><td>TD3 smoothing; clip; delay</td><td>0.1; 0.3; 2</td><td>0.2; 0.5; 2</td></tr>
+<tr><td>Budget</td><td>1000 ep × 1500 steps (20 ms), 10 seeds</td><td>1000 ep × 600 steps (50 ms), 5 seeds</td></tr>
+<tr><td>Selection</td><td>best validation, every 10 ep</td><td>best validation, every 50 ep, incl. untrained</td></tr>
+</table>
+</div><div style="flex:1;display:flex;flex-direction:column;gap:16px"><div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:52px;font-weight:600;color:#0E6E78;line-height:1;min-width:max-content">≈ 1 h</p><p style="font-size:24px;line-height:1.35">per Study 2 run on CPU (≈ 600 000 steps): TD3 52–54 min, DDPG 48–68 min, TD3 without constraint 68–72 min</p></div><div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:52px;font-weight:600;color:#0E6E78;line-height:1;min-width:max-content">70 915</p><p style="font-size:24px;line-height:1.35">actor parameters: about 71 000 multiply-adds every 50 ms, light for a converter controller</p></div></div></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B17</p>
+<aside>Table 3.1 of the proposal, plus the measured cost. Each Study 2 run is about 600,000 environment steps and took roughly one hour on CPU: TD3 52 to 54 minutes, DDPG 48 to 68, TD3 without the constraint 68 to 72 minutes, so the 15 Study 2 runs are about 15 CPU-hours. Inference is cheap: the Study 2 actor, 16 inputs, two hidden layers of 256 and 3 outputs, has 70,915 parameters, about 71,000 multiply-adds per decision every 50 ms, which a modern DSP or embedded controller handles easily. Sources: Table 3.1; runs/*/summary.json wall times; parameter count from the network sizes.</aside>
+</section>

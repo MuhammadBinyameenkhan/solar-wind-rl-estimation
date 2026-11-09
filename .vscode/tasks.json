@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Setup: create .venv and install requirements (macOS/Linux)",
+      "type": "shell",
+      "command": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt ipykernel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup: create .venv and install requirements (Windows)",
+      "type": "shell",
+      "command": "py -m venv .venv; .venv\\Scripts\\pip install -r requirements.txt ipykernel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run tests",
+      "type": "shell",
+      "command": "python -m pytest -q tests",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Full study (run_all.sh, macOS/Linux)",
+      "type": "shell",
+      "command": "bash run_all.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Study 2: reward convergence check",
+      "type": "shell",
+      "command": "python scripts/convergence.py --tags td3 ddpg td3_noproj",
+      "problemMatcher": []
+    },
+    {
+      "label": "Study 3: validate IEEE 33-bus feeder data (pandapower)",
+      "type": "shell",
+      "command": "python study3_ieee33/scripts/validate_ieee33_baseline.py",
+      "problemMatcher": []
+    },
+    {
+      "label": "Study 3: validate network model (V2, V3)",
+      "type": "shell",
+      "command": "python study3_ieee33/scripts/validate_network_model.py --n 6",
+      "problemMatcher": []
+    }
+  ]
+}

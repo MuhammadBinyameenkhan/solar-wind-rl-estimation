@@ -1,0 +1,18 @@
+<section id="q-hreq2" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Feasibility</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: How are the Study 2 bounds computed, in numbers?</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start"><div style="flex:1;display:flex;flex-direction:column;gap:18px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:28px"><img src="/_blob/94d4a50c653e1ec22048acc2c508fc1f" alt="J_v ≤ h/(2 RoCoF_lim), D_v ≤ h/Δf_band" style="width:760px;height:80px;object-fit:contain"><ul style="width:780px;display:flex;flex-direction:column;gap:10px;padding-left:32px;margin:0"><li style="font-size:26px;line-height:1.4">RoCoF<sub>lim</sub> = 1 Hz/s = 0.02 pu/s → <b>J<sub>v</sub> ≤ 25 h</b></li><li style="font-size:26px;line-height:1.4">Δf<sub>band</sub> = 0.2 Hz = 0.004 pu → <b>D<sub>v</sub> ≤ 250 h</b></li><li style="font-size:26px;line-height:1.4">h in pu of 2 MVA; static ranges J<sub>v</sub> 0.2–8 s, D<sub>v</sub> 0–50 pu still apply</li><li style="font-size:26px;line-height:1.4">Tuned (3 s, 15 pu) needs 0.12 pu inertial and 0.06 pu damping headroom</li></ul></div><div style="width:760px;display:flex;flex-direction:column;gap:16px"><table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:760px;background:#FFFDF8">
+<tr><th style="width:52%">Upward headroom h</th><th style="width:24%">J<sub>v</sub> bound</th><th style="width:24%">D<sub>v</sub> bound</th></tr>
+<tr><td>0.25 pu (0.5 MW, idle BESS)</td><td>6.25 s</td><td>50 pu (cap)</td></tr>
+<tr><td>0.12 pu (0.24 MW)</td><td>3.0 s</td><td>30 pu</td></tr>
+<tr><td>0.05 pu (0.1 MW, evening peak)</td><td>1.25 s</td><td>12.5 pu</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Worked from Eq. (3.21) with the Study 2 limits; the EMS uses at most 80 % of the BESS power limit, so some upward headroom normally remains.</p>
+</div></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B9</p>
+<aside>In Study 2 each mechanism is sized at its own limit. The inertial power at the RoCoF limit is 2 J_v times 0.02 per-unit per second, so J_v can be at most 25 times the headroom; the damping power at the band edge is D_v times 0.004, so D_v can be at most 250 times the headroom, all on the 2 MVA base. With an idle battery and 0.5 MW of headroom the bounds are loose, 6.25 seconds and the 50 per-unit cap; in the evening peak with only 0.1 MW left, the tuned setting of 3 seconds and 15 per-unit is not deliverable and is cut to 1.25 seconds and 12.5 per-unit. These are worked examples of the equation, not simulation outputs. Code: vsgrl/envs/vsg_env.py, param_bounds.
+LaTeX (3.21): h_{\mathrm{req,max}} = \max(2J_v\,\mathrm{RoCoF}_{\mathrm{lim}},\ D_v\,\Delta f_{\mathrm{band}}) \le h</aside>
+</section>

@@ -1,0 +1,17 @@
+<section id="q-damping" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Evaluation</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: Why do you say damping matters more than inertia?</h2>
+</div>
+<div style="display:flex;gap:24px"><div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:52px;font-weight:600;color:#0E6E78;line-height:1;min-width:max-content">1 s = 8 pu</p><p style="font-size:24px;line-height:1.35">of damping in headroom cost (Study 1, Eq. 3.17)</p></div><div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:52px;font-weight:600;color:#9A5B0C;line-height:1;min-width:max-content">(0 s, 35 pu)</p><p style="font-size:24px;line-height:1.35">the tuned fixed VSG of Study 1: no inertia at all</p></div><div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:52px;font-weight:600;color:#0E6E78;line-height:1;min-width:max-content">≈ 12 pu</p><p style="font-size:24px;line-height:1.35">oracle damping in Study 2, almost independent of headroom</p></div></div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:40%">Evidence</th><th style="width:26%">Inertia J</th><th style="width:34%">Damping D</th></tr>
+<tr><td>Study 1 learned schedules (10 seeds), DDPG / TD3</td><td>0.46 ± 0.12 s / 0.40 ± 0.10 s</td><td>21.0 ± 2.0 / 22.6 ± 2.3 pu; 35–50 pu at each contingency</td></tr>
+<tr><td>Study 1 headroom cost at the grid-code limits</td><td>0.08 pu per s</td><td>0.01 pu per pu</td></tr>
+<tr><td>Study 2 summed rule, Study 1 limits</td><td>cut to ≈ 2 s</td><td>cut to ≈ 11–14 pu</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Damping acts over the whole deviation; inertia only over the first instants, which the diesel coupling already shares. Under a headroom budget, scheduling D gives more per kW.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B22</p>
+<aside>Several results point the same way. Under the Study 1 limits one second of inertia costs as much headroom as eight per-unit of damping. The tuned fixed VSG in Study 1 chose zero inertia and 35 per-unit damping. The learned policies converge to about 0.4 seconds of inertia and 21 to 23 per-unit damping, raising damping to 35 to 50 at each contingency and dropping it once the deviation is arrested. In Study 2 the oracle's damping hardly changes with headroom. So headroom-limited VSG control is mainly a damping-scheduling problem. Source: Sections 4.2.2, 4.2.3, 4.3.2.</aside>
+</section>

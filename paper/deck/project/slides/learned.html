@@ -1,0 +1,27 @@
+<section id="learned" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">4 · Preliminary results · Study 2 · learned controllers (RQ2, RQ3)</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">TD3 finds a different trade-off, not a better one</h2>
+</div>
+<div style="display:flex;gap:32px;align-items:start">
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1100px;background:#FFFDF8">
+<tr><th style="width:38%">Controller (200 scenarios)</th><th style="width:13%;text-align:right">Nadir Hz</th><th style="width:13%;text-align:right">RoCoF Hz/s</th><th style="width:12%;text-align:right">BESS kWh</th><th style="width:12%;text-align:right">Infeas. s</th><th style="width:12%;text-align:right">Return</th></tr>
+<tr style="background:#DCEBEC"><td>Fixed VSG, tuned (3 s, 15 pu)</td><td>0.451</td><td>1.228</td><td>0.798</td><td>0.536</td><td>−80.7</td></tr>
+<tr><td>Tuned + constraint</td><td>0.451</td><td>1.228</td><td>0.798</td><td>0.001</td><td>−80.8</td></tr>
+<tr><td>Fixed VSG, standard (3, 20)</td><td>0.382</td><td>1.237</td><td>0.951</td><td>0.527</td><td>−90.0</td></tr>
+<tr><td>Bang-bang VSG</td><td>0.379</td><td>1.208</td><td>0.954</td><td>0.787</td><td>−90.6</td></tr>
+<tr style="background:#F7E3C2"><td>TD3, final policy</td><td>0.407</td><td>1.213</td><td>0.822</td><td>0.008</td><td>−91.2</td></tr>
+<tr><td>TD3 without constraint</td><td>0.386</td><td>1.207</td><td>0.843</td><td>1.989</td><td>−90.1</td></tr>
+<tr><td>DDPG, final policy</td><td>0.473</td><td>1.435</td><td>0.876</td><td>0.012</td><td>−98.8</td></tr>
+<tr><td>BESS droop, no inertia</td><td>0.630</td><td>5.547</td><td>0.945</td><td>0.019</td><td>−163.8</td></tr>
+<tr><td>Diesel only (97.5 % collapse)</td><td>3.07</td><td>7.44</td><td>0</td><td>0</td><td>−501.3</td></tr>
+</table>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#13233A;border-radius:12px;padding:24px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:48px;font-weight:600;color:#E3A13B;line-height:1">9 / 10</p><p style="font-size:24px;line-height:1.4;color:#F6F4EE">runs selected the untrained agent (the tuned VSG); the tenth was better on validation, worse on test</p></div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:24px 28px"><h3 style="font-size:28px;font-weight:600">TD3 vs tuned</h3><p style="font-size:24px;line-height:1.4;color:#4A5568">Nadir −0.044 Hz (89 % of scenarios, p ≈ 8·10⁻²⁵) for +0.024 kWh BESS energy; worse return; only narrowly non-dominated</p></div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">25</p>
+<aside>Research questions two and three, now with the measured EGAT load. Residual TD3 and DDPG were trained for 1000 episodes on five seeds each, with and without the constraint, and tested on 200 scenarios. Without fast support the diesel-only system collapses in 97.5 percent of scenarios; droop without inertia survives but at 5.5 hertz per second. The tuned fixed VSG has the best objective return. For nine of the ten learned runs, the best validation checkpoint was the untrained agent, which is the tuned VSG itself; the tenth, TD3 seed 3, looked half a percent better on validation but was about four percent worse on test, so selection effectively returns the tuned VSG. The final TD3 policies lower the nadir by 0.044 hertz, in 89 percent of scenarios, but use more battery energy, so the return is worse: a different point on the same trade-off, and only narrowly non-dominated. DDPG is worse than TD3 on nadir, RoCoF and return. So the agents learn within the constraint, but in this plant they do not beat a tuned VSG, consistent with the oracle.</aside>
+</section>
