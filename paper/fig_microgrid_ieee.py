@@ -40,11 +40,17 @@ def arrow(x0, y0, x1, y1, c=K, ls="-", lw=LW):
                 arrowprops=dict(arrowstyle="-|>", color=c, lw=lw, ls=ls, mutation_scale=7, shrinkA=0, shrinkB=0))
 
 
-def block(x, y, w, h, text, c=K, fill="white", fs=7, ls="-", bold=False):
+def block(x, y, w, h, text, c=K, fill="white", fs=7, ls="-", bold=False, pad=1.6):
+    """Box centred at (x, y); widened if needed so that the text keeps a margin of `pad` on each side."""
+    t = ax.text(x, y, text, ha="center", va="center", fontsize=fs, zorder=5, color=K,
+                fontweight="bold" if bold else "normal", linespacing=1.15)
+    fig.canvas.draw()
+    bb = t.get_window_extent().transformed(ax.transData.inverted())
+    w = max(w, bb.width + 2 * pad)
+    h = max(h, bb.height + 2 * 0.9)
     ax.add_patch(FancyBboxPatch((x - w / 2, y - h / 2), w, h, boxstyle="square,pad=0", lw=LW, ec=c,
                                 fc=fill, ls=ls, zorder=3))
-    ax.text(x, y, text, ha="center", va="center", fontsize=fs, zorder=5, color=K,
-            fontweight="bold" if bold else "normal", linespacing=1.15)
+    return w
 
 
 def converter(x, y, top="=", bot="~", s=4.2):
@@ -164,25 +170,25 @@ ax.text(XM + 0.7, 23.35, "$s_t$", fontsize=6.8, va="center")
 block(XM, 19.5, 25.0, 4.2, "DRL agent (residual TD3 / DDPG)\nor fixed VSG, every 50 ms", fs=6.6, c=BLUE)
 arrow(XM, 17.4, XM, 11.6, c=BLUE)
 ax.text(XM + 0.7, 14.5, r"$(J_v, D_v, \alpha)_{\rm cmd}$", fontsize=6.6, color=BLUE, va="center")
-block(XM, 9.5, 25.0, 4.2, "Direction-aware headroom projection\n(clipping or joint scaling)", fs=6.6, c=BLUE, fill="#e8eff8")
+wp = block(XM, 9.5, 25.0, 4.2, "Direction-aware headroom projection\n(clipping or joint scaling)", fs=6.6, c=BLUE, fill="#e8eff8")
 XB_ = 30.2
-line([XM - 12.5, XB_, XB_], [9.5, 9.5, 45.6], c=BLUE)
+line([XM - wp / 2, XB_, XB_], [9.5, 9.5, 45.6], c=BLUE)
 arrow(XB_, 45.6, X_B - 2.1, 47.6, c=BLUE)
 ax.text(XB_ + 0.6, 39.5, r"$J_v, D_v, \alpha$", fontsize=6.6, color=BLUE, va="center", rotation=90)
 
 # headroom available to the VSG
-block(73, 9.5, 19.0, 4.2, "Headroom $h_{up}$, $h_{dn}$\n(SoC limits, PV reserve)", fs=6.6)
-arrow(73 - 9.5, 9.5, XM + 12.5, 9.5)
+wh = block(74, 9.5, 19.0, 4.2, "Headroom $h_{up}$, $h_{dn}$\n(SoC limits, PV reserve)", fs=6.6)
+arrow(74 - wh / 2, 9.5, XM + wp / 2, 9.5)
 
 # EMS (red)
-block(73, 19.5, 19.0, 4.2, "EMS (hourly): BESS\ndispatch, curtailment", fs=6.6, c=RED)
-arrow(73, 17.4, 73, 11.6, c=RED, ls=DASH)
-ax.text(73.7, 14.5, "$P_{b0}$", fontsize=6.8, color=RED, va="center")
-line([73, 73], [21.6, 44.5], c=RED, ls=DASH)
+block(74, 19.5, 19.0, 4.2, "EMS (hourly): BESS\ndispatch, curtailment", fs=6.6, c=RED)
+arrow(74, 17.4, 74, 11.6, c=RED, ls=DASH)
+ax.text(74.7, 14.5, "$P_{b0}$", fontsize=6.8, color=RED, va="center")
+line([74, 74], [21.6, 44.5], c=RED, ls=DASH)
 line([X_P + 4.5, X_W - 4.5], [44.5, 44.5], c=RED, ls=DASH)
 arrow(X_P + 4.5, 44.5, X_P + 2.1, 46.6, c=RED, ls=DASH)
 arrow(X_W - 4.5, 44.5, X_W - 2.1, 46.6, c=RED, ls=DASH)
-ax.text(72.3, 39.0, "curtailment", fontsize=6.2, color=RED, rotation=90, va="center", ha="right")
+ax.text(73.3, 39.0, "curtailment", fontsize=6.2, color=RED, rotation=90, va="center", ha="right")
 
 # secondary control (red): AGC to the diesel governor, set-point to the VSG
 XS = 17
