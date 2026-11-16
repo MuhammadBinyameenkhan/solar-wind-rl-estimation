@@ -78,3 +78,15 @@ internal reactances and places them at buses 1 and 18 of the published feeder:
 * No AVR on the diesel and VSG in this first version.
 * Saturation-time metric: count the time the BESS is at its limit (proposed for Study 3), or keep
   Study 2's definition for comparability.
+
+## Voltage-control parameter sources (collected 16 Nov 2026)
+| Item | Value | Source | Status |
+|---|---|---|---|
+| BESS grid-forming VSG: steady-state Q–V droop m_Q(0) | 0.05 pu/pu (range 0.01–0.05) | UNIFI Consortium, "UNIFI Specifications for Grid-forming Inverter-based Resources — Version 3", UNIFI-2026-2-1 / NLR/TP-5D00-98381, Jan. 2026, Table 7, p. 33 | sourced |
+| BESS grid-forming VSG: steady-state P–f droop m_P(0) | 0.05 pu/pu (range 0.01–0.05) | same, Table 7 | sourced (for reference; Study 3 keeps the VSG damping D_v as the action) |
+| GFM minimum reactive stiffness \|Q/V\|min | 0.5 pu/pu (range 0.5–10) | same, Table 8, p. 33–34 | sourced (acceptance check) |
+| GFM maximum equivalent inductance L_max | 0.75 pu (range 0.1–0.75) | same, Table 8 | sourced (acceptance check on X_v = 0.5 pu) |
+| PV / wind (grid-following) reactive capability, Category B | ≥ 44 % injecting and ≥ 44 % absorbing | D. Narang, "Highlights of IEEE Standard 1547-2018", NREL webinar, Oct. 2019 (rev. Nov. 2019), slide 30 | sourced (capability only) |
+| PV / wind volt-var default curve (V1–V4, Q1–Q4) and response time | — | IEEE Std 1547-2018, Clause 5.3 table (not in the highlights) | **missing** |
+| Diesel excitation system (IEEE 421.5 sample data, e.g. ST1A or AC8B) | — | IEEE Std 421.5-2016 | **missing** |
+| Diesel alternator data (kVA, Xd, X'd, X''d, T'do, H) | — | manufacturer datasheet, 2–3 MVA genset | **missing** |
