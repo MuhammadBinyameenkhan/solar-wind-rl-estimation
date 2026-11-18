@@ -31,7 +31,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from _common import base_parser, setup
+from _common import base_parser, make_env, setup
 from oracle_test import D_GRID, H_GRID
 from scipy import stats
 
@@ -39,18 +39,6 @@ from vsgrl.config import resolve_path
 from vsgrl.controllers import FixedTunedVSG, make_baseline
 from vsgrl.data.hybrid import load_processed
 from vsgrl.rollout import run_episode
-
-
-def make_env(cfg, df, split):
-    """Study 2 single-bus environment, or the Study 3 feeder environment when the config selects it."""
-    if cfg["system"].get("network", {}).get("model") == "ieee33":
-        import sys
-        root = Path(__file__).resolve().parents[1]
-        sys.path.insert(0, str(root / "study3_ieee33"))
-        from vsgrl33.env33 import Ieee33VSGEnv
-        return Ieee33VSGEnv(cfg, df, split=split, record_trace=True)
-    from vsgrl.envs import VSGEnv
-    return VSGEnv(cfg, df, split=split, record_trace=True)
 
 
 def slope_test(x, y):

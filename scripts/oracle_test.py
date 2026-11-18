@@ -18,23 +18,33 @@ import itertools
 
 import numpy as np
 import pandas as pd
-from _common import base_parser, setup
+from _common import base_parser, make_env, setup
 
 from vsgrl.controllers import FixedTunedVSG
 from vsgrl.data.hybrid import load_processed
-from vsgrl.envs import VSGEnv
 from vsgrl.rollout import run_episode
 
 H_GRID = [1.0, 3.0, 5.0, 8.0]
 D_GRID = [5.0, 10.0, 15.0, 20.0, 30.0, 50.0]
 
+def _grid_column(job):
+    """Returns of one fixed (H, D) on all validation scenarios (worker function)."""
+    cfg, H, D, alpha, n = job
+    env = make_env(cfg, load_processed(cfg), "val")
+    scs = env.sampler.fixed_set("val", n, cfg["eval"]["scenario_seed"] + 7)
+    ctrl = FixedTunedVSG(cfg, env, h=H, d=D, alpha=alpha)
+    return np.array([run_episode(env, ctrl, sc)[0]["return"] for sc in scs])
+
+
 if __name__ == "__main__":
     p = base_parser(__doc__)
     p.add_argument("--n", type=int, default=40, help="validation scenarios")
     p.add_argument("--alpha", type=float, default=0.7)
+    p.add_argument("--workers", type=int, default=1)
+    p.add_argument("--out", default=None, help="CSV with the per-scenario returns of every grid setting")
     a = p.parse_args()
     cfg = setup(a)
-    env = VSGEnv(cfg, load_processed(cfg), split="val", record_trace=True)
+    env = make_env(cfg, load_processed(cfg), "val")
     scs = env.sampler.fixed_set("val", a.n, cfg["eval"]["scenario_seed"] + 7)
 
     combos = list(itertools.product(H_GRID, D_GRID))
@@ -43,11 +53,18 @@ if __name__ == "__main__":
     for i, sc in enumerate(scs):
         env.mg.reset(sc, 1.0)
         head.append(env.mg.headroom_up() * env.mg.Sb)
-    for j, (H, D) in enumerate(combos):
-        ctrl = FixedTunedVSG(cfg, env, h=H, d=D, alpha=a.alpha)
-        for i, sc in enumerate(scs):
-            R[i, j] = run_episode(env, ctrl, sc)[0]["return"]
+    jobs = [(cfg, H, D, a.alpha, a.n) for H, D in combos]
+    if a.workers > 1:
+        import multiprocessing as mp
+        with mp.get_context("spawn").Pool(a.workers) as pool:
+            cols = pool.map(_grid_column, jobs)
+    else:
+        cols = [_grid_column(j) for j in jobs]
+    for j, ((H, D), col) in enumerate(zip(combos, cols)):
+        R[:, j] = col
         print(f"H={H:3.0f} s  D={D:4.0f} pu   mean return {R[:, j].mean():8.2f}")
+    if a.out:
+        pd.DataFrame(R, columns=[f"H{H:g}_D{D:g}" for H, D in combos]).assign(headroom_up_mw=head).to_csv(a.out, index=False)
 
     mean = R.mean(0)
     jb = int(mean.argmax())
