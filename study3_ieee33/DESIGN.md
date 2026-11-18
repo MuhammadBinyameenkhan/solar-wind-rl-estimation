@@ -108,3 +108,9 @@ V_B1max 100 pu; K_C2 0; K_I2 0; V_B2max 0 pu.
 * Figure 8 — AC rotating exciter with non-controlled rectifier:
   T_E dV_E/dt = E_FE − V_FE,  V_Emin ≤ V_E ≤ (V_FEmax − K_D I_FD)/(K_E + S_E(V_E));
   V_FE = V_E S_E(V_E) + K_E V_E + K_D I_FD;  I_N = K_C I_FD / V_E;  F_EX = f(I_N);  E_FD = V_E F_EX.
+
+### IEEE 421.5-2016 Table H.18 — AC8C sample data (Annex H.13) — USED for the diesel AVR
+R_C 0, X_C 0 pu; T_R 0 s; K_PR 80 pu; K_IR 5 pu/s; K_DR 10 pu·s; T_DR 0.02 s; V_Rmax 35, V_Rmin 0 pu; K_A 1 pu;
+T_A 0.01 s; K_P 1 pu; θ_P 0°; K_I 0 pu; X_L 0 pu; K_C1 0 pu; V_Bmax 1.25 pu; SW_1 position A; K_C 0.55 pu; K_D 1.1 pu;
+K_E 1 pu; T_E 1.2 s; V_FEMAX 6 pu; E_1 9 pu, S_E(E_1) 3; E_2 6.5 pu, S_E(E_2) 0.3.
+Not listed in the table (so not used): V_PIDmax / V_PIDmin, V_Emin; OEL / UEL / PSS inputs are not modelled (gates inactive).
