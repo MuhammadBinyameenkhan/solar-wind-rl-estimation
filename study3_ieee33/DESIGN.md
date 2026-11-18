@@ -98,3 +98,13 @@ K_PA 4 pu; K_IA 0 pu/s; V_Amax 0.996, V_Amin −0.866 pu; K_A 20 pu; T_A 0.0018 
 K_F 0.2 pu; T_F 0.01 s; K_FW 0; V_FWmax 10, V_FWmin 0 pu; S_CT 1; K_C 0; K_D 1; K_E 1 pu; T_E 1 s; V_FEmax 16, V_Emin 0 pu;
 E_1 4.167 pu, S_E(E_1) 0.001; E_2 3.125 pu, S_E(E_2) 0.01; SW_1 position A; K_C1 0; K_P 1; K_I1 0; X_L 0; θ_P 0°;
 V_B1max 100 pu; K_C2 0; K_I2 0; V_B2max 0 pu.
+
+### IEEE 421.5-2016 model structure received
+* Type AC8C block diagram (screenshot received 18 Nov 2026): V_C, V_REF, V_S summing → HV gate (UEL) → LV gate (OEL)
+  → PID K_PR + K_IR/s + sK_DR/(1+sT_DR), limits V_PIDmax/V_PIDmin → HV / LV gates → K_A/(1+sT_A), limits V_Rmax/V_Rmin
+  → × V_B (power source: SW_1 position A = potential/compound source V_E1 = |K_P V_T + j(K_I + K_P X_L) I_T|,
+  I_N1 = K_C1 V_FE / V_E1, F_EX1 = f(I_N1), V_B ≤ V_Bmax; position B = constant) → E_FE → AC rotating exciter → E_FD.
+  Decision: AC8C is used (digital PID AVR with brushless exciter); its sample-data table is still needed.
+* Figure 8 — AC rotating exciter with non-controlled rectifier:
+  T_E dV_E/dt = E_FE − V_FE,  V_Emin ≤ V_E ≤ (V_FEmax − K_D I_FD)/(K_E + S_E(V_E));
+  V_FE = V_E S_E(V_E) + K_E V_E + K_D I_FD;  I_N = K_C I_FD / V_E;  F_EX = f(I_N);  E_FD = V_E F_EX.
