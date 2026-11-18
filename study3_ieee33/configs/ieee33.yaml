@@ -10,7 +10,49 @@ system:
   wind: {rated_mw: 4.64375}            # 1.0 MW x k
   pv: {rated_mw: 3.715}                # 0.8 MW x k
   bess: {power_mw: 2.321875, energy_mwh: 9.2875}     # 0.5 MW / 2 MWh x k
-  diesel: {rated_mw: 2.321875}         # 0.5 MW x k
+  diesel:                              # author decision (18 Nov 2026), option A: the published machine as it is
+    rated_mw: 3.92                     # 4.9 MVA x 0.8 pf
+    sync_coeff_pu: 1.8448              # 1 / X'd on S_base (0.286 x 9.2875 / 4.9); weights the rotor-speed frequency
+    machine:                           # Mahtani et al., IEEE Trans. Ind. Appl. 61(3), 2025, Table II (4.9 MVA, 11 kV, 1500 rpm)
+      rated_mva: 4.9
+      xd: 2.18
+      xq: 0.950
+      xdp: 0.286
+      tdo_s: 4.0
+    avr:                               # IEEE Std 421.5-2016 Type AC8C, sample data Table H.18 (Annex H.13)
+      k_pr: 80.0
+      k_ir: 5.0
+      k_dr: 10.0
+      t_dr: 0.02
+      k_a: 1.0
+      t_a: 0.01
+      v_rmax: 35.0
+      v_rmin: 0.0
+      k_p: 1.0
+      v_bmax: 1.25
+      k_c: 0.55
+      k_d: 1.1
+      k_e: 1.0
+      t_e: 1.2
+      v_femax: 6.0
+      e1: 9.0
+      se_e1: 3.0
+      e2: 6.5
+      se_e2: 0.3
+  vsg:
+    q_droop_mq: 0.05                   # UNIFI v3 (UNIFI-2026-2-1), Table 7: m_Q(0) default 0.05 pu/pu
+    q_capability_frac: 0.44            # IEEE 1547-2018 Cat. B: 44 % of nameplate apparent power (OpenDER / NREL highlights)
+  res_volt_var:                        # IEEE 1547-2018 Cat. B volt-var defaults (EPRI OpenDER 2.2.0, AS-with std-values.csv)
+    v1: 0.92
+    q1: 0.44
+    v2: 0.98
+    q2: 0.0
+    v3: 1.02
+    q3: 0.0
+    v4: 1.08
+    q4: -0.44
+    olrt_s: 5.0
+    q_capability_frac: 0.44
   load: {peak_mw: 3.715, min_mw: 1.393125}
   disturbance:
     step_mw_range: [0.92875, 1.8575]   # 0.2-0.4 MW x k
@@ -23,6 +65,7 @@ system:
     bus_vsg: 18
     bus_res: 33                        # PV and wind
     load_model: constant_power         # as in the published case; constant_impedance is an option
+    voltage_control: true              # diesel AC8C AVR + salient machine, VSG Q-V droop, PV/wind volt-var
 eval:
   out_dir: study3_ieee33/results
 train:

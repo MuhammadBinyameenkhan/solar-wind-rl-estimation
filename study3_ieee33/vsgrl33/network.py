@@ -108,3 +108,61 @@ class DynamicNetwork:
         I_m = self.Ymm @ E + self.Ymb @ V
         S_m = E * np.conj(I_m)          # power delivered by each EMF into the network
         return V, S_m
+
+
+class DynamicNetworkVC:
+    """Phasor network with a salient-pole diesel machine (one-axis model) at bus_d and the VSG EMF behind X_v.
+
+    Diesel stator (R_s = 0) in its rotor frame (q axis at angle delta):  v_d = X_q i_q,  v_q = E'_q - X'_d i_d.
+    In the network frame (theta = delta - pi/2) the machine current into the network is
+        I = (E'_q / X'_d) e^{j theta} + j a V + j b conj(V) e^{2 j theta},
+        a = (1/X'_d + 1/X_q) / 2,  b = (1/X_q - 1/X'_d) / 2.
+    The term j a V is a constant shunt and goes into the bus matrix; the conj(V) term is solved exactly as a
+    2 x 2 real system at the machine bus, so no iteration is needed."""
+
+    def __init__(self, feeder: Feeder, V0, load_pu, bus_d, bus_v, Xdp, Xq, X_v, const_z_loads=False):
+        n = feeder.n
+        self.bd, self.bv = bus_d - 1, bus_v - 1
+        if const_z_loads:
+            y_load = load_pu * (feeder.share_p - 1j * feeder.qp) / np.abs(V0) ** 2
+        else:
+            y_load = np.zeros(n, complex)
+        self.Xdp, self.Xq = Xdp, Xq
+        self.a = 0.5 * (1.0 / Xdp + 1.0 / Xq)
+        self.b = 0.5 * (1.0 / Xq - 1.0 / Xdp)
+        Ybb = feeder.Y_lines + np.diag(y_load)
+        Ybb[self.bd, self.bd] += -1j * self.a           # current j a V into the network = shunt -j a
+        self.yv = 1.0 / (1j * X_v)
+        Ybb[self.bv, self.bv] += self.yv
+        self.Zbb = np.linalg.inv(Ybb)
+        self.z_dd = self.Zbb[self.bd, self.bd]
+        self.y_load = y_load
+        self.i_d = self.i_q = 0.0
+        self.I_d = 0j
+        self.S_vt = 0j
+
+    def solve(self, E, I_inj):
+        """E[0] = E'_q e^{j delta} (diesel), E[1] = VSG EMF phasor. Returns V and the power delivered by
+        each machine (diesel at its terminal, VSG at its EMF)."""
+        Eq, delta = abs(E[0]), np.angle(E[0])
+        e = np.exp(1j * (delta - 0.5 * np.pi))
+        rhs = I_inj.astype(complex).copy()
+        rhs[self.bd] += (Eq / self.Xdp) * e
+        rhs[self.bv] += self.yv * E[1]
+        V = self.Zbb @ rhs
+        w = V[self.bd]
+        k = self.z_dd * 1j * self.b * e * e
+        kr, ki = k.real, k.imag
+        det = (1.0 - kr) * (1.0 + kr) - ki * ki
+        x = ((1.0 + kr) * w.real + ki * w.imag) / det
+        y = (ki * w.real + (1.0 - kr) * w.imag) / det
+        V1 = x + 1j * y
+        extra = 1j * self.b * e * e * np.conj(V1)
+        V = V + self.Zbb[:, self.bd] * extra
+        I_d = (Eq / self.Xdp) * e + 1j * self.a * V[self.bd] + extra
+        Ir = I_d * np.conj(e)
+        self.i_d, self.i_q, self.I_d = Ir.real, Ir.imag, I_d
+        I_v = self.yv * (E[1] - V[self.bv])
+        self.S_vt = V[self.bv] * np.conj(I_v)               # VSG power at its terminal
+        S_m = np.array([V[self.bd] * np.conj(I_d), E[1] * np.conj(I_v)])
+        return V, S_m

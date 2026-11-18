@@ -41,7 +41,7 @@ for sc in scs3:
     fd = mg.feeder
     S_inj = np.zeros(fd.n, complex) if mg.const_z else -mg.load0 * (fd.share_p + 1j * fd.qp)
     S_inj[mg.bus_r - 1] += mg.p_w0 + mg.pv_base
-    I_inj = np.conj(S_inj / mg.V0)
+    I_inj = np.conj(S_inj / mg.V0) + mg.y_corr * mg.V0
     V, S_m = mg.net_on.solve(E, I_inj)
     worst_v = max(worst_v, np.max(np.abs(V - mg.V0)))
     worst_p = max(worst_p, abs(S_m[0].real - mg.Pe_d0), abs(S_m[1].real - mg.pb0))

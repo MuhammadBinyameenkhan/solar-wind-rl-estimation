@@ -14,7 +14,8 @@ import numpy as np
 
 from vsgrl.microgrid import Microgrid
 
-from .network import DynamicNetwork, Feeder
+from .avr import AC8C
+from .network import DynamicNetwork, DynamicNetworkVC, Feeder
 
 
 SAT_TOL = 1e-6      # pu; exceedances below this are numerical, not saturation
@@ -36,6 +37,32 @@ class Ieee33Microgrid(Microgrid):
         self.feeder_scale = nw.get("impedance_scale", 1.0)   # 1 = published feeder; ~0 = single-bus limit
         if self.feeder_scale != 1.0:
             self.feeder.Y_lines = self.feeder.Y_lines / max(self.feeder_scale, 1e-9)
+        # ---- voltage control (DESIGN.md): salient-pole diesel with IEEE 421.5 AC8C AVR, VSG Q-V droop (UNIFI v3)
+        self.vc = bool(nw.get("voltage_control", False))
+        if self.vc:
+            d = cfg["system"]["diesel"]
+            m = d["machine"]
+            to_sys = self.Sb / m["rated_mva"]                     # machine pu -> system pu (ideal step-up transformer)
+            self.Xd_s, self.Xq_s, self.Xdp_s = m["xd"] * to_sys, m["xq"] * to_sys, m["xdp"] * to_sys
+            self.Tdo = m["tdo_s"]
+            self.avr_cfg = d["avr"]
+            v = cfg["system"]["vsg"]
+            self.mQ = v["q_droop_mq"]                              # pu voltage per pu reactive power (own rating)
+            b = cfg["system"]["bess"]
+            self.S_conv = b["power_mw"] * math.sqrt(1.0 + v["q_capability_frac"] ** 2)   # MVA
+            # PV and wind inverters: IEEE 1547-2018 Category B volt-var (defaults as in EPRI OpenDER)
+            vv = cfg["system"]["res_volt_var"]
+            self.vv_V = [vv["v1"], vv["v2"], vv["v3"], vv["v4"]]
+            self.vv_Q = [vv["q1"], vv["q2"], vv["q3"], vv["q4"]]
+            self.vv_tau = vv["olrt_s"] / 2.3                       # OpenDER: first-order lag, 90 % at the OLRT
+            s_np = (cfg["system"]["pv"]["rated_mw"] + cfg["system"]["wind"]["rated_mw"]) * \
+                math.sqrt(1.0 + vv["q_capability_frac"] ** 2)
+            self.S_np_res = s_np / self.Sb                         # nameplate apparent power (system pu)
+
+    def volt_var(self, v):
+        """IEEE 1547-2018 volt-var curve: reactive power (system pu, + = injection) at voltage v (pu)."""
+        q = float(np.interp(v, self.vv_V, self.vv_Q))
+        return q * self.S_np_res
 
     # ------------------------------------------------------------------ setup
     def reset(self, sc, episode_s):
@@ -43,25 +70,68 @@ class Ieee33Microgrid(Microgrid):
         fd = self.feeder
         gen = {self.bus_v: self.pb0, self.bus_r: self.p_w0 + self.pv_base}
         V0, S1 = fd.load_flow(self.load0, gen)        # constant-power loads, diesel terminal at 1.0 pu
+        self.q_res = self.q_v0 = 0.0
+        if self.vc:
+            # steady state with the VSG on its UNIFI Q-V droop line around 1.0 pu and the PV/wind volt-var:
+            # damped fixed point on the two reactive injections, each limited to its converter capability
+            mq_sys = self.mQ * self.Sb / self.S_conv               # pu voltage per system-pu reactive power
+            q_lim = math.sqrt(max((self.S_conv / self.Sb) ** 2 - self.pb0 ** 2, 0.0))
+            for _ in range(2000):
+                q_r = self.volt_var(abs(V0[self.bus_r - 1]))
+                q_v = min(max((1.0 - abs(V0[self.bus_v - 1])) / mq_sys, -q_lim), q_lim)
+                dq = max(abs(q_r - self.q_res), abs(q_v - self.q_v0))
+                if dq < 1e-10:
+                    break
+                self.q_res += 0.2 * (q_r - self.q_res)
+                self.q_v0 += 0.2 * (q_v - self.q_v0)
+                gen = {self.bus_v: self.pb0 + 1j * self.q_v0, self.bus_r: self.p_w0 + self.pv_base + 1j * self.q_res}
+                V0, S1 = fd.load_flow(self.load0, gen)
+            else:
+                raise RuntimeError("reactive-power steady state did not converge")
         self.V0 = V0
-        self.losses0 = S1.real + sum(gen.values()) - self.load0
+        self.losses0 = S1.real + sum(float(np.real(g)) for g in gen.values()) - self.load0
         # EMFs behind the internal reactances (diesel supplies the feeder losses as well)
         I_d = np.conj(S1 / V0[self.bus_d - 1])
-        S_v = self.pb0 + 0j
+        S_v = self.pb0 + 1j * self.q_v0
         I_v = np.conj(S_v / V0[self.bus_v - 1])
         E_d = V0[self.bus_d - 1] + 1j * self.X_d * I_d
         E_v = V0[self.bus_v - 1] + 1j * self.X_v * I_v
         self.Ed_mag, self.Ev_mag = abs(E_d), abs(E_v)
         self.th_d, self.th_v = math.atan2(E_d.imag, E_d.real), math.atan2(E_v.imag, E_v.real)
-        self.net_on = DynamicNetwork(fd, V0, self.load0, self.bus_d, self.bus_v, self.X_d, self.X_v, self.const_z)
-        self.net_off = DynamicNetwork(fd, V0, self.load0, self.bus_d, self.bus_v, self.X_d, 1e9, self.const_z)
+        if self.vc:
+            self.net_on = DynamicNetworkVC(fd, V0, self.load0, self.bus_d, self.bus_v, self.Xdp_s, self.Xq_s,
+                                           self.X_v, True)
+            self.net_off = DynamicNetworkVC(fd, V0, self.load0, self.bus_d, self.bus_v, self.Xdp_s, self.Xq_s,
+                                            1e9, True)
+            V1 = V0[self.bus_d - 1]
+            I1 = np.conj(S1 / V1)
+            delta = float(np.angle(V1 + 1j * self.Xq_s * I1))        # q axis along V + j X_q I
+            e = np.exp(1j * (delta - 0.5 * math.pi))
+            i_d = float((I1 * np.conj(e)).real)
+            v_q = float((V1 * np.conj(e)).imag)
+            Eq = v_q + self.Xdp_s * i_d
+            efd = Eq + (self.Xd_s - self.Xdp_s) * i_d                 # = I_FD in steady state
+            self.avr = AC8C(self.avr_cfg)
+            self.avr.initialise(efd, efd, abs(V1))
+            self.Ed_mag, self.th_d = Eq, delta                       # Ed_mag holds E'_q in this model
+            self.efd0 = efd
+            self.Vref_v, self.Q0_v = 1.0, 0.0                        # droop line V = 1.0 - m_Q Q (own rating)
+            self.q_f, self.vv_f = self.q_v0, abs(V0[self.bus_v - 1])
+        else:
+            self.net_on = DynamicNetwork(fd, V0, self.load0, self.bus_d, self.bus_v, self.X_d, self.X_v, True)
+            self.net_off = DynamicNetwork(fd, V0, self.load0, self.bus_d, self.bus_v, self.X_d, 1e9, True)
         self.Pe_d0 = S1.real                          # diesel electrical power incl. feeder losses
         self.p_gov = self.p_d = self.Pe_d0
+        # The loads' admittance at the initial point is in the bus matrix of both networks; with constant-power
+        # loads only the difference to constant power enters as a correction current (y_corr V), which keeps
+        # the per-step fixed-point iteration contractive on the full feeder.
+        self.y_corr = 0.0 if self.const_z else self.net_on.y_load
         self.V = V0.copy()
         self.ang_v_prev = np.angle(V0[self.bus_v - 1])
         self.ang_d_prev = np.angle(V0[self.bus_d - 1])
         self.f_pll = 0.0                              # angle-based frequency at the VSG bus (PLL-like, analysis only)
         self.vmin = float(np.abs(V0).min())
+        self.vmax = float(np.abs(V0).max())
 
     # ------------------------------------------------------------- dynamics
     def advance(self, H_v, D_v, alpha, n_steps, mode="vsg", trace=None):
@@ -95,7 +165,7 @@ class Ieee33Microgrid(Microgrid):
             # --- bus current injections (positive into the network), using last step's voltages
             V = self.V
             S_inj = -(load_bus * share_s) - DLP * self.f_meas * fd.share_p
-            S_inj[ir] += self.p_w + self.pv_base + self.p_pv_s          # PV and wind at bus 33
+            S_inj[ir] += self.p_w + self.pv_base + self.p_pv_s + 1j * self.q_res   # PV and wind at bus 33
             dis, ch = self.bess_limits(self.soc)
             if droop_on:
                 pv_req = self.p_set - D_v * self.f_meas
@@ -106,11 +176,16 @@ class Ieee33Microgrid(Microgrid):
             elif not vsg_on:
                 pv_req = pb_fast = sat = 0.0
                 S_inj[iv] += self.pb0
-            I_inj = np.conj(S_inj / V)
-
-            # --- network solution
+            # --- network solution, iterated to convergence within the step (implicit in the bus voltages)
             E = np.array([self.Ed_mag * np.exp(1j * self.th_d), self.Ev_mag * np.exp(1j * self.th_v)])
-            V, S_m = net.solve(E, I_inj)
+            for _it in range(20):
+                I_inj = np.conj(S_inj / V) + self.y_corr * V
+                V_new, S_m = net.solve(E, I_inj)
+                dv = float(np.max(np.abs(V_new - V)))
+                V = V_new
+                if dv < 1e-10:
+                    break
+            self.n_it_max = max(getattr(self, "n_it_max", 0), _it + 1)
             if vsg_on:
                 P_vnet = S_m[1].real                   # BESS power delivered by the grid-forming VSG
                 pv_req = P_vnet - self.pb0 + self.p_pv_s   # total fast support asked by the network
@@ -131,6 +206,25 @@ class Ieee33Microgrid(Microgrid):
                 pb_fast = P_vnet - self.pb0
             pv = pb_fast + self.p_pv_s                 # total fast support (BESS + PV share)
             Pe_d = S_m[0].real
+            if self.vc:
+                # diesel field flux and AC8C excitation (system pu; X i products are base-independent)
+                dX = self.Xd_s - self.Xdp_s
+                ifd = self.Ed_mag + dX * net.i_d
+                efd = self.avr.step(abs(V[idd]), ifd, dt)
+                self.Ed_mag += dt * (efd - self.Ed_mag - dX * net.i_d) / self.Tdo
+                if vsg_on:
+                    # UNIFI v3 Q-V droop on the VSG terminal voltage, through the measurement filter T_f
+                    S_vt = net.S_vt
+                    self.q_f += dt * (S_vt.imag - self.q_f) / self.Tf
+                    self.vv_f += dt * (abs(V[iv]) - self.vv_f) / self.Tf
+                    v_tgt = self.Vref_v - self.mQ * (self.q_f - self.Q0_v) * Sb / self.S_conv
+                    err = v_tgt - self.vv_f
+                    q_max = math.sqrt(max((self.S_conv / Sb) ** 2 - S_vt.real ** 2, 0.0))
+                    if (S_vt.imag >= q_max and err > 0.0) or (S_vt.imag <= -q_max and err < 0.0):
+                        err = 0.0                      # converter reactive limit: stop raising / lowering the EMF
+                    self.Ev_mag += dt * err / self.Tf
+                # PV / wind volt-var (IEEE 1547-2018 Cat. B, OLRT as first-order lag)
+                self.q_res += dt * (self.volt_var(abs(V[ir])) - self.q_res) / self.vv_tau
 
             # --- angle-based frequency at the VSG bus (PLL-like; recorded for analysis, includes
             #     the phase-jump spikes at load steps that the EMT validation also showed)
@@ -210,6 +304,7 @@ class Ieee33Microgrid(Microgrid):
             self.sat = sat
             vm = np.abs(V)
             self.vmin = min(self.vmin, float(vm.min()))
+            self.vmax = max(self.vmax, float(vm.max()))
             self._k = k + 1
             self.t = t + dt
             if trace is not None and k % trace["every"] == 0:
