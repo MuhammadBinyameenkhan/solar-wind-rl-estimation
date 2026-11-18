@@ -14,7 +14,7 @@ import yaml
 from .agents.td3 import TD3Agent
 from .config import resolve_path
 from .data.hybrid import load_processed
-from .envs import VSGEnv
+from .envs import VSGEnv, make_env
 
 log = logging.getLogger(__name__)
 
@@ -43,8 +43,8 @@ def train_one(cfg: dict, algo: str, seed: int, out_dir: Path, df: pd.DataFrame |
         yaml.safe_dump(cfg, fh, sort_keys=False)
 
     df = df if df is not None else load_processed(cfg)
-    env = VSGEnv(cfg, df, split="train")
-    val_env = VSGEnv(cfg, df, split="val")
+    env = make_env(cfg, df, split="train")
+    val_env = make_env(cfg, df, split="val")
     val_set = val_env.sampler.fixed_set("val", t["eval_episodes"], cfg["eval"]["scenario_seed"] + 1)
     agent = TD3Agent(env.observation_space.shape[0], env.action_space.shape[0], t, algo=algo, seed=seed)
 

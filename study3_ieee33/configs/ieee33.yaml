@@ -76,5 +76,7 @@ env:
   action_dims: 2                       # (J_v, D_v); the PV share is not used with ieee1547_droop
 eval:
   out_dir: study3_ieee33/results
+  adaptive_base: tuned                 # adaptive rules centred on the tuned fixed VSG (same base as the RL residual)
+  controllers: [fixed, fixed_tuned, fixed_feasible, bang_bang, adaptive_rocof, adaptive_dir, fuzzy, ddpg, td3]
 train:
   out_dir: study3_ieee33/runs

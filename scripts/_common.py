@@ -28,11 +28,5 @@ def setup(args):
 
 def make_env(cfg, df, split, record_trace=True):
     """Study 2 single-bus environment, or the Study 3 feeder environment when the config selects it."""
-    if cfg["system"].get("network", {}).get("model") == "ieee33":
-        s3 = str(ROOT / "study3_ieee33")
-        if s3 not in sys.path:
-            sys.path.insert(0, s3)
-        from vsgrl33.env33 import Ieee33VSGEnv
-        return Ieee33VSGEnv(cfg, df, split=split, record_trace=record_trace)
-    from vsgrl.envs import VSGEnv
-    return VSGEnv(cfg, df, split=split, record_trace=record_trace)
+    from vsgrl.envs import make_env as _make
+    return _make(cfg, df, split=split, record_trace=record_trace)

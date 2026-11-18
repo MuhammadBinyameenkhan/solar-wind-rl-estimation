@@ -9,6 +9,14 @@ bang_bang       adaptive-inertia VSG (Alipoor, Miura & Ise, IEEE JESTPE 2015):
                 H = H_big while the frequency is moving away from nominal, H_small otherwise
 adaptive_rocof  self-adaptive VSG: H and D grow with |RoCoF| and |Δf| (common in the
                 adaptive-VSG literature; gains chosen once on the validation split)
+adaptive_dir    direction-aware self-adaptive VSG (rule of the self-adaptive inertia and damping
+                combination control, Li et al. 2017): H grows with |RoCoF| only while the frequency
+                moves away from nominal, D grows with |Δf|
+fuzzy           fuzzy-logic (H, D) scheduler: zero-order Sugeno rule base on (Δf, RoCoF) with
+                triangular N/Z/P sets; input scales = grid-code band and RoCoF limit; output gains
+                tuned on the validation split
+With eval.adaptive_base = tuned, the adaptive rules (bang_bang, adaptive_rocof, adaptive_dir, fuzzy)
+are centred on the tuned fixed VSG, i.e. the same base as the residual RL policy.
 td3 / ddpg      learned policies (see vsgrl/agents)
 """
 from __future__ import annotations
@@ -92,11 +100,19 @@ class FixedFeasibleVSG(BaseController):
         return min(self.H0, h_ub), min(self.D0, d_ub), self.a0
 
 
+def _tuned_base(ctrl, cfg):
+    """Centre an adaptive rule on the tuned fixed VSG when eval.adaptive_base == 'tuned'."""
+    if (cfg.get("eval") or {}).get("adaptive_base", "nominal") == "tuned":
+        t = (cfg["eval"].get("baseline_params") or {}).get("fixed_tuned") or {}
+        ctrl.H0, ctrl.D0, ctrl.a0 = t.get("h", ctrl.H0), t.get("d", ctrl.D0), t.get("alpha", ctrl.a0)
+
+
 class BangBangVSG(BaseController):
     name = "bang_bang"
 
     def __init__(self, cfg, env, h_big=None, h_small=None, thr_hz=0.01, **_):
         super().__init__(cfg, env)
+        _tuned_base(self, cfg)
         self.h_big = h_big or 2.0 * self.H0
         self.h_small = h_small or 0.5 * self.H0
         self.thr = thr_hz / cfg["system"]["grid_code"]["f_target_hz"]
@@ -113,6 +129,7 @@ class AdaptiveRocofVSG(BaseController):
 
     def __init__(self, cfg, env, k_h=4.0, k_d=60.0, **_):
         super().__init__(cfg, env)
+        _tuned_base(self, cfg)
         gc = cfg["system"]["grid_code"]
         self.k_h, self.k_d = k_h, k_d          # s per (Hz/s), pu per Hz
         self.rs, self.fs = gc["rocof_limit_hz_s"], gc["f_target_hz"]
@@ -121,6 +138,59 @@ class AdaptiveRocofVSG(BaseController):
         rocof_hz = abs(obs[1]) * self.rs
         df_hz = abs(obs[0]) * self.fs
         return self.H0 + self.k_h * rocof_hz, self.D0 + self.k_d * df_hz, self.a0
+
+
+class AdaptiveDirectionalVSG(BaseController):
+    """H = H0 + k_h |RoCoF| while Δf·RoCoF > 0 (frequency moving away) and |Δf| > thr, else H0;
+    D = D0 + k_d |Δf|. Units: k_h in s per Hz/s, k_d in pu per Hz."""
+    name = "adaptive_dir"
+
+    def __init__(self, cfg, env, k_h=0.0, k_d=0.0, thr_hz=0.01, **_):
+        super().__init__(cfg, env)
+        _tuned_base(self, cfg)
+        gc = cfg["system"]["grid_code"]
+        self.k_h, self.k_d, self.thr = k_h, k_d, thr_hz
+        self.rs, self.fs = gc["rocof_limit_hz_s"], gc["f_target_hz"]
+
+    def params(self, obs):
+        df_hz, rocof_hz = obs[0] * self.fs, obs[1] * self.rs
+        away = df_hz * rocof_hz > 0.0 and abs(df_hz) > self.thr
+        return self.H0 + (self.k_h * abs(rocof_hz) if away else 0.0), self.D0 + self.k_d * abs(df_hz), self.a0
+
+
+class FuzzyVSG(BaseController):
+    """Zero-order Sugeno fuzzy scheduler of (H, D).
+
+    Inputs, normalised and clipped to [-1, 1]: x = Δf / f_band, y = RoCoF / RoCoF_lim, with f_band the
+    reward band (env.reward.f_band_hz) and RoCoF_lim the grid-code limit. Each input has the three
+    triangular sets N(x) = max(0, -x), Z(x) = 1 - |x|, P(x) = max(0, x) (a partition of unity).
+    Rules (product inference, weighted-average defuzzification):
+      H: (N,N) and (P,P) frequency moving away  -> +1  (large inertia)
+         (N,P) and (P,N) frequency recovering   -> -1  (small inertia, faster return)
+         any Z                                   ->  0  (base inertia)
+      D: Δf is N or P -> +1, Δf is Z -> 0
+    H = H0 + k_h * u_H, D = D0 + k_d * u_D; k_h (s) and k_d (pu) are tuned on the validation split."""
+    name = "fuzzy"
+
+    def __init__(self, cfg, env, k_h=0.0, k_d=0.0, **_):
+        super().__init__(cfg, env)
+        _tuned_base(self, cfg)
+        gc, rw = cfg["system"]["grid_code"], cfg["env"]["reward"]
+        self.k_h, self.k_d = k_h, k_d
+        self.fs, self.rs = gc["f_target_hz"], gc["rocof_limit_hz_s"]
+        self.fb = rw.get("f_band_hz") or gc["f_target_hz"]
+
+    @staticmethod
+    def _sets(v):
+        v = float(np.clip(v, -1.0, 1.0))
+        return max(0.0, -v), 1.0 - abs(v), max(0.0, v)
+
+    def params(self, obs):
+        nx, zx, px = self._sets(obs[0] * self.fs / self.fb)
+        ny, zy, py = self._sets(obs[1])                 # obs[1] is RoCoF / RoCoF_lim
+        u_h = (nx * ny + px * py) - (nx * py + px * ny)  # weights sum to 1 over the 9 rules
+        u_d = nx + px
+        return self.H0 + self.k_h * u_h, self.D0 + self.k_d * u_d, self.a0
 
 
 class PolicyController:
@@ -137,7 +207,8 @@ class PolicyController:
         return env.step(self.agent.act(obs, noise=0.0))
 
 
-BASELINES = {c.name: c for c in [NoSupport, Droop, FixedVSG, FixedTunedVSG, FixedFeasibleVSG, BangBangVSG, AdaptiveRocofVSG]}
+BASELINES = {c.name: c for c in [NoSupport, Droop, FixedVSG, FixedTunedVSG, FixedFeasibleVSG, BangBangVSG, AdaptiveRocofVSG,
+                                AdaptiveDirectionalVSG, FuzzyVSG]}
 
 
 def make_baseline(name, cfg, env):

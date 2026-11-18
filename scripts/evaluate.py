@@ -21,7 +21,7 @@ from vsgrl.agents.td3 import TD3Agent
 from vsgrl.config import resolve_path
 from vsgrl.controllers import BASELINES, PolicyController, make_baseline
 from vsgrl.data.hybrid import load_processed
-from vsgrl.envs import VSGEnv
+from vsgrl.envs import make_env
 from vsgrl.rollout import run_episode
 from vsgrl.scenarios import scenarios_from_frame, scenarios_to_frame
 
@@ -42,7 +42,7 @@ def controllers_for(names, cfg, df, split, checkpoint="best"):
     was trained with (action mapping, projection), and the current `system` section (so
     robustness studies with --set system.* still apply)."""
     runs = resolve_path(cfg["train"]["out_dir"])
-    base_env = VSGEnv(cfg, df, split=split, record_trace=True)
+    base_env = make_env(cfg, df, split=split, record_trace=True)
     for n in names:
         if n in BASELINES:
             yield n, 0, make_baseline(n, cfg, base_env), base_env
@@ -63,7 +63,7 @@ def controllers_for(names, cfg, df, split, checkpoint="best"):
                 base = (run_cfg.get("eval", {}).get("baseline_params") or {}).get("fixed_tuned")
                 if base:
                     c.setdefault("eval", {}).setdefault("baseline_params", {})["fixed_tuned"] = base
-            env = VSGEnv(c, df, split=split, record_trace=True)
+            env = make_env(c, df, split=split, record_trace=True)
             label = n if checkpoint == "best" else f"{n}_{checkpoint}"
             yield label, seed, PolicyController(label, TD3Agent.load(ck, cfg["train"])), env
 
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     out = resolve_path(cfg["eval"]["out_dir"])
     (out / "traces").mkdir(parents=True, exist_ok=True)
     df = load_processed(cfg)
-    env = VSGEnv(cfg, df, split=a.split, record_trace=True)
+    env = make_env(cfg, df, split=a.split, record_trace=True)
 
     scen_file = out / f"scenarios_{a.split}.csv"
     n = a.n or cfg["eval"]["n_scenarios"]
