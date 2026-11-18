@@ -78,5 +78,14 @@ eval:
   out_dir: study3_ieee33/results
   adaptive_base: tuned                 # adaptive rules centred on the tuned fixed VSG (same base as the RL residual)
   controllers: [fixed, fixed_tuned, fixed_feasible, bang_bang, adaptive_rocof, adaptive_dir, fuzzy, ddpg, td3]
+  # Tuned on the 33-bus VALIDATION split (40 scenarios) with scripts/tune_baselines.py, two stages
+  # (fixed first, adaptive rules around it); every score in results/tuning/tune_val.csv.
+  # The best adaptive gains are all zero: each adaptive rule reduces to the tuned fixed VSG.
+  baseline_params:
+    fixed_tuned: {h: 3.0, d: 10.0, alpha: 0.3}     # alpha unused with res_support = ieee1547_droop
+    bang_bang: {h_big: 4.0, h_small: 3.0}
+    adaptive_rocof: {k_h: 0.0, k_d: 0.0}
+    adaptive_dir: {k_h: 0.0, k_d: 0.0}
+    fuzzy: {k_h: 0.0, k_d: 0.0}
 train:
   out_dir: study3_ieee33/runs

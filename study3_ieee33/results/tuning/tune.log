@@ -1,0 +1,243 @@
+stage 1, fixed VSG: {'h': 3.0, 'd': 10.0, 'alpha': 0.3} val return -48.186
+/usr/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+0 of 32 scores re-used, 32 to run
+  fixed_tuned|alpha=0.3,d=5,h=1: val return -80.624
+  fixed_tuned|alpha=0.3,d=10,h=1: val return -56.014
+  fixed_tuned|alpha=0.3,d=15,h=1: val return -56.619
+  fixed_tuned|alpha=0.3,d=20,h=1: val return -63.691
+  fixed_tuned|alpha=0.3,d=25,h=1: val return -72.302
+  fixed_tuned|alpha=0.3,d=30,h=1: val return -80.871
+  fixed_tuned|alpha=0.3,d=40,h=1: val return -96.393
+  fixed_tuned|alpha=0.3,d=50,h=1: val return -109.549
+  fixed_tuned|alpha=0.3,d=5,h=3: val return -60.743
+  fixed_tuned|alpha=0.3,d=10,h=3: val return -48.186
+  fixed_tuned|alpha=0.3,d=15,h=3: val return -52.485
+  fixed_tuned|alpha=0.3,d=20,h=3: val return -61.206
+  fixed_tuned|alpha=0.3,d=25,h=3: val return -70.664
+  fixed_tuned|alpha=0.3,d=30,h=3: val return -79.746
+  fixed_tuned|alpha=0.3,d=40,h=3: val return -95.775
+  fixed_tuned|alpha=0.3,d=50,h=3: val return -109.200
+  fixed_tuned|alpha=0.3,d=5,h=5: val return -59.521
+  fixed_tuned|alpha=0.3,d=10,h=5: val return -49.299
+  fixed_tuned|alpha=0.3,d=15,h=5: val return -53.891
+  fixed_tuned|alpha=0.3,d=20,h=5: val return -62.498
+  fixed_tuned|alpha=0.3,d=25,h=5: val return -71.792
+  fixed_tuned|alpha=0.3,d=30,h=5: val return -80.696
+  fixed_tuned|alpha=0.3,d=40,h=5: val return -96.480
+  fixed_tuned|alpha=0.3,d=50,h=5: val return -109.673
+  fixed_tuned|alpha=0.3,d=5,h=8: val return -62.478
+  fixed_tuned|alpha=0.3,d=10,h=8: val return -53.367
+  fixed_tuned|alpha=0.3,d=15,h=8: val return -57.683
+  fixed_tuned|alpha=0.3,d=20,h=8: val return -65.783
+  fixed_tuned|alpha=0.3,d=25,h=8: val return -74.593
+  fixed_tuned|alpha=0.3,d=30,h=8: val return -83.089
+  fixed_tuned|alpha=0.3,d=40,h=8: val return -98.250
+  fixed_tuned|alpha=0.3,d=50,h=8: val return -110.972
+stage 1, fixed VSG: {'h': 3.0, 'd': 10.0, 'alpha': 0.3} val return -48.186
+0 of 73 scores re-used, 73 to run
+  bang_bang|h_big=4,h_small=0.5: val return -49.639
+  bang_bang|h_big=4,h_small=1.5: val return -48.772
+  bang_bang|h_big=4,h_small=3: val return -48.360
+  bang_bang|h_big=6,h_small=0.5: val return -50.505
+  bang_bang|h_big=6,h_small=1.5: val return -49.754
+  bang_bang|h_big=6,h_small=3: val return -49.496
+  bang_bang|h_big=8,h_small=0.5: val return -51.346
+  bang_bang|h_big=8,h_small=1.5: val return -50.767
+  bang_bang|h_big=8,h_small=3: val return -50.692
+  adaptive_rocof|k_d=0,k_h=0: val return -48.186
+  adaptive_rocof|k_d=30,k_h=0: val return -54.570
+  adaptive_rocof|k_d=60,k_h=0: val return -63.302
+  adaptive_rocof|k_d=120,k_h=0: val return -77.145
+/usr/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+32 of 32 scores re-used, 0 to run
+stage 1, fixed VSG: {'h': 3.0, 'd': 10.0, 'alpha': 0.3} val return -48.186
+13 of 73 scores re-used, 60 to run
+  adaptive_rocof|k_d=240,k_h=0: val return -94.211
+  adaptive_rocof|k_d=480,k_h=0: val return -105.620
+  adaptive_rocof|k_d=0,k_h=2: val return -48.599
+  adaptive_rocof|k_d=30,k_h=2: val return -55.232
+  adaptive_rocof|k_d=60,k_h=2: val return -63.840
+  adaptive_rocof|k_d=120,k_h=2: val return -77.442
+  adaptive_rocof|k_d=240,k_h=2: val return -94.495
+  adaptive_rocof|k_d=480,k_h=2: val return -105.903
+  adaptive_rocof|k_d=0,k_h=4: val return -49.298
+  adaptive_rocof|k_d=30,k_h=4: val return -55.946
+  adaptive_rocof|k_d=60,k_h=4: val return -64.421
+  adaptive_rocof|k_d=120,k_h=4: val return -77.830
+  adaptive_rocof|k_d=240,k_h=4: val return -94.827
+  adaptive_rocof|k_d=480,k_h=4: val return -106.240
+  adaptive_rocof|k_d=0,k_h=8: val return -50.074
+  adaptive_rocof|k_d=30,k_h=8: val return -56.613
+  adaptive_rocof|k_d=60,k_h=8: val return -64.975
+  adaptive_rocof|k_d=120,k_h=8: val return -78.285
+  adaptive_rocof|k_d=240,k_h=8: val return -95.116
+  adaptive_rocof|k_d=480,k_h=8: val return -106.494
+  adaptive_dir|k_d=0,k_h=0: val return -48.186
+  adaptive_dir|k_d=30,k_h=0: val return -54.570
+  adaptive_dir|k_d=60,k_h=0: val return -63.302
+  adaptive_dir|k_d=120,k_h=0: val return -77.145
+  adaptive_dir|k_d=240,k_h=0: val return -94.211
+  adaptive_dir|k_d=0,k_h=2: val return -48.561
+  adaptive_dir|k_d=30,k_h=2: val return -55.261
+  adaptive_dir|k_d=60,k_h=2: val return -63.860
+  adaptive_dir|k_d=120,k_h=2: val return -77.467
+  adaptive_dir|k_d=240,k_h=2: val return -94.556
+  adaptive_dir|k_d=0,k_h=4: val return -49.193
+  adaptive_dir|k_d=30,k_h=4: val return -55.953
+  adaptive_dir|k_d=60,k_h=4: val return -64.425
+  adaptive_dir|k_d=120,k_h=4: val return -77.841
+  adaptive_dir|k_d=240,k_h=4: val return -94.896
+  adaptive_dir|k_d=0,k_h=8: val return -49.896
+  adaptive_dir|k_d=30,k_h=8: val return -56.607
+  adaptive_dir|k_d=60,k_h=8: val return -64.942
+  adaptive_dir|k_d=120,k_h=8: val return -78.242
+  adaptive_dir|k_d=240,k_h=8: val return -95.171
+  fuzzy|k_d=0,k_h=0: val return -48.186
+  fuzzy|k_d=5,k_h=0: val return -51.546
+  fuzzy|k_d=10,k_h=0: val return -58.323
+  fuzzy|k_d=20,k_h=0: val return -71.611
+  fuzzy|k_d=40,k_h=0: val return -89.705
+  fuzzy|k_d=0,k_h=1: val return -48.218
+  fuzzy|k_d=5,k_h=1: val return -51.813
+  fuzzy|k_d=10,k_h=1: val return -58.612
+  fuzzy|k_d=20,k_h=1: val return -71.847
+  fuzzy|k_d=40,k_h=1: val return -89.802
+  fuzzy|k_d=0,k_h=2: val return -48.331
+  fuzzy|k_d=5,k_h=2: val return -52.090
+  fuzzy|k_d=10,k_h=2: val return -58.890
+  fuzzy|k_d=20,k_h=2: val return -72.057
+  fuzzy|k_d=40,k_h=2: val return -89.921
+  fuzzy|k_d=0,k_h=4: val return -48.650
+  fuzzy|k_d=5,k_h=4: val return -52.629
+  fuzzy|k_d=10,k_h=4: val return -59.407
+  fuzzy|k_d=20,k_h=4: val return -72.436
+  fuzzy|k_d=40,k_h=4: val return -90.149
+    controller     h      d  alpha  val_return  val_return_sd  nadir_hz  collapse_rate  h_big  h_small   k_h     k_d
+   fixed_tuned 1.000  5.000  0.300     -80.624         36.084     0.810          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 1.000 10.000  0.300     -56.014         24.186     0.568          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 1.000 15.000  0.300     -56.619         23.190     0.444          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 1.000 20.000  0.300     -63.691         25.158     0.373          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 1.000 25.000  0.300     -72.302         28.051     0.327          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 1.000 30.000  0.300     -80.871         31.154     0.295          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 1.000 40.000  0.300     -96.393         37.040     0.254          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 1.000 50.000  0.300    -109.549         42.082     0.228          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 3.000  5.000  0.300     -60.743         30.693     0.616          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 3.000 10.000  0.300     -48.186         22.821     0.473          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 3.000 15.000  0.300     -52.485         22.751     0.382          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 3.000 20.000  0.300     -61.206         25.061     0.317          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 3.000 25.000  0.300     -70.664         28.087     0.269          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 3.000 30.000  0.300     -79.746         31.209     0.235          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 3.000 40.000  0.300     -95.775         37.045     0.208          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 3.000 50.000  0.300    -109.200         42.103     0.195          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 5.000  5.000  0.300     -59.521         30.269     0.560          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 5.000 10.000  0.300     -49.299         23.085     0.428          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 5.000 15.000  0.300     -53.891         23.048     0.352          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 5.000 20.000  0.300     -62.498         25.270     0.307          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 5.000 25.000  0.300     -71.792         28.226     0.271          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 5.000 30.000  0.300     -80.696         31.325     0.242          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 5.000 40.000  0.300     -96.480         37.113     0.202          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 5.000 50.000  0.300    -109.673         42.079     0.178          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 8.000  5.000  0.300     -62.478         31.420     0.497          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 8.000 10.000  0.300     -53.367         24.250     0.399          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 8.000 15.000  0.300     -57.683         23.987     0.334          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 8.000 20.000  0.300     -65.783         26.007     0.288          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 8.000 25.000  0.300     -74.593         28.783     0.257          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 8.000 30.000  0.300     -83.089         31.728     0.236          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 8.000 40.000  0.300     -98.250         37.316     0.205          0.000    NaN      NaN   NaN     NaN
+   fixed_tuned 8.000 50.000  0.300    -110.972         42.090     0.183          0.000    NaN      NaN   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -49.639         23.025     0.455          0.000  4.000    0.500   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -48.772         22.732     0.450          0.000  4.000    1.500   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -48.360         22.808     0.448          0.000  4.000    3.000   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -50.505         23.155     0.437          0.000  6.000    0.500   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -49.754         22.912     0.428          0.000  6.000    1.500   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -49.496         23.109     0.423          0.000  6.000    3.000   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -51.346         23.212     0.438          0.000  8.000    0.500   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -50.767         23.223     0.428          0.000  8.000    1.500   NaN     NaN
+     bang_bang   NaN    NaN    NaN     -50.692         23.474     0.421          0.000  8.000    3.000   NaN     NaN
+adaptive_rocof   NaN    NaN    NaN     -48.186         22.821     0.473          0.000    NaN      NaN 0.000   0.000
+adaptive_rocof   NaN    NaN    NaN     -54.570         24.429     0.347          0.000    NaN      NaN 0.000  30.000
+adaptive_rocof   NaN    NaN    NaN     -63.302         27.881     0.287          0.000    NaN      NaN 0.000  60.000
+adaptive_rocof   NaN    NaN    NaN     -77.145         33.436     0.253          0.000    NaN      NaN 0.000 120.000
+adaptive_rocof   NaN    NaN    NaN     -94.211         39.657     0.234          0.000    NaN      NaN 0.000 240.000
+adaptive_rocof   NaN    NaN    NaN    -105.620         40.986     0.223          0.000    NaN      NaN 0.000 480.000
+adaptive_rocof   NaN    NaN    NaN     -48.599         22.932     0.448          0.000    NaN      NaN 2.000   0.000
+adaptive_rocof   NaN    NaN    NaN     -55.232         24.681     0.350          0.000    NaN      NaN 2.000  30.000
+adaptive_rocof   NaN    NaN    NaN     -63.840         28.049     0.291          0.000    NaN      NaN 2.000  60.000
+adaptive_rocof   NaN    NaN    NaN     -77.442         33.483     0.237          0.000    NaN      NaN 2.000 120.000
+adaptive_rocof   NaN    NaN    NaN     -94.495         39.712     0.218          0.000    NaN      NaN 2.000 240.000
+adaptive_rocof   NaN    NaN    NaN    -105.903         41.088     0.209          0.000    NaN      NaN 2.000 480.000
+adaptive_rocof   NaN    NaN    NaN     -49.298         23.214     0.435          0.000    NaN      NaN 4.000   0.000
+adaptive_rocof   NaN    NaN    NaN     -55.946         24.970     0.352          0.000    NaN      NaN 4.000  30.000
+adaptive_rocof   NaN    NaN    NaN     -64.421         28.260     0.300          0.000    NaN      NaN 4.000  60.000
+adaptive_rocof   NaN    NaN    NaN     -77.830         33.579     0.239          0.000    NaN      NaN 4.000 120.000
+adaptive_rocof   NaN    NaN    NaN     -94.827         39.849     0.208          0.000    NaN      NaN 4.000 240.000
+adaptive_rocof   NaN    NaN    NaN    -106.240         41.214     0.200          0.000    NaN      NaN 4.000 480.000
+adaptive_rocof   NaN    NaN    NaN     -50.074         23.308     0.427          0.000    NaN      NaN 8.000   0.000
+adaptive_rocof   NaN    NaN    NaN     -56.613         24.987     0.348          0.000    NaN      NaN 8.000  30.000
+adaptive_rocof   NaN    NaN    NaN     -64.975         28.274     0.302          0.000    NaN      NaN 8.000  60.000
+adaptive_rocof   NaN    NaN    NaN     -78.285         33.604     0.246          0.000    NaN      NaN 8.000 120.000
+adaptive_rocof   NaN    NaN    NaN     -95.116         39.785     0.206          0.000    NaN      NaN 8.000 240.000
+adaptive_rocof   NaN    NaN    NaN    -106.494         41.179     0.196          0.000    NaN      NaN 8.000 480.000
+  adaptive_dir   NaN    NaN    NaN     -48.186         22.821     0.473          0.000    NaN      NaN 0.000   0.000
+  adaptive_dir   NaN    NaN    NaN     -54.570         24.429     0.347          0.000    NaN      NaN 0.000  30.000
+  adaptive_dir   NaN    NaN    NaN     -63.302         27.881     0.287          0.000    NaN      NaN 0.000  60.000
+  adaptive_dir   NaN    NaN    NaN     -77.145         33.436     0.253          0.000    NaN      NaN 0.000 120.000
+  adaptive_dir   NaN    NaN    NaN     -94.211         39.657     0.234          0.000    NaN      NaN 0.000 240.000
+  adaptive_dir   NaN    NaN    NaN     -48.561         22.877     0.448          0.000    NaN      NaN 2.000   0.000
+  adaptive_dir   NaN    NaN    NaN     -55.261         24.683     0.350          0.000    NaN      NaN 2.000  30.000
+  adaptive_dir   NaN    NaN    NaN     -63.860         28.057     0.290          0.000    NaN      NaN 2.000  60.000
+  adaptive_dir   NaN    NaN    NaN     -77.467         33.507     0.236          0.000    NaN      NaN 2.000 120.000
+  adaptive_dir   NaN    NaN    NaN     -94.556         39.774     0.219          0.000    NaN      NaN 2.000 240.000
+  adaptive_dir   NaN    NaN    NaN     -49.193         23.094     0.435          0.000    NaN      NaN 4.000   0.000
+  adaptive_dir   NaN    NaN    NaN     -55.953         24.925     0.351          0.000    NaN      NaN 4.000  30.000
+  adaptive_dir   NaN    NaN    NaN     -64.425         28.240     0.298          0.000    NaN      NaN 4.000  60.000
+  adaptive_dir   NaN    NaN    NaN     -77.841         33.599     0.236          0.000    NaN      NaN 4.000 120.000
+  adaptive_dir   NaN    NaN    NaN     -94.896         39.935     0.209          0.000    NaN      NaN 4.000 240.000
+  adaptive_dir   NaN    NaN    NaN     -49.896         23.178     0.428          0.000    NaN      NaN 8.000   0.000
+  adaptive_dir   NaN    NaN    NaN     -56.607         24.990     0.349          0.000    NaN      NaN 8.000  30.000
+  adaptive_dir   NaN    NaN    NaN     -64.942         28.283     0.302          0.000    NaN      NaN 8.000  60.000
+  adaptive_dir   NaN    NaN    NaN     -78.242         33.632     0.242          0.000    NaN      NaN 8.000 120.000
+  adaptive_dir   NaN    NaN    NaN     -95.171         39.920     0.206          0.000    NaN      NaN 8.000 240.000
+         fuzzy   NaN    NaN    NaN     -48.186         22.821     0.473          0.000    NaN      NaN 0.000   0.000
+         fuzzy   NaN    NaN    NaN     -51.546         22.841     0.393          0.000    NaN      NaN 0.000   5.000
+         fuzzy   NaN    NaN    NaN     -58.323         24.990     0.332          0.000    NaN      NaN 0.000  10.000
+         fuzzy   NaN    NaN    NaN     -71.611         30.368     0.264          0.000    NaN      NaN 0.000  20.000
+         fuzzy   NaN    NaN    NaN     -89.705         38.125     0.238          0.000    NaN      NaN 0.000  40.000
+         fuzzy   NaN    NaN    NaN     -48.218         22.776     0.462          0.000    NaN      NaN 1.000   0.000
+         fuzzy   NaN    NaN    NaN     -51.813         22.950     0.388          0.000    NaN      NaN 1.000   5.000
+         fuzzy   NaN    NaN    NaN     -58.612         25.116     0.331          0.000    NaN      NaN 1.000  10.000
+         fuzzy   NaN    NaN    NaN     -71.847         30.481     0.258          0.000    NaN      NaN 1.000  20.000
+         fuzzy   NaN    NaN    NaN     -89.802         38.152     0.234          0.000    NaN      NaN 1.000  40.000
+         fuzzy   NaN    NaN    NaN     -48.331         22.786     0.453          0.000    NaN      NaN 2.000   0.000
+         fuzzy   NaN    NaN    NaN     -52.090         23.060     0.385          0.000    NaN      NaN 2.000   5.000
+         fuzzy   NaN    NaN    NaN     -58.890         25.236     0.330          0.000    NaN      NaN 2.000  10.000
+         fuzzy   NaN    NaN    NaN     -72.057         30.579     0.255          0.000    NaN      NaN 2.000  20.000
+         fuzzy   NaN    NaN    NaN     -89.921         38.196     0.231          0.000    NaN      NaN 2.000  40.000
+         fuzzy   NaN    NaN    NaN     -48.650         22.858     0.440          0.000    NaN      NaN 4.000   0.000
+         fuzzy   NaN    NaN    NaN     -52.629         23.274     0.379          0.000    NaN      NaN 4.000   5.000
+         fuzzy   NaN    NaN    NaN     -59.407         25.444     0.329          0.000    NaN      NaN 4.000  10.000
+         fuzzy   NaN    NaN    NaN     -72.436         30.736     0.254          0.000    NaN      NaN 4.000  20.000
+         fuzzy   NaN    NaN    NaN     -90.149         38.301     0.226          0.000    NaN      NaN 4.000  40.000
+wrote /home/user/solar-wind-rl-estimation/study3_ieee33/results/tuning/tune_val.csv
+
+# paste into the config under eval:
+baseline_params:
+  fixed_tuned:
+    h: 3.0
+    d: 10.0
+    alpha: 0.3
+  bang_bang:
+    h_big: 4.0
+    h_small: 3.0
+  adaptive_rocof:
+    k_h: 0.0
+    k_d: 0.0
+  adaptive_dir:
+    k_h: 0.0
+    k_d: 0.0
+  fuzzy:
+    k_h: 0.0
+    k_d: 0.0
+
