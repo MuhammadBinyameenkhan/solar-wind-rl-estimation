@@ -88,5 +88,13 @@ internal reactances and places them at buses 1 and 18 of the published feeder:
 | GFM maximum equivalent inductance L_max | 0.75 pu (range 0.1–0.75) | same, Table 8 | sourced (acceptance check on X_v = 0.5 pu) |
 | PV / wind (grid-following) reactive capability, Category B | ≥ 44 % injecting and ≥ 44 % absorbing | D. Narang, "Highlights of IEEE Standard 1547-2018", NREL webinar, Oct. 2019 (rev. Nov. 2019), slide 30 | sourced (capability only) |
 | PV / wind volt-var default curve (V1–V4, Q1–Q4) and response time | — | IEEE Std 1547-2018, Clause 5.3 table (not in the highlights) | **missing** |
-| Diesel excitation system (IEEE 421.5 sample data, e.g. ST1A or AC8B) | — | IEEE Std 421.5-2016 | **missing** |
-| Diesel alternator data (kVA, Xd, X'd, X''d, T'do, H) | — | manufacturer datasheet, 2–3 MVA genset | **missing** |
+| Diesel excitation system | Type AC9C, sample data set 1 (thyristor bridge supplying the exciter field), values below | IEEE Std 421.5-2016, Annex H.14, Table H.19, p. 152 | sourced; block diagram (Figure 17) still needed |
+| Diesel alternator data | 4900 kVA, pf 0.8, 11 kV, 50 Hz, 1500 rpm; Xd 2.18, Xq 0.950, X'd 0.286, X''d 0.190, X''q 0.255 pu; T'do 4.0 s, T'd 0.59 s, T''d 14 ms | K. Mahtani, J. Muñoz-Antón, S. B. Lee, C. A. Platero, "Online diagnostics of brushless synchronous machine exciter field winding through temperature and resistance measurement," IEEE Trans. Ind. Appl., vol. 61, no. 3, pp. 3774–, May/Jun. 2025, Table II | sourced (author decision 18 Nov 2026: option A, diesel rated 4.9 MVA / 3.92 MW at 0.8 pf) |
+| Diesel inertia constant H | 2 s (own base), as in Study 2 | not given in the machine source | to confirm |
+
+### IEEE 421.5-2016 Table H.19 — AC9C sample data, set 1 (p. 152)
+R_C 0, X_C 0 pu; T_R 0.01 s; K_PR 10 pu; K_IR 10 pu/s; K_DR 0 pu·s; T_DR 0.01 s; V_PIDmax 1.6, V_PIDmin 0 pu;
+K_PA 4 pu; K_IA 0 pu/s; V_Amax 0.996, V_Amin −0.866 pu; K_A 20 pu; T_A 0.0018 s; V_Rmax 19.92, V_Rmin −17.32 pu;
+K_F 0.2 pu; T_F 0.01 s; K_FW 0; V_FWmax 10, V_FWmin 0 pu; S_CT 1; K_C 0; K_D 1; K_E 1 pu; T_E 1 s; V_FEmax 16, V_Emin 0 pu;
+E_1 4.167 pu, S_E(E_1) 0.001; E_2 3.125 pu, S_E(E_2) 0.01; SW_1 position A; K_C1 0; K_P 1; K_I1 0; X_L 0; θ_P 0°;
+V_B1max 100 pu; K_C2 0; K_I2 0; V_B2max 0 pu.
