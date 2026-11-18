@@ -39,6 +39,17 @@ class Ieee33Microgrid(Microgrid):
             self.feeder.Y_lines = self.feeder.Y_lines / max(self.feeder_scale, 1e-9)
         # ---- voltage control (DESIGN.md): salient-pole diesel with IEEE 421.5 AC8C AVR, VSG Q-V droop (UNIFI v3)
         self.vc = bool(nw.get("voltage_control", False))
+        # PV / wind active-power support: "vsg_share" = Study 2 PV share alpha (PV in the virtual unit);
+        # "ieee1547_droop" = IEEE 1547-2018 frequency droop at the RES inverters, independent of the VSG
+        # (author decision 18 Nov 2026; on the feeder the alpha loop between buses 33 and 18 is unstable).
+        self.res_droop = nw.get("res_support", "vsg_share") == "ieee1547_droop"
+        if self.res_droop:
+            fdp = cfg["system"]["res_freq_droop"]
+            self.fd_db = fdp["deadband_hz"] / fdp["standard_f_nom_hz"]     # per-unit deadband
+            self.fd_k = fdp["droop"]
+            self.fd_tau = fdp["olrt_s"] / 2.3
+            self.P_pv_np = cfg["system"]["pv"]["rated_mw"] / self.Sb
+            self.P_w_np = cfg["system"]["wind"]["rated_mw"] / self.Sb
         if self.vc:
             d = cfg["system"]["diesel"]
             m = d["machine"]
@@ -58,6 +69,19 @@ class Ieee33Microgrid(Microgrid):
             s_np = (cfg["system"]["pv"]["rated_mw"] + cfg["system"]["wind"]["rated_mw"]) * \
                 math.sqrt(1.0 + vv["q_capability_frac"] ** 2)
             self.S_np_res = s_np / self.Sb                         # nameplate apparent power (system pu)
+
+    def headroom_up(self):
+        """Upward reserve behind the VSG commitments: with RES on their own droop, the BESS only."""
+        if self.res_droop:
+            dis, _ = self.bess_limits(self.soc)
+            return max(dis - self.pb0, 0.0)
+        return super().headroom_up()
+
+    def headroom_down(self):
+        if self.res_droop:
+            _, ch = self.bess_limits(self.soc)
+            return max(ch + self.pb0, 0.0)
+        return super().headroom_down()
 
     def volt_var(self, v):
         """IEEE 1547-2018 volt-var curve: reactive power (system pu, + = injection) at voltage v (pu)."""
@@ -127,6 +151,7 @@ class Ieee33Microgrid(Microgrid):
         # the per-step fixed-point iteration contractive on the full feeder.
         self.y_corr = 0.0 if self.const_z else self.net_on.y_load
         self.V = V0.copy()
+        self.p_w_s = 0.0                              # wind frequency-droop adjustment (IEEE 1547 mode)
         self.ang_v_prev = np.angle(V0[self.bus_v - 1])
         self.ang_d_prev = np.angle(V0[self.bus_d - 1])
         self.f_pll = 0.0                              # angle-based frequency at the VSG bus (PLL-like, analysis only)
@@ -165,7 +190,7 @@ class Ieee33Microgrid(Microgrid):
             # --- bus current injections (positive into the network), using last step's voltages
             V = self.V
             S_inj = -(load_bus * share_s) - DLP * self.f_meas * fd.share_p
-            S_inj[ir] += self.p_w + self.pv_base + self.p_pv_s + 1j * self.q_res   # PV and wind at bus 33
+            S_inj[ir] += self.p_w + self.pv_base + self.p_pv_s + self.p_w_s + 1j * self.q_res   # PV and wind at bus 33
             dis, ch = self.bess_limits(self.soc)
             if droop_on:
                 pv_req = self.p_set - D_v * self.f_meas
@@ -188,7 +213,7 @@ class Ieee33Microgrid(Microgrid):
             self.n_it_max = max(getattr(self, "n_it_max", 0), _it + 1)
             if vsg_on:
                 P_vnet = S_m[1].real                   # BESS power delivered by the grid-forming VSG
-                pv_req = P_vnet - self.pb0 + self.p_pv_s   # total fast support asked by the network
+                pv_req = P_vnet - self.pb0 + (0.0 if self.res_droop else self.p_pv_s)   # fast support asked of the VSG unit
                 P_lim = min(max(P_vnet, -ch), dis)
                 sat = abs(P_vnet - P_lim)
                 if sat > SAT_TOL:                      # current limit: move the virtual rotor to the limit
@@ -204,7 +229,7 @@ class Ieee33Microgrid(Microgrid):
                 else:
                     sat = 0.0
                 pb_fast = P_vnet - self.pb0
-            pv = pb_fast + self.p_pv_s                 # total fast support (BESS + PV share)
+            pv = pb_fast + (0.0 if self.res_droop else self.p_pv_s)   # fast support of the VSG unit
             Pe_d = S_m[0].real
             if self.vc:
                 # diesel field flux and AC8C excitation (system pu; X i products are base-independent)
@@ -220,7 +245,7 @@ class Ieee33Microgrid(Microgrid):
                     v_tgt = self.Vref_v - self.mQ * (self.q_f - self.Q0_v) * Sb / self.S_conv
                     err = v_tgt - self.vv_f
                     q_max = math.sqrt(max((self.S_conv / Sb) ** 2 - S_vt.real ** 2, 0.0))
-                    if (S_vt.imag >= q_max and err > 0.0) or (S_vt.imag <= -q_max and err < 0.0):
+                    if (S_vt.imag >= q_max - 1e-9 and err > 0.0) or (S_vt.imag <= -q_max + 1e-9 and err < 0.0):
                         err = 0.0                      # converter reactive limit: stop raising / lowering the EMF
                     self.Ev_mag += dt * err / self.Tf
                 # PV / wind volt-var (IEEE 1547-2018 Cat. B, OLRT as first-order lag)
@@ -246,15 +271,28 @@ class Ieee33Microgrid(Microgrid):
                     self.dw_v += dt * (self.p_set - pv - D_v * self.dw_v) / H2v
                     self.dw_b = (self.Kd * self.dw_d + self.Ks * self.dw_v) / (self.Kd + self.Ks)
                 self.th_v += dt * w0 * self.dw_v
-                pv_tgt = min(max(alpha * pv_req, -self.pv_base), self.h_pv)
-                self.p_pv_s += dt * (pv_tgt - self.p_pv_s) / self.Tpv
+                if not self.res_droop:
+                    pv_tgt = min(max(alpha * pv_req, -self.pv_base), self.h_pv)
+                    self.p_pv_s += dt * (pv_tgt - self.p_pv_s) / self.Tpv
             else:
                 self.dw_v = self.dw_b = self.dw_d
-                if droop_on:
+                if self.res_droop:
+                    pass
+                elif droop_on:
                     pv_tgt = min(max(alpha * pv_req, -self.pv_base), self.h_pv)
                     self.p_pv_s += dt * (pv_tgt - self.p_pv_s) / self.Tpv
                 else:
                     self.p_pv_s = 0.0
+            if self.res_droop:
+                # IEEE 1547-2018 frequency droop (OpenDER defaults): deadband, 5 % droop on nameplate power,
+                # OLRT as first-order lag; PV up to its de-loaded reserve, wind (at MPP) only downwards
+                fm = self.f_meas
+                dp = (-self.fd_db - fm) / self.fd_k if fm < -self.fd_db else \
+                    (-(fm - self.fd_db) / self.fd_k if fm > self.fd_db else 0.0)
+                pv_t = min(max(dp * self.P_pv_np, -self.pv_base), self.h_pv)
+                w_t = min(max(dp * self.P_w_np, -self.p_w), 0.0)
+                self.p_pv_s += dt * (pv_t - self.p_pv_s) / self.fd_tau
+                self.p_w_s += dt * (w_t - self.p_w_s) / self.fd_tau
             self.p_vsg = pv
             self.V = V
 

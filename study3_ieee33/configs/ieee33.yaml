@@ -42,6 +42,11 @@ system:
   vsg:
     q_droop_mq: 0.05                   # UNIFI v3 (UNIFI-2026-2-1), Table 7: m_Q(0) default 0.05 pu/pu
     q_capability_frac: 0.44            # IEEE 1547-2018 Cat. B: 44 % of nameplate apparent power (OpenDER / NREL highlights)
+  res_freq_droop:                      # IEEE 1547-2018 Cat. III frequency-droop defaults (EPRI OpenDER 2.2.0)
+    deadband_hz: 0.036                 # PF_DBUF / PF_DBOF at the standard's 60 Hz -> applied as 0.06 % of nominal
+    standard_f_nom_hz: 60.0
+    droop: 0.05                        # PF_KUF / PF_KOF
+    olrt_s: 5.0                        # PF_OLRT
   res_volt_var:                        # IEEE 1547-2018 Cat. B volt-var defaults (EPRI OpenDER 2.2.0, AS-with std-values.csv)
     v1: 0.92
     q1: 0.44
@@ -66,6 +71,9 @@ system:
     bus_res: 33                        # PV and wind
     load_model: constant_power         # as in the published case; constant_impedance is an option
     voltage_control: true              # diesel AC8C AVR + salient machine, VSG Q-V droop, PV/wind volt-var
+    res_support: ieee1547_droop        # author decision 18 Nov 2026: PV/wind frequency droop, not the VSG PV share
+env:
+  action_dims: 2                       # (J_v, D_v); the PV share is not used with ieee1547_droop
 eval:
   out_dir: study3_ieee33/results
 train:

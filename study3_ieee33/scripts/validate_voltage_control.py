@@ -68,6 +68,8 @@ for sc in scs[:3]:
     if hasattr(sc0, "dist_mw"):
         sc0.dist_mw = 0.0
     m, tr = run_episode(envq, make_baseline("fixed_tuned", cfg_q, envq), sc0)
+    late = float(np.max(np.abs(tr.df_hz.values[-500:])))
+    print(f"  equilibrium sc: max|df| {np.max(np.abs(tr.df_hz.values)):.1e} Hz, last 5 s {late:.1e} Hz")
     drift = max(drift, float(np.max(np.abs(tr.df_hz.values))))
 print(f"V2b equilibrium (3 scenarios, no events/noise): max |df| = {drift:.2e} Hz  ->", "PASS" if drift < 1e-6 else "CHECK")
 
