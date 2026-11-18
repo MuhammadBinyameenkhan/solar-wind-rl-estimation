@@ -140,6 +140,28 @@ class TD3Agent:
                     "obs_dim": self.obs_dim, "act_dim": self.act_dim, "hidden": self.hidden,
                     "algo": self.algo}, path)
 
+    # ------------------------------------------------------------- full state (resume training)
+    def state(self) -> dict:
+        b = self.buffer
+        return {"actor": self.actor.state_dict(), "critic": self.critic.state_dict(),
+                "actor_t": self.actor_t.state_dict(), "critic_t": self.critic_t.state_dict(),
+                "a_opt": self.a_opt.state_dict(), "c_opt": self.c_opt.state_dict(),
+                "n_updates": self.n_updates, "rng": self.rng.bit_generator.state,
+                "torch_rng": torch.get_rng_state(),
+                "buf": {"n": b.n, "ptr": b.ptr, "o": b.o[:b.n].copy(), "a": b.a[:b.n].copy(), "r": b.r[:b.n].copy(),
+                        "o2": b.o2[:b.n].copy(), "d": b.d[:b.n].copy()}}
+
+    def load_state(self, st: dict):
+        for k in ("actor", "critic", "actor_t", "critic_t", "a_opt", "c_opt"):
+            getattr(self, k).load_state_dict(st[k])
+        self.n_updates = st["n_updates"]
+        self.rng.bit_generator.state = st["rng"]
+        torch.set_rng_state(st["torch_rng"])
+        b, sb = self.buffer, st["buf"]
+        n = sb["n"]
+        b.o[:n], b.a[:n], b.r[:n], b.o2[:n], b.d[:n] = sb["o"], sb["a"], sb["r"], sb["o2"], sb["d"]
+        b.n, b.ptr = n, sb["ptr"]
+
     @classmethod
     def load(cls, path, cfg_train):
         ck = torch.load(path, map_location="cpu", weights_only=False)

@@ -35,10 +35,21 @@ def evaluate_policy(env: VSGEnv, agent: TD3Agent, scenarios) -> dict:
 
 
 def train_one(cfg: dict, algo: str, seed: int, out_dir: Path, df: pd.DataFrame | None = None) -> Path:
+    """Train one seed. The full training state is written to <out_dir>/resume.pt at every validation;
+    if that file exists the run continues from it (same result as an uninterrupted run), and a run
+    that already finished (summary.json) is skipped."""
     torch.set_num_threads(1)
     t = cfg["train"]
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    if (out_dir / "summary.json").exists():
+        log.info("[%s seed %d] already finished: %s", algo, seed, out_dir)
+        return out_dir
+    resume = out_dir / "resume.pt"
+    if resume.exists():
+        old = yaml.safe_load((out_dir / "config.yaml").read_text())
+        if old != yaml.safe_load(yaml.safe_dump(cfg, sort_keys=False)):
+            raise RuntimeError(f"{out_dir}: config differs from the interrupted run; delete the folder to restart")
     with open(out_dir / "config.yaml", "w") as fh:
         yaml.safe_dump(cfg, fh, sort_keys=False)
 
@@ -49,21 +60,29 @@ def train_one(cfg: dict, algo: str, seed: int, out_dir: Path, df: pd.DataFrame |
     agent = TD3Agent(env.observation_space.shape[0], env.action_space.shape[0], t, algo=algo, seed=seed)
 
     rng = np.random.default_rng(seed)
-    # Episode-0 validation: the untrained (zero-initialised residual) policy = base controller,
-    # so model selection never returns a policy worse than where training started.
-    v0 = evaluate_policy(val_env, agent, val_set)
-    best = v0["val_return"]
-    agent.save(out_dir / "best.pt")
-    vrows = [dict(v0, episode=0, steps=0)]
-    log.info("[%s seed %d] ep 0 (untrained)  val R=%.2f", algo, seed, best)
-    obs, _ = env.reset(seed=seed)
-    total_steps, upd_credit = 0, 0.0
-    rows = []
-    t0 = time.time()
     n_ep = t["episodes"]
-    for ep in range(1, n_ep + 1):
-        if ep > 1:
-            obs, _ = env.reset()
+    if resume.exists():
+        st = torch.load(resume, map_location="cpu", weights_only=False)
+        agent.load_state(st["agent"])
+        rng.bit_generator.state = st["rng"]
+        env._rng.bit_generator.state = st["env_rng"]
+        env.sampler.stats = st["sampler_stats"]
+        best, vrows, rows = st["best"], st["vrows"], st["rows"]
+        total_steps, upd_credit, ep0, t_used = st["total_steps"], st["upd_credit"], st["episode"], st["wall_s"]
+        log.info("[%s seed %d] resumed after episode %d", algo, seed, ep0)
+    else:
+        # Episode-0 validation: the untrained (zero-initialised residual) policy = base controller,
+        # so model selection never returns a policy worse than where training started.
+        v0 = evaluate_policy(val_env, agent, val_set)
+        best = v0["val_return"]
+        agent.save(out_dir / "best.pt")
+        vrows = [dict(v0, episode=0, steps=0)]
+        log.info("[%s seed %d] ep 0 (untrained)  val R=%.2f", algo, seed, best)
+        total_steps, upd_credit, ep0, t_used = 0, 0.0, 0, 0.0
+        rows = []
+    t0 = time.time() - t_used
+    for ep in range(ep0 + 1, n_ep + 1):
+        obs, _ = env.reset(seed=seed) if ep == 1 else env.reset()
         noise = t["expl_noise"] + (t["expl_noise_final"] - t["expl_noise"]) * (ep - 1) / max(n_ep - 1, 1)
         done, Hs, Ds, As, closs = False, [], [], [], []
         while not done:
@@ -99,11 +118,18 @@ def train_one(cfg: dict, algo: str, seed: int, out_dir: Path, df: pd.DataFrame |
                      algo, seed, ep, n_ep, e["return"], v["val_return"], v["val_max_df_hz"], time.time() - t0)
             pd.DataFrame(rows).to_csv(out_dir / "train_log.csv", index=False)
             pd.DataFrame(vrows).to_csv(out_dir / "val_log.csv", index=False)
+            tmp = out_dir / "resume.pt.tmp"
+            torch.save({"agent": agent.state(), "rng": rng.bit_generator.state,
+                        "env_rng": env._rng.bit_generator.state, "sampler_stats": env.sampler.stats,
+                        "best": best, "vrows": vrows, "rows": rows, "total_steps": total_steps,
+                        "upd_credit": upd_credit, "episode": ep, "wall_s": time.time() - t0}, tmp)
+            tmp.replace(resume)
     agent.save(out_dir / "final.pt")
     with open(out_dir / "summary.json", "w") as fh:
         json.dump({"algo": algo, "seed": seed, "episodes": n_ep, "steps": total_steps,
                    "best_val_return": best, "wall_s": time.time() - t0,
                    "train_scenario_rejection_rate": env.sampler.rejection_rate("train")}, fh, indent=2)
+    resume.unlink(missing_ok=True)
     return out_dir
 
 
