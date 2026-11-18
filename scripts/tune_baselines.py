@@ -9,6 +9,7 @@ Examples
       --out study3_ieee33/results/tuning/tune_val.csv
 """
 import copy
+import json
 import itertools
 import multiprocessing as mp
 
@@ -52,12 +53,42 @@ def _score(job):
             "collapse_rate": float(np.mean([m.get("collapsed", False) for m in ms]))}
 
 
-def run(cfg, jobs, n, workers):
-    if workers > 1:
+def _key(name, kw):
+    return name + "|" + ",".join(f"{k}={float(v):g}" for k, v in sorted(kw.items()))
+
+
+def run(cfg, jobs, n, workers, part=None):
+    """Score the jobs; with `part` (a JSON-lines file) finished scores are appended as they arrive and
+    re-used on a restart, so an interrupted tuning resumes where it stopped (results are identical)."""
+    done = {}
+    if part is not None and part.exists():
+        for line in part.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                done[r["key"]] = r
+    todo = [j for j in jobs if _key(*j) not in done]
+    print(f"{len(jobs) - len(todo)} of {len(jobs)} scores re-used, {len(todo)} to run", flush=True)
+
+    def keep(r, j):
+        r = dict(r, key=_key(*j))
+        done[r["key"]] = r
+        if part is not None:
+            with open(part, "a") as fh:
+                fh.write(json.dumps(r) + "\n")
+        print(f"  {r['key']}: val return {r['val_return']:.3f}", flush=True)
+
+    if todo and workers > 1:
         with mp.get_context("spawn").Pool(workers, initializer=_init, initargs=(cfg, n)) as pool:
-            return pool.map(_score, jobs, chunksize=1)
-    _init(cfg, n)
-    return [_score(j) for j in jobs]
+            for j, r in zip(todo, pool.imap(_score, todo, chunksize=1)):
+                keep(r, j)
+    elif todo:
+        _init(cfg, n)
+        for j in todo:
+            keep(_score(j), j)
+    out = []
+    for j in jobs:
+        out.append({k: v for k, v in done[_key(*j)].items() if k != "key"})
+    return out
 
 
 if __name__ == "__main__":
@@ -71,11 +102,14 @@ if __name__ == "__main__":
     names = a.only or ["fixed_tuned", *ADAPTIVE_GRIDS]
     act3 = cfg["env"].get("action_dims", 3) >= 3
     best, rows = {}, []
+    part = resolve_path(a.out).with_suffix(".partial.jsonl") if a.out else None
+    if part is not None:
+        part.parent.mkdir(parents=True, exist_ok=True)
 
     if "fixed_tuned" in names:
         grid = dict(FIXED_GRID, alpha=ALPHA_GRID if act3 else [cfg["system"]["vsg"]["nominal_alpha"]])
         jobs = [("fixed_tuned", dict(zip(grid, v))) for v in itertools.product(*grid.values())]
-        out = run(cfg, jobs, a.n, a.workers)
+        out = run(cfg, jobs, a.n, a.workers, part)
         rows += out
         b = max(out, key=lambda r: r["val_return"])
         best["fixed_tuned"] = {k: b[k] for k in grid}
@@ -86,7 +120,7 @@ if __name__ == "__main__":
     jobs = [(nm, dict(zip(g, v))) for nm, g in ADAPTIVE_GRIDS.items() if nm in names
             for v in itertools.product(*g.values())]
     if jobs:
-        out = run(cfg, jobs, a.n, a.workers)
+        out = run(cfg, jobs, a.n, a.workers, part)
         rows += out
         for nm, g in ADAPTIVE_GRIDS.items():
             res = [r for r in out if r["controller"] == nm]
