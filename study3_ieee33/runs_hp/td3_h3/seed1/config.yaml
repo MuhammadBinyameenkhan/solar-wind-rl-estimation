@@ -1,0 +1,250 @@
+site:
+  name: Nakhon Ratchasima, Thailand
+  latitude: 14.9799
+  longitude: 102.0977
+  elevation_m: null
+  utc_offset_hours: 7.0
+data:
+  era5_csv: data/raw/era5_wind_2024.nc
+  nasa_power_csv: data/raw/nasa_power_solar_2024.csv
+  load_csv: study3_ieee33/data/egat_load_ieee33.csv
+  processed_csv: study3_ieee33/data/hourly_resource_ieee33.csv
+  era5_columns: {}
+  nasa_columns: {}
+  nasa_time_standard: auto
+  nasa_utc_offset_hours: null
+  split:
+    method: weekly_blocks
+    train: 0.7
+    val: 0.15
+    test: 0.15
+    test_years: []
+    val_years: []
+system:
+  f_nominal_hz: 50.0
+  s_base_mva: 9.2875
+  wind:
+    rated_mw: 4.64375
+    hub_height_m: 100.0
+    cut_in_ms: 2.5
+    rated_speed_ms: 10.0
+    cut_out_ms: 25.0
+    shear_exponent: 0.143
+    power_curve_csv: null
+    turbulence_intensity: 0.1
+    turbulence_time_constant_s: 2.0
+    rotor_smoothing_s: 0.5
+  pv:
+    rated_mw: 3.715
+    deload_fraction: 0.15
+    temp_coeff_per_c: -0.004
+    noct_c: 45.0
+    derate: 0.9
+    response_time_s: 0.08
+  bess:
+    power_mw: 2.321875
+    energy_mwh: 9.2875
+    soc_init_range:
+    - 0.3
+    - 0.9
+    soc_min: 0.1
+    soc_max: 0.95
+    soc_taper: 0.05
+    eta_charge: 0.95
+    eta_discharge: 0.95
+    secondary_ki: 2.0
+  diesel:
+    rated_mw: 3.92
+    inertia_h_s: 2.0
+    damping_pu: 2.0
+    sync_coeff_pu: 1.8448
+    droop: 0.05
+    governor_time_s: 0.2
+    engine_time_s: 0.5
+    min_load_frac: 0.3
+    max_dispatch_frac: 0.85
+    ramp_pu_per_s: 1.0
+    secondary_ki: 2.0
+    machine:
+      rated_mva: 4.9
+      xd: 2.18
+      xq: 0.95
+      xdp: 0.286
+      tdo_s: 4.0
+    avr:
+      k_pr: 80.0
+      k_ir: 5.0
+      k_dr: 10.0
+      t_dr: 0.02
+      k_a: 1.0
+      t_a: 0.01
+      v_rmax: 35.0
+      v_rmin: 0.0
+      k_p: 1.0
+      v_bmax: 1.25
+      k_c: 0.55
+      k_d: 1.1
+      k_e: 1.0
+      t_e: 1.2
+      v_femax: 6.0
+      e1: 9.0
+      se_e1: 3.0
+      e2: 6.5
+      se_e2: 0.3
+  load:
+    peak_mw: 3.715
+    min_mw: 1.393125
+    damping_pu: 1.0
+    noise_frac: 0.005
+  vsg:
+    h_min_s: 0.2
+    h_max_s: 8.0
+    d_min_pu: 0.0
+    d_max_pu: 50.0
+    alpha_min: 0.0
+    alpha_max: 1.0
+    sync_coeff_pu: 2.0
+    measurement_filter_s: 0.02
+    gfl_response_s: 0.05
+    nominal_h_s: 3.0
+    nominal_d_pu: 20.0
+    nominal_alpha: 0.3
+    q_droop_mq: 0.05
+    q_capability_frac: 0.44
+  ems:
+    enabled: true
+    diesel_target_frac: 0.6
+    max_dispatch_frac: 0.8
+  disturbance:
+    step_mw_range:
+    - 0.92875
+    - 1.8575
+    n_events_range:
+    - 2
+    - 3
+    time_s_range:
+    - 0.5
+    - 1.5
+    min_separation_s: 7.0
+    settle_tail_s: 5.0
+    max_cumulative_mw: 1.8575
+    prob_load_increase: 0.75
+    design_step_mw: 1.8575
+    adequacy_margin: 1.0
+  grid_code:
+    f_dev_limit_hz: 1.0
+    f_target_hz: 0.5
+    rocof_limit_hz_s: 1.0
+    rocof_window_s: 0.1
+    settling_band_hz: 0.1
+  res_freq_droop:
+    deadband_hz: 0.036
+    standard_f_nom_hz: 60.0
+    droop: 0.05
+    olrt_s: 5.0
+  res_volt_var:
+    v1: 0.92
+    q1: 0.44
+    v2: 0.98
+    q2: 0.0
+    v3: 1.02
+    q3: 0.0
+    v4: 1.08
+    q4: -0.44
+    olrt_s: 5.0
+    q_capability_frac: 0.44
+  network:
+    model: ieee33
+    v_base_kv: 12.66
+    bus_diesel: 1
+    bus_vsg: 18
+    bus_res: 33
+    load_model: constant_power
+    voltage_control: true
+    res_support: ieee1547_droop
+env:
+  episode_s: 30.0
+  agent_dt_s: 0.05
+  sim_dt_s: 0.002
+  headroom_constraint: true
+  projection: band_power
+  param_filter_s: 0.25
+  action_dims: 2
+  action_mode: residual
+  residual_base: tuned
+  terminate_dev_hz: 3.0
+  reward:
+    f_band_hz: 0.2
+    rocof_band_hz_s: 1.0
+    w_freq_inband: 0.02
+    w_freq: 1.0
+    w_rocof: 0.5
+    w_bess: 0.1
+    w_fast: 2.0
+    w_sat: 2.0
+    w_violation: 1.0
+    w_action_mag: 0.05
+    w_action_rate: 0.3
+    collapse_penalty: 50.0
+train:
+  algo: td3
+  episodes: 500
+  seeds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  hidden:
+  - 256
+  - 256
+  actor_lr: 0.0001
+  actor_zero_init: true
+  critic_lr: 0.0003
+  gamma: 0.99
+  tau: 0.005
+  batch_size: 256
+  buffer_size: 1000000
+  warmup_steps: 10000
+  updates_per_step: 0.5
+  expl_noise: 0.2
+  expl_noise_final: 0.03
+  policy_noise: 0.2
+  noise_clip: 0.5
+  policy_delay: 2
+  eval_every: 50
+  eval_episodes: 20
+  device: cpu
+  out_dir: study3_ieee33/runs_hp
+eval:
+  n_scenarios: 200
+  scenario_seed: 20260
+  controllers:
+  - fixed
+  - fixed_tuned
+  - fixed_feasible
+  - bang_bang
+  - adaptive_rocof
+  - adaptive_dir
+  - fuzzy
+  - ddpg
+  - td3
+  baseline_params:
+    fixed_tuned:
+      h: 3.0
+      d: 10.0
+      alpha: 0.3
+    bang_bang:
+      h_big: 4.0
+      h_small: 3.0
+    adaptive_rocof:
+      k_h: 0.0
+      k_d: 0.0
+    adaptive_dir:
+      k_h: 0.0
+      k_d: 0.0
+    fuzzy:
+      k_h: 0.0
+      k_d: 0.0
+  out_dir: study3_ieee33/results
+  adaptive_base: tuned
