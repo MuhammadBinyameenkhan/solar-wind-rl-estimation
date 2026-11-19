@@ -7,6 +7,7 @@ data/sample/
 data/processed/
 runs/
 runs_smoke/
+runs_hp/
 results/
 results_smoke/
 matlab/export/*
