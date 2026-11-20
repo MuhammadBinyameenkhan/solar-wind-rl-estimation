@@ -1,0 +1,27 @@
+
+RMS model vs Simscape EMT (12 scenarios: [1 2 3 4 5 6 7 8 9 10 11 12]; solver: Simulink/Simscape Electrical)
+controller      metric (mean)               RMS        EMT       diff
+fixed_tuned     nadir_hz                 0.5402     0.5311      -1.7%
+fixed_tuned     rocof_max_hz_s           1.4860     3.7808     154.4%
+fixed_tuned     rocof_500ms_hz_s         0.9473     0.9533       0.6%
+fixed_tuned     rotor_rocof_hz_s              -     2.2065
+fixed_tuned     bess_energy_kwh          0.7336     0.7355       0.3%
+fixed_tuned     infeasible_commit_s      1.9142     1.8675      -2.4%
+fixed_tuned     saturation_s             0.1058     0.3008     184.3%
+fixed_tuned     rmse_df_hz                    -     0.0132
+fixed_feasible  nadir_hz                 0.5418     0.5309      -2.0%
+fixed_feasible  rocof_max_hz_s           1.4817     3.7763     154.9%
+fixed_feasible  rocof_500ms_hz_s         0.9551     0.9502      -0.5%
+fixed_feasible  rotor_rocof_hz_s              -     2.1913
+fixed_feasible  bess_energy_kwh          0.7344     0.7364       0.3%
+fixed_feasible  infeasible_commit_s      0.0108     0.0142      30.8%
+fixed_feasible  saturation_s             0.1408     0.3725     164.5%
+fixed_feasible  rmse_df_hz                    -     0.0132
+policy          nadir_hz                 0.5020     0.5119       2.0%
+policy          rocof_max_hz_s           1.5487     3.7717     143.5%
+policy          rocof_500ms_hz_s         0.9003     0.9773       8.6%
+policy          rotor_rocof_hz_s              -     2.2506
+policy          bess_energy_kwh          0.7643     0.7728       1.1%
+policy          infeasible_commit_s      0.0300     0.0308       2.8%
+policy          saturation_s             0.1725     0.3792     119.8%
+policy          rmse_df_hz                    -     0.0166

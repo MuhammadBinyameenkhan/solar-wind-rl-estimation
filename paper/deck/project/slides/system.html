@@ -1,0 +1,26 @@
+<section id="system" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">3 · Methodology · Study 2 test system</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">A hybrid microgrid driven by a year of Thai site data</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:start">
+<img src="/_blob/80e706bd35d8da277d0890130105df2d" alt="Single-line diagram: diesel 0.5 MW, BESS 0.5 MW/2 MWh grid-forming VSG, PV 0.8 MW de-loaded, wind 1.0 MW, load 0.3–0.8 MW on a 400 V 50 Hz bus, with hourly EMS and 50 ms scheduler" style="width:960px;height:545px;object-fit:contain;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px">
+<div style="flex:1;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px">
+<h3 style="font-size:28px;font-weight:600">Site and data</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">14.98° N, 102.10° E · 8777 h of 2024 · wind mean 4.2 m/s at 100 m (CF 9.5 %) · PV CF 17.3 %</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px">
+<h3 style="font-size:28px;font-weight:600">Operation</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Hourly EMS keeps diesel near 60 %; PV held 15 % below MPP as fast reserve</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px">
+<h3 style="font-size:28px;font-weight:600">Events</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">30 s episodes, 2–3 load steps of 0.2–0.4 MW; weekly blocks 5 : 1 : 1 for train, validation, test</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">15</p>
+<aside>Study 2 is a 2 MVA, 400 V microgrid. The diesel unit is the only physical inertia. The battery is grid-forming and runs the VSG; the PV plant is held fifteen percent below its maximum power point so it can release fast reserve within 80 milliseconds. Operating points come from one year of hourly ERA5 wind and NASA POWER solar data for Nakhon Ratchasima. The site is low-wind, so a class III turbine is used. Because there is only one year, the hours are split into weekly blocks, five for training, one for validation and one for test in every seven weeks, so all seasons appear in every subset.</aside>
+</section>

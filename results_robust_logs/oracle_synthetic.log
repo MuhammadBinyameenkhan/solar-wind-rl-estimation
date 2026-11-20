@@ -1,0 +1,37 @@
+H=  1 s  D=   5 pu   mean return  -158.90
+H=  1 s  D=  10 pu   mean return  -103.35
+H=  1 s  D=  15 pu   mean return   -99.16
+H=  1 s  D=  20 pu   mean return  -105.46
+H=  1 s  D=  30 pu   mean return  -123.30
+H=  1 s  D=  50 pu   mean return  -151.06
+H=  3 s  D=   5 pu   mean return  -134.13
+H=  3 s  D=  10 pu   mean return   -95.29
+H=  3 s  D=  15 pu   mean return   -94.66
+H=  3 s  D=  20 pu   mean return  -102.46
+H=  3 s  D=  30 pu   mean return  -121.48
+H=  3 s  D=  50 pu   mean return  -149.42
+H=  5 s  D=   5 pu   mean return  -135.25
+H=  5 s  D=  10 pu   mean return   -97.95
+H=  5 s  D=  15 pu   mean return   -96.63
+H=  5 s  D=  20 pu   mean return  -104.09
+H=  5 s  D=  30 pu   mean return  -122.42
+H=  5 s  D=  50 pu   mean return  -149.71
+H=  8 s  D=   5 pu   mean return  -148.38
+H=  8 s  D=  10 pu   mean return  -106.16
+H=  8 s  D=  15 pu   mean return  -102.23
+H=  8 s  D=  20 pu   mean return  -108.27
+H=  8 s  D=  30 pu   mean return  -125.02
+H=  8 s  D=  50 pu   mean return  -151.14
+
+best single fixed VSG : H=3 s, D=15  →  -94.66
+per-scenario oracle   : -92.66
+oracle gain           : 1.99  (2.1 % of the best fixed return)
+
+Oracle choice vs available upward headroom:
+              headroom_up_mw  H_best  D_best  gain
+headroom_bin                                      
+low                     0.22    4.00   15.36  3.45
+mid                     0.38    3.15   12.69  0.86
+high                    0.54    3.00   11.92  1.56
+
+Verdict: NO-GO — a tuned fixed VSG is near-optimal; change the plant/reward first

@@ -1,0 +1,17 @@
+<section id="q-hreq1" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Feasibility</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: Where does h<sub>req</sub> = 0.08 J + 0.01 D come from?</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start"><div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:28px"><p style="font-size:24px;color:#5A6270">Study 1, Eq. (3.17), worst case of the grid code: both limits at once</p><img src="/_blob/e808349acf6ec2f5ffa7c3f42f325d1c" alt="h_req = 2J RoCoF_max/f0 + D Δf_max/f0 = 0.08 J + 0.01 D" style="width:860px;height:110px;object-fit:contain"><ul style="width:860px;display:flex;flex-direction:column;gap:10px;padding-left:32px;margin:0"><li style="font-size:26px;line-height:1.4">RoCoF<sub>max</sub> = 2 Hz/s → 2J · 2/50 = <b>0.08 J</b></li><li style="font-size:26px;line-height:1.4">Δf<sub>max</sub> = 0.5 Hz → D · 0.5/50 = <b>0.01 D</b></li><li style="font-size:26px;line-height:1.4">So 1 s of inertia costs as much headroom as <b>8 pu of damping</b></li><li style="font-size:26px;line-height:1.4">Per unit of S<sub>base</sub> = 2500 kVA</li></ul></div><div style="width:640px;display:flex;flex-direction:column;gap:16px"><table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:640px;background:#FFFDF8">
+<tr><th style="width:62%">Setting (J, D)</th><th style="width:38%">h<sub>req</sub> (pu)</th></tr>
+<tr><td>Low (1 s, 10 pu)</td><td>0.18</td></tr>
+<tr><td>High (4 s, 30 pu)</td><td>0.62</td></tr>
+<tr><td>Max (15 s, 60 pu)</td><td><b>1.80</b></td></tr>
+</table>
+<div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:52px;font-weight:600;color:#9A5B0C;line-height:1;min-width:max-content">4500 kVA</p><p style="font-size:24px;line-height:1.35">needed by (15 s, 60 pu) on a 2500 kVA converter</p></div></div></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B8</p>
+<aside>Substitute the grid-code limits into the VSG power law. With RoCoF at 2 hertz per second, the inertial term 2J times RoCoF over f0 is 2J times 0.04, so 0.08 J. With a 0.5 hertz deviation the damping term is D times 0.01. Hence one second of inertia costs as much as eight per-unit of damping, which is why headroom-limited control turns out to be mainly a damping problem. The literature setting of 15 seconds and 60 per-unit needs 1.2 plus 0.6, 1.8 per-unit, 4500 kVA on a 2500 kVA converter, so it is derated in every step. Source: Sections 3.6, 4.2.3.
+LaTeX (3.17): h_{\mathrm{req}} = 2J\,\frac{\mathrm{RoCoF}_{\max}}{f_0} + D\,\frac{\Delta f_{\max}}{f_0} = 0.08J + 0.01D</aside>
+</section>

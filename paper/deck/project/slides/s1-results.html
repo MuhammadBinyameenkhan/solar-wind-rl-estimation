@@ -1,0 +1,16 @@
+<section id="s1-results" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">4 · Preliminary results · Study 1</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">Same regulation, about one fifth less reserved headroom</h2>
+</div>
+<img src="/_blob/7458aa5fba236b785c9a2433bcd8096d" alt="Study 1: IAE against delivered headroom for fixed settings, rule-based, DDPG and TD3 on five test windows and on the held-out stress test, and VSG power injection" style="width:1664px;height:433px;object-fit:contain;background:#FFFDF8;border-radius:12px">
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:600;color:#0E6E78;line-height:1;min-width:max-content">19–21 %</p><p style="font-size:24px;line-height:1.35">less headroom reserved by DDPG/TD3 than the tuned VSG (stress test)</p></div>
+<div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:600;color:#0E6E78;line-height:1;min-width:max-content">2.15</p><p style="font-size:24px;line-height:1.35">Hz·s IAE for TD3 against 2.18 for the tuned VSG (held-out)</p></div>
+<div style="flex:1;display:flex;align-items:center;gap:20px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:600;color:#9A5B0C;line-height:1;min-width:max-content">4500</p><p style="font-size:24px;line-height:1.35">kVA needed by a (15 s, 60 pu) VSG on a 2500 kVA converter</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">22</p>
+<aside>Study 1, ten seeds, converter-only microgrid. Literature-style high settings are simply not deliverable: fifteen seconds and sixty per-unit would need 1.8 per-unit of headroom, 4500 kVA on a 2500 kVA converter, and they are derated in every step. On the five deterministic test windows the tuned constant VSG regulates best, 1.73 against 1.84 hertz-seconds for TD3, but it reserves the most headroom and is derated in 41 percent of steps. On the fifty held-out stress episodes the advantage disappears: TD3 reaches 2.15 against 2.18, and both learned controllers reserve 19 to 21 percent less headroom on every seed. So learning trades regulation for headroom rather than dominating the tuned VSG. Source: IREMOS, Table 4.1 of the proposal.
+LaTeX (3.25): \mathrm{IAE} = \int_0^T|\Delta f|\,dt</aside>
+</section>

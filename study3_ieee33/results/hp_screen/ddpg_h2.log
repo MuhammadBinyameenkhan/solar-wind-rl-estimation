@@ -1,0 +1,28 @@
+2026-11-19 09:24:14,005 INFO vsgrl.train: [ddpg seed 0] ep 0 (untrained)  val R=-47.97
+2026-11-19 09:24:14,462 INFO vsgrl.train: [ddpg seed 1] ep 0 (untrained)  val R=-47.97
+2026-11-19 09:30:27,806 INFO vsgrl.train: [ddpg seed 0] ep 50/500  train R=-17.15  val R=-50.38  val |Δf|max=0.477 Hz  (374s)
+2026-11-19 09:30:34,494 INFO vsgrl.train: [ddpg seed 1] ep 50/500  train R=-47.83  val R=-84.04  val |Δf|max=0.349 Hz  (380s)
+2026-11-19 09:37:13,511 INFO vsgrl.train: [ddpg seed 0] ep 100/500  train R=-53.97  val R=-52.26  val |Δf|max=0.484 Hz  (780s)
+2026-11-19 09:37:18,370 INFO vsgrl.train: [ddpg seed 1] ep 100/500  train R=-36.14  val R=-55.95  val |Δf|max=0.485 Hz  (784s)
+2026-11-19 09:43:53,074 INFO vsgrl.train: [ddpg seed 0] ep 150/500  train R=-67.32  val R=-52.72  val |Δf|max=0.451 Hz  (1179s)
+2026-11-19 09:44:04,894 INFO vsgrl.train: [ddpg seed 1] ep 150/500  train R=-29.29  val R=-55.12  val |Δf|max=0.471 Hz  (1190s)
+2026-11-19 09:50:27,600 INFO vsgrl.train: [ddpg seed 0] ep 200/500  train R=-43.59  val R=-58.70  val |Δf|max=0.387 Hz  (1574s)
+2026-11-19 09:50:45,772 INFO vsgrl.train: [ddpg seed 1] ep 200/500  train R=-41.56  val R=-55.00  val |Δf|max=0.410 Hz  (1591s)
+2026-11-19 09:57:33,542 INFO vsgrl.train: [ddpg seed 0] ep 250/500  train R=-45.14  val R=-51.39  val |Δf|max=0.401 Hz  (2000s)
+2026-11-19 09:58:01,684 INFO vsgrl.train: [ddpg seed 1] ep 250/500  train R=-104.86  val R=-57.22  val |Δf|max=0.404 Hz  (2027s)
+2026-11-19 10:04:37,052 INFO vsgrl.train: [ddpg seed 0] ep 300/500  train R=-33.89  val R=-54.94  val |Δf|max=0.378 Hz  (2423s)
+2026-11-19 10:05:00,635 INFO vsgrl.train: [ddpg seed 1] ep 300/500  train R=-69.50  val R=-55.52  val |Δf|max=0.413 Hz  (2446s)
+2026-11-19 10:11:22,315 INFO vsgrl.train: [ddpg seed 0] ep 350/500  train R=-75.55  val R=-57.99  val |Δf|max=0.409 Hz  (2828s)
+2026-11-19 10:11:48,678 INFO vsgrl.train: [ddpg seed 1] ep 350/500  train R=-59.41  val R=-54.05  val |Δf|max=0.485 Hz  (2854s)
+2026-11-19 10:18:38,830 INFO vsgrl.train: [ddpg seed 0] ep 400/500  train R=-42.45  val R=-56.42  val |Δf|max=0.422 Hz  (3265s)
+2026-11-19 10:18:56,124 INFO vsgrl.train: [ddpg seed 1] ep 400/500  train R=-39.37  val R=-53.44  val |Δf|max=0.441 Hz  (3282s)
+2026-11-19 10:25:23,620 INFO vsgrl.train: [ddpg seed 0] ep 450/500  train R=-82.84  val R=-59.62  val |Δf|max=0.353 Hz  (3670s)
+2026-11-19 10:25:44,671 INFO vsgrl.train: [ddpg seed 1] ep 450/500  train R=-38.70  val R=-54.28  val |Δf|max=0.399 Hz  (3690s)
+2026-11-19 10:32:10,486 INFO vsgrl.train: [ddpg seed 0] ep 500/500  train R=-75.70  val R=-72.55  val |Δf|max=0.409 Hz  (4076s)
+done: /home/user/solar-wind-rl-estimation/study3_ieee33/runs_hp/ddpg_h2/seed0
+2026-11-19 10:32:19,925 INFO vsgrl.train: [ddpg seed 1] ep 500/500  train R=-32.38  val R=-52.25  val |Δf|max=0.447 Hz  (4085s)
+done: /home/user/solar-wind-rl-estimation/study3_ieee33/runs_hp/ddpg_h2/seed1
+2026-11-19 11:00:12,548 INFO vsgrl.train: [ddpg seed 0] already finished: /home/user/solar-wind-rl-estimation/study3_ieee33/runs_hp/ddpg_h2/seed0
+2026-11-19 11:00:12,548 INFO vsgrl.train: [ddpg seed 1] already finished: /home/user/solar-wind-rl-estimation/study3_ieee33/runs_hp/ddpg_h2/seed1
+done: /home/user/solar-wind-rl-estimation/study3_ieee33/runs_hp/ddpg_h2/seed0
+done: /home/user/solar-wind-rl-estimation/study3_ieee33/runs_hp/ddpg_h2/seed1

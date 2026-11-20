@@ -1,0 +1,41 @@
+  reference grid H=1 s, D=5 pu done
+  reference grid H=1 s, D=10 pu done
+  reference grid H=1 s, D=15 pu done
+  reference grid H=1 s, D=20 pu done
+  reference grid H=1 s, D=30 pu done
+  reference grid H=1 s, D=50 pu done
+  reference grid H=3 s, D=5 pu done
+  reference grid H=3 s, D=10 pu done
+  reference grid H=3 s, D=15 pu done
+  reference grid H=3 s, D=20 pu done
+  reference grid H=3 s, D=30 pu done
+  reference grid H=3 s, D=50 pu done
+  reference grid H=5 s, D=5 pu done
+  reference grid H=5 s, D=10 pu done
+  reference grid H=5 s, D=15 pu done
+  reference grid H=5 s, D=20 pu done
+  reference grid H=5 s, D=30 pu done
+  reference grid H=5 s, D=50 pu done
+  reference grid H=8 s, D=5 pu done
+  reference grid H=8 s, D=10 pu done
+  reference grid H=8 s, D=15 pu done
+  reference grid H=8 s, D=20 pu done
+  reference grid H=8 s, D=30 pu done
+  reference grid H=8 s, D=50 pu done
+validation references: best fixed -47.90 (grid_H3_D10), tuned fixed -47.90, oracle -47.69
+ run  seed             verdict  slope_per_100_ep  p_slope  val_return_final  val_return_best  gap_closed_final  gap_closed_best
+ td3 seed0 converged (plateau)            -0.102    0.649           -47.623          -47.590             1.338            1.493
+ td3 seed1 converged (plateau)             0.507    0.339           -49.270          -47.970            -6.518           -0.321
+ td3 seed2 converged (plateau)             0.195    0.518           -48.479          -47.193            -2.749            3.387
+ td3 seed3 converged (plateau)             0.111    0.748           -48.633          -47.970            -3.481           -0.321
+ td3 seed4 converged (plateau)            -0.391    0.537           -50.014          -47.947           -10.070           -0.209
+ddpg seed0           degrading            -3.280    0.006           -56.650          -47.950           -41.718           -0.222
+ddpg seed1 converged (plateau)             0.538    0.127           -50.363          -47.970           -11.735           -0.321
+ddpg seed2     still improving             1.515    0.040           -49.271          -47.970            -6.526           -0.321
+ddpg seed3 converged (plateau)            -2.672    0.217           -62.132          -47.970           -67.864           -0.321
+ddpg seed4 converged (plateau)             2.292    0.152           -51.748          -47.970           -18.336           -0.321
+
+ run  seeds  converged_seeds  improving_seeds  degrading_seeds  iqm_final  iqm_ci_low  iqm_ci_high  mean_gap_closed_final  mean_gap_closed_best  R_best_fixed  R_tuned_fixed  R_oracle
+ td3      5                5                0                0    -48.794     -49.766      -47.908                 -4.296                 0.806       -47.903        -47.903   -47.693
+ddpg      5                3                1                1    -52.920     -60.305      -49.635                -29.236                -0.301       -47.903        -47.903   -47.693
+wrote /home/user/solar-wind-rl-estimation/study3_ieee33/results/convergence and /home/user/solar-wind-rl-estimation/study3_ieee33/results/figures/fig_convergence.png

@@ -1,0 +1,32 @@
+<section id="summax" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">3 · Methodology · feasibility (RQ1)</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">RoCoF and deviation peak at different instants</h2>
+</div>
+<div style="display:flex;gap:48px;align-items:center">
+<div style="position:relative;width:860px;height:440px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px">
+<svg aria-label="Sketch of frequency deviation and RoCoF after a load step: RoCoF is largest just after the step, the deviation is largest at the nadir where RoCoF is zero" style="position:absolute;left:0;top:0;width:860px;height:440px" width="860" height="440" viewBox="0 0 860 440"><line x1="70" y1="200" x2="820" y2="200" stroke="#9AA5B1" stroke-width="2"/><line x1="110" y1="40" x2="110" y2="400" stroke="#C9C2B2" stroke-width="2" stroke-dasharray="6 6"/><path d="M110 200 C 180 300, 250 352, 330 352 S 470 240, 560 215 S 720 200, 820 200" fill="none" stroke="#0E6E78" stroke-width="6"/><path d="M110 380 C 150 330, 230 230, 330 200 S 470 150, 560 185 S 720 200, 820 200" fill="none" stroke="#E3A13B" stroke-width="6"/><circle cx="110" cy="380" r="12" fill="#E3A13B"/><circle cx="330" cy="352" r="12" fill="#0E6E78"/><line x1="330" y1="352" x2="330" y2="200" stroke="#0E6E78" stroke-width="2" stroke-dasharray="6 6"/></svg>
+<p style="position:absolute;left:132px;top:368px;width:300px;font-size:24px;color:#9A5B0C;font-weight:600">RoCoF peak (t = 0⁺)</p>
+<p style="position:absolute;left:356px;top:330px;width:300px;font-size:24px;color:#0E6E78;font-weight:600">Δf peak (nadir)</p>
+<p style="position:absolute;left:600px;top:40px;width:240px;font-size:24px;color:#0E6E78">— Δf</p>
+<p style="position:absolute;left:600px;top:76px;width:240px;font-size:24px;color:#9A5B0C">— RoCoF</p>
+<p style="position:absolute;left:740px;top:212px;width:100px;font-size:24px;color:#5A6270">time</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:24px 28px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5A6270">Summed (earlier studies)</p>
+<img src="/_blob/dc3ffbe779bc85ee72f1e10d8d6e7d6a" alt="h_req,sum = 2 J_v RoCoF_lim + D_v Δf_lim" style="width:518px;height:45px;object-fit:contain">
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;border:2px solid #0E6E78;border-radius:12px;padding:24px 28px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0E6E78">Time-separated (Study 2)</p>
+<img src="/_blob/f97c6216f6ae56c1625cdd61de02301f" alt="h_req,max = max(2 J_v RoCoF_lim, D_v Δf_band) ≤ h" style="width:694px;height:45px;object-fit:contain">
+</div>
+<p style="font-size:24px;line-height:1.45;color:#4A5568">RoCoF_lim = 1 Hz/s (sizing value, 500 ms window), Δf_band = 0.2 Hz, both per unit of f₀.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">18</p>
+<aside>The second refinement is timing. The summed rule of my earlier studies assumes the worst RoCoF and the worst deviation happen together. In a swing response they do not: RoCoF peaks immediately after the step, when the deviation is still near zero, and the deviation peaks at the nadir, where RoCoF is zero. So each mechanism is sized at its own peak: the larger of the two commitments must fit the headroom. Note that the 1 hertz-per-second limit is a sizing value over a 500 millisecond window; over 100 milliseconds every controller exceeds it, which I will come back to. The sketch is schematic, not simulated data.
+LaTeX (IREA 7): h_{\mathrm{req,sum}} = 2J_v\,\mathrm{RoCoF}_{\mathrm{lim}} + D_v\,\Delta f_{\mathrm{lim}}
+LaTeX (3.21): h_{\mathrm{req,max}} = \max(2J_v\,\mathrm{RoCoF}_{\mathrm{lim}}, D_v\,\Delta f_{\mathrm{band}}) \le h</aside>
+</section>

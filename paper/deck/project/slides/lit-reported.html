@@ -1,0 +1,22 @@
+<section id="lit-reported" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">2 · Literature review · reported results</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">Large reported gains — against weak references</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px">Shi 2024 · rule · vs fixed J, D</p><div style="width:840px;height:36px;background:#5B8A96;border-radius:4px"></div><p style="font-size:26px;font-weight:600">−60 %</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px">Egbomwan 2023 · TD3 · vs PI (MAE)</p><div style="width:792px;height:36px;background:#5B8A96;border-radius:4px"></div><p style="font-size:26px;font-weight:600">−56.6 %</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px">Han 2023 · rule · vs constant H (40 kW)</p><div style="width:770px;height:36px;background:#5B8A96;border-radius:4px"></div><p style="font-size:26px;font-weight:600">−55 %</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px">Lu &amp; Zhuan 2024 · SAC · vs fixed VSG</p><div style="width:560px;height:36px;background:#5B8A96;border-radius:4px"></div><p style="font-size:26px;font-weight:600">−40 %</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px">Li 2017 · rule · vs constant J, D</p><div style="width:560px;height:36px;background:#5B8A96;border-radius:4px"></div><p style="font-size:26px;font-weight:600">−40 %</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px">Criollo 2026 · SAC · vs PID (RoCoF)</p><div style="width:521px;height:36px;background:#5B8A96;border-radius:4px"></div><p style="font-size:26px;font-weight:600">−37 %</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px">Li 2026 · TD3 · vs fixed VSG</p><div style="width:462px;height:36px;background:#5B8A96;border-radius:4px"></div><p style="font-size:26px;font-weight:600">−33 %</p></div>
+<hr style="border-top:2px dashed #C9C2B2;width:1664px">
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px;font-weight:600">This thesis · TD3 · vs tuned VSG</p><div style="width:126px;height:36px;background:#E3A13B;border-radius:4px"></div><p style="font-size:26px;font-weight:600;color:#9A5B0C">−10 % nadir · 5 seeds · 200 scenarios</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="width:560px;font-size:24px;font-weight:600">This thesis · oracle bound</p><div style="width:29px;height:36px;background:#E3A13B;border-radius:4px"></div><p style="font-size:26px;font-weight:600;color:#9A5B0C">≤ 1.3 % for any scheduler, before training</p></div>
+</div>
+<p style="font-size:26px;line-height:1.4;color:#4A5568;width:1640px">Frequency-deviation reduction unless noted, each against its own reference, from one trained agent or design. Systems differ (kW–MW, 50/60 Hz): compare references, not rows.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">11</p>
+<aside>Every value here is quoted from the papers' own tables or figures. The published improvements are large, 33 to 60 percent, but each is measured against a fixed-parameter VSG or a PI controller with default settings, from one trained agent. In my Study 2, against a VSG tuned on validation data, over five seeds and 200 test scenarios, TD3 reduces the nadir by 10 percent, and the oracle shows no scheduler could improve the objective by more than 1.3 percent. The point is not that my agents are weaker. It is how much a reported gain depends on the reference it is measured against. Sources: Shi Sec. 5.2; Egbomwan 2023 Sec. V; Han Table 3; Lu and Zhuan Table 2; Li 2017 Fig. 2; Criollo abstract; Li 2026 Table 3.</aside>
+</section>

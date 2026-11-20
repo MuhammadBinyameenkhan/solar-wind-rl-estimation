@@ -1,0 +1,9 @@
+{
+  "algo": "td3",
+  "seed": 0,
+  "episodes": 500,
+  "steps": 300000,
+  "best_val_return": -47.97037605195133,
+  "wall_s": 4151.07669377327,
+  "train_scenario_rejection_rate": 0.0
+}

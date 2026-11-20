@@ -1,0 +1,34 @@
+<section id="learning" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">3 · Methodology · learning formulation (RQ2)</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">A residual TD3 agent on top of a tuned VSG</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:center;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:24px 36px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0E6E78">Interval cost (50 ms)</p>
+<img src="/_blob/65b44a70c37ebeeeb4c620b6f39af434" alt="c = w_f ⟨(|Δf| − 0.2)₊²⟩/0.5² + w_in ⟨Δf²⟩/0.5² + w_r ⟨(|RoCoF| − 1)₊²⟩ + w_fast ⟨(P_v − P_set)²⟩/P_b,max² + w_b ⟨ΔP_b²⟩/P_b,max² + w_s ⟨sat⟩/0.05 + w_v viol" style="width:887px;height:229px;object-fit:contain">
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;line-height:1.4">Penalises Δf outside ±0.2 Hz, RoCoF above 1 Hz/s, fast VSG power, BESS use, saturation and violations.</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Weights (1, 0.02, 0.5, 2, 0.1, 2, 1); return R = −Σ c</p>
+</div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:24px 32px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0E6E78">Residual action</p>
+<img src="/_blob/72706f8f8b7b74a5b0fc49876d55a362" alt="J_v = J_0 + a_1 (J_ub − J_0) for a_1 ≥ 0; J_v = J_0 + a_1 (J_0 − J_min) for a_1 &lt; 0" style="width:553px;height:113px;object-fit:contain">
+<p style="font-size:24px;line-height:1.4;color:#4A5568">a = 0 is the validation-tuned VSG (3 s, 15 pu, α = 1); same for D_v and α. 16 normalised observations.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:24px 32px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0E6E78">TD3 critic target</p>
+<img src="/_blob/0a1148f638a6eb937c8ce4d1ec72d351" alt="y = r + γ min over i of Q_φ'i(s', μ_θ'(s') + ε), ε ~ clip(N(0, σ²), −c, c)" style="width:740px;height:51px;object-fit:contain">
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Two critics, smallest target, clipped target noise, delayed actor (Fujimoto 2018). DDPG uses one critic. 5 seeds × 1000 episodes.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">20</p>
+<aside>Scheduling is a Markov decision process with a 50 millisecond decision interval. The cost penalises frequency only outside the plus-minus 0.2 hertz band and RoCoF only above 1 hertz per second, together with fast VSG power, battery use, saturation and violations. The weights were chosen so that the best fixed setting has an interior damping; with a plain quadratic penalty, maximum damping always won and the problem became trivial. The action is residual: zero output reproduces the tuned VSG, and the actor's output layer starts at zero, so the untrained agent is exactly the tuned controller. TD3 uses two critics and the smaller target to avoid overestimation.
+LaTeX (3.22): J_v = J_0 + a_1(J_{\mathrm{ub}} - J_0)\ (a_1 \ge 0), \quad J_v = J_0 + a_1(J_0 - J_{\min})\ (a_1 < 0)
+LaTeX (3.23): c = w_f\frac{\langle(|\Delta f|-0.2)_+^2\rangle}{0.5^2} + w_{\mathrm{in}}\frac{\langle\Delta f^2\rangle}{0.5^2} + w_r\langle(|\mathrm{RoCoF}|-1)_+^2\rangle + w_{\mathrm{fast}}\frac{\langle(P_v-P_{\mathrm{set}})^2\rangle}{P_{b,\max}^2} + w_b\frac{\langle\Delta P_b^2\rangle}{P_{b,\max}^2} + w_s\frac{\langle\mathrm{sat}\rangle}{0.05} + w_v\,\mathrm{viol}
+LaTeX (3.24): y = r + \gamma\min_{i=1,2}Q_{\phi'_i}(s', \mu_{\theta'}(s') + \varepsilon), \quad \varepsilon \sim \mathrm{clip}(\mathcal{N}(0,\sigma^2), -c, c)</aside>
+</section>
