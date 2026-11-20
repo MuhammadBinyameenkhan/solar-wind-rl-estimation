@@ -4,7 +4,7 @@ The builders write each equation as a paragraph containing @@EQ|<key>|<number>@@
 paragraph for a borderless three-column table: empty cell, centred Word (OMML) equation, number at the right.
 The OMML comes from paper/equations/omml.json, produced by make_equations.py, so no pandoc is needed here.
 
-Usage: python paper/insert_equations.py <file.docx> <text width in DXA> <font size in half-points>
+Usage: python paper/insert_equations.py <file.docx> <text width in DXA> <font size in half-points> [omml json in paper/equations]
 """
 import json
 import re
@@ -13,7 +13,7 @@ import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-OMML = json.loads((HERE / "equations" / "omml.json").read_text(encoding="utf8"))
+OMML = json.loads((HERE / "equations" / (sys.argv[4] if len(sys.argv) > 4 else "omml.json")).read_text(encoding="utf8"))
 NO_BORDER = "".join(f'<w:{s} w:val="nil"/>' for s in ("top", "left", "bottom", "right", "insideH", "insideV"))
 
 
