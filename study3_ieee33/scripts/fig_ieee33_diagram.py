@@ -42,8 +42,8 @@ for i, b in enumerate(range(23, 26)):  # lateral from bus 3
 for i, b in enumerate(range(26, 34)):  # lateral from bus 6
     P[b] = (5.0 + i, -3.4)
 
-fig, ax = plt.subplots(figsize=(7.16, 3.55))
-ax.set_xlim(-3.2, 18.6)
+fig, ax = plt.subplots(figsize=(7.16, 3.4))
+ax.set_xlim(-3.2, 21.6)
 ax.set_ylim(-6.6, 4.4)
 ax.set_aspect("equal")
 ax.axis("off")
@@ -123,8 +123,9 @@ mw = lambda v: f"{v:.2f}".rstrip("0").rstrip(".")      # noqa: E731
 xb, yb = P[nw["bus_diesel"]]
 seg((xb - 0.22, yb), (xb - 1.2, yb), color=RED, lw=LW, zorder=2)
 gen_symbol(xb - 1.65, yb, "SG", RED)
-ax.text(xb - 1.65, yb + 0.62, f"Diesel SG\n{mw(sy['diesel']['rated_mw'])} MW\n(slack)", ha="center", va="bottom",
-        fontsize=6.4, color=RED, linespacing=1.05)
+dm = sy["diesel"]["machine"]
+ax.text(xb - 1.65, yb + 0.62, f"Diesel SG {mw(dm['rated_mva'])} MVA\n({mw(sy['diesel']['rated_mw'])} MW, slack)\nIEEE 421.5 AC8C AVR\n+ governor droop",
+        ha="center", va="bottom", fontsize=6.4, color=RED, linespacing=1.05)
 
 # BESS + grid-forming VSG
 xb, yb = P[nw["bus_vsg"]]
@@ -133,8 +134,14 @@ seg((xb, yb + 0.06), (xb, yb + 1.05), color=BLUE, lw=LW, zorder=2)
 conv_symbol(xb, yb + 1.45, BLUE)
 seg((xb, yb + 1.85), (xb, yb + 2.15), color=BLUE, lw=LW, zorder=2)
 battery(xb, yb + 2.35, BLUE)
-ax.text(xb - 0.55, yb + 1.9, f"BESS\n{mw(sy['bess']['power_mw'])} MW /\n{mw(sy['bess']['energy_mwh'])} MWh\ngrid-forming VSG",
-        ha="right", va="center", fontsize=6.4, color=BLUE, linespacing=1.05)
+ax.text(xb + 0.6, yb + 1.9, f"BESS {mw(sy['bess']['power_mw'])} MW /\n{mw(sy['bess']['energy_mwh'])} MWh\ngrid-forming VSG\n($J_v$, $D_v$; Q-V droop)",
+        ha="left", va="center", fontsize=6.4, color=BLUE, linespacing=1.05)
+# RL agent: residual (J_v, D_v) commands to the VSG
+ax.add_patch(Rectangle((xb - 4.7, yb + 1.0), 3.6, 0.9, fc="white", ec=K, lw=0.7, ls=(0, (3, 1.5)), zorder=5))
+ax.text(xb - 2.9, yb + 1.45, "TD3 agent\n" + r"residual $\Delta J_v$, $\Delta D_v$", ha="center", va="center",
+        fontsize=6.2, linespacing=1.15, zorder=6)
+ax.annotate("", xy=(xb - 0.42, yb + 1.45), xytext=(xb - 1.1, yb + 1.45), zorder=6,
+            arrowprops=dict(arrowstyle="-|>", lw=0.6, color=K, mutation_scale=5, shrinkA=0, shrinkB=0))
 
 # PV + wind (grid-following)
 xb, yb = P[nw["bus_res"]]
@@ -146,7 +153,7 @@ for dx, kind in ((-0.55, "pv"), (0.55, "wind")):
     conv_symbol(x, yb - 1.45, GREEN, top="=" if kind == "pv" else "~")
     seg((x, yb - 1.85), (x, yb - 2.05), color=GREEN, lw=LW, zorder=2)
     (pv if kind == "pv" else turbine)(x, yb - 2.4, GREEN)
-ax.text(xb + 1.25, yb - 1.75, f"PV {mw(sy['pv']['rated_mw'])} MW (de-loaded)\nWind {mw(sy['wind']['rated_mw'])} MW\ngrid-following",
+ax.text(xb + 1.25, yb - 1.75, f"PV {mw(sy['pv']['rated_mw'])} MW (de-loaded)\nWind {mw(sy['wind']['rated_mw'])} MW\ngrid-following, IEEE 1547-2018\nCat. III f-droop, Cat. B volt-var",
         ha="left", va="center", fontsize=6.4, color=GREEN, linespacing=1.05)
 
 # ---------------------------------------------------------------- notes and legend
