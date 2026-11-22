@@ -1,8 +1,8 @@
 // IEEE 33-bus manuscript (Study 3) in the Praise Worthy Prize template used for the IREA manuscript.
 // Every number comes from study3_ieee33/results (paper_numbers.json and the CSV files); nothing is typed by hand
 // except the plant parameters, which are those of study3_ieee33/configs/ieee33.yaml.
-// Run: python study3_ieee33/scripts/paper_figures.py && python paper/ieee33_equations.py && node paper/make_ieee33_pwp.js
-//      -> paper/IEEE33_manuscript_PWP.docx
+// Run: python study3_ieee33/scripts/paper_figures.py && python paper/ieee33_equations.py && node paper/make_irea_33bus.js
+//      -> paper/IREA_33bus_manuscript_PWP.docx
 const fs = require("fs");
 const path = require("path");
 const {
@@ -372,14 +372,14 @@ for (const el of C) {
 }
 flush();
 const doc = new Document({
-  creator: "Muhammad Binyameen Khan", title: "IEEE 33-bus manuscript (PWP template)",
+  creator: "Muhammad Binyameen Khan", title: "IREA manuscript, 33-bus study (PWP template)",
   styles: { default: { document: { run: { font: FONT, size: BODY } } } },
   numbering: { config: [{ reference: "bul", levels: [{ level: 0, format: LevelFormat.BULLET, text: "•", alignment: AlignmentType.LEFT,
     style: { paragraph: { indent: { left: 340, hanging: 227 } } } }] }] },
   sections,
 });
 Packer.toBuffer(doc).then((b) => {
-  const out = path.join(__dirname, "IEEE33_manuscript_PWP.docx");
+  const out = path.join(__dirname, "IREA_33bus_manuscript_PWP.docx");
   fs.writeFileSync(out, b);
   console.log("wrote", out, `(${order.length} references, ${figN} figures, ${tabN} tables, ${eqN} equations)`);
   require("child_process").execFileSync("python3", [path.join(__dirname, "insert_equations.py"), out, String(COL_W), String(BODY), "omml_ieee33.json"], { stdio: "inherit" });
