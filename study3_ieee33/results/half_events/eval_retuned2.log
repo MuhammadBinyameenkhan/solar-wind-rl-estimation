@@ -1,0 +1,3 @@
+test adequacy-screen rejection rate: 0.0%
+fixed_feasible   seed 0: nadir 0.303 Hz  RoCoF 0.632 Hz/s  BESS 1.813 kWh  return -7.70
+wrote /home/user/solar-wind-rl-estimation/study3_ieee33/results_half_rt2/per_scenario.csv

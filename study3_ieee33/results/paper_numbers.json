@@ -1977,6 +1977,32 @@
    "f_violation": 0.0,
    "collapsed": 0.0
   },
+  "fixed_retuned": {
+   "return": -7.732199401707895,
+   "nadir_hz": 0.2988067832058845,
+   "rocof_max_hz_s": 0.6141310095738594,
+   "settling_time_s": 3.296469166666069,
+   "bess_energy_kwh": 1.8161936871255977,
+   "qss_dev_hz": 0.0282747952488507,
+   "infeasible_commit_s": 2.5448999999997195,
+   "saturation_s": 0.0,
+   "rocof_violation": 0.0,
+   "f_violation": 0.0,
+   "collapsed": 0.0
+  },
+  "fixed_retuned_feasible": {
+   "return": -7.701727401064759,
+   "nadir_hz": 0.30273401698368163,
+   "rocof_max_hz_s": 0.6321051598740252,
+   "settling_time_s": 3.260077499999411,
+   "bess_energy_kwh": 1.8133918536322449,
+   "qss_dev_hz": 0.02816618831284299,
+   "infeasible_commit_s": 0.011149999999998755,
+   "saturation_s": 0.0,
+   "rocof_violation": 0.0,
+   "f_violation": 0.0,
+   "collapsed": 0.0
+  },
   "fixed_tuned": {
    "return": -8.770503730634957,
    "nadir_hz": 0.22772200798872091,
