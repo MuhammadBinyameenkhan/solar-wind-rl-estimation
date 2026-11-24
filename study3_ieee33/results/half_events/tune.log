@@ -1,1 +1,76 @@
 0 of 32 scores re-used, 32 to run
+  fixed_tuned|alpha=0.3,d=5,h=1: val return -10.455
+  fixed_tuned|alpha=0.3,d=10,h=1: val return -8.956
+  fixed_tuned|alpha=0.3,d=15,h=1: val return -11.186
+  fixed_tuned|alpha=0.3,d=20,h=1: val return -13.955
+  fixed_tuned|alpha=0.3,d=25,h=1: val return -16.675
+  fixed_tuned|alpha=0.3,d=30,h=1: val return -19.219
+  fixed_tuned|alpha=0.3,d=40,h=1: val return -23.602
+  fixed_tuned|alpha=0.3,d=50,h=1: val return -27.150
+  fixed_tuned|alpha=0.3,d=5,h=3: val return -7.702
+  fixed_tuned|alpha=0.3,d=10,h=3: val return -8.673
+  fixed_tuned|alpha=0.3,d=15,h=3: val return -11.495
+  fixed_tuned|alpha=0.3,d=20,h=3: val return -14.434
+  fixed_tuned|alpha=0.3,d=25,h=3: val return -17.179
+  fixed_tuned|alpha=0.3,d=30,h=3: val return -19.672
+  fixed_tuned|alpha=0.3,d=40,h=3: val return -23.938
+  fixed_tuned|alpha=0.3,d=50,h=3: val return -27.408
+  fixed_tuned|alpha=0.3,d=5,h=5: val return -8.656
+  fixed_tuned|alpha=0.3,d=10,h=5: val return -9.779
+  fixed_tuned|alpha=0.3,d=15,h=5: val return -12.427
+  fixed_tuned|alpha=0.3,d=20,h=5: val return -15.206
+  fixed_tuned|alpha=0.3,d=25,h=5: val return -17.832
+  fixed_tuned|alpha=0.3,d=30,h=5: val return -20.233
+  fixed_tuned|alpha=0.3,d=40,h=5: val return -24.365
+  fixed_tuned|alpha=0.3,d=50,h=5: val return -27.741
+  fixed_tuned|alpha=0.3,d=5,h=8: val return -10.460
+  fixed_tuned|alpha=0.3,d=10,h=8: val return -11.408
+  fixed_tuned|alpha=0.3,d=15,h=8: val return -13.763
+  fixed_tuned|alpha=0.3,d=20,h=8: val return -16.324
+  fixed_tuned|alpha=0.3,d=25,h=8: val return -18.788
+  fixed_tuned|alpha=0.3,d=30,h=8: val return -21.064
+  fixed_tuned|alpha=0.3,d=40,h=8: val return -25.012
+  fixed_tuned|alpha=0.3,d=50,h=8: val return -28.258
+stage 1, fixed VSG: {'h': 3.0, 'd': 5.0, 'alpha': 0.3} val return -7.702
+ controller     h      d  alpha  val_return  val_return_sd  nadir_hz  collapse_rate
+fixed_tuned 1.000  5.000  0.300     -10.455          6.167     0.402          0.000
+fixed_tuned 1.000 10.000  0.300      -8.956          4.168     0.282          0.000
+fixed_tuned 1.000 15.000  0.300     -11.186          4.484     0.221          0.000
+fixed_tuned 1.000 20.000  0.300     -13.955          5.257     0.186          0.000
+fixed_tuned 1.000 25.000  0.300     -16.675          6.146     0.162          0.000
+fixed_tuned 1.000 30.000  0.300     -19.219          7.017     0.146          0.000
+fixed_tuned 1.000 40.000  0.300     -23.602          8.597     0.125          0.000
+fixed_tuned 1.000 50.000  0.300     -27.150          9.888     0.111          0.000
+fixed_tuned 3.000  5.000  0.300      -7.702          3.529     0.305          0.000
+fixed_tuned 3.000 10.000  0.300      -8.673          3.359     0.234          0.000
+fixed_tuned 3.000 15.000  0.300     -11.495          4.297     0.188          0.000
+fixed_tuned 3.000 20.000  0.300     -14.434          5.339     0.156          0.000
+fixed_tuned 3.000 25.000  0.300     -17.179          6.313     0.132          0.000
+fixed_tuned 3.000 30.000  0.300     -19.672          7.201     0.116          0.000
+fixed_tuned 3.000 40.000  0.300     -23.938          8.731     0.102          0.000
+fixed_tuned 3.000 50.000  0.300     -27.408          9.989     0.095          0.000
+fixed_tuned 5.000  5.000  0.300      -8.656          3.759     0.275          0.000
+fixed_tuned 5.000 10.000  0.300      -9.779          3.793     0.211          0.000
+fixed_tuned 5.000 15.000  0.300     -12.427          4.688     0.173          0.000
+fixed_tuned 5.000 20.000  0.300     -15.206          5.661     0.151          0.000
+fixed_tuned 5.000 25.000  0.300     -17.832          6.582     0.133          0.000
+fixed_tuned 5.000 30.000  0.300     -20.233          7.429     0.118          0.000
+fixed_tuned 5.000 40.000  0.300     -24.365          8.902     0.097          0.000
+fixed_tuned 5.000 50.000  0.300     -27.741         10.123     0.085          0.000
+fixed_tuned 8.000  5.000  0.300     -10.460          4.426     0.245          0.000
+fixed_tuned 8.000 10.000  0.300     -11.408          4.491     0.196          0.000
+fixed_tuned 8.000 15.000  0.300     -13.763          5.258     0.165          0.000
+fixed_tuned 8.000 20.000  0.300     -16.324          6.125     0.142          0.000
+fixed_tuned 8.000 25.000  0.300     -18.788          6.972     0.125          0.000
+fixed_tuned 8.000 30.000  0.300     -21.064          7.765     0.115          0.000
+fixed_tuned 8.000 40.000  0.300     -25.012          9.162     0.099          0.000
+fixed_tuned 8.000 50.000  0.300     -28.258         10.333     0.087          0.000
+wrote /home/user/solar-wind-rl-estimation/study3_ieee33/results/half_events/tune_val_fixed.csv
+
+# paste into the config under eval:
+baseline_params:
+  fixed_tuned:
+    h: 3.0
+    d: 5.0
+    alpha: 0.3
+
