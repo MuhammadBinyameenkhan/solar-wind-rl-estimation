@@ -45,7 +45,8 @@ NAME = {"fixed": "Fixed VSG (untuned)", "fixed_tuned": "Fixed VSG (tuned)", "fix
 
 def save(fig, name):
     for ext in ("png", "pdf"):
-        fig.savefig(FIG / f"{name}.{ext}", dpi=600, bbox_inches="tight", pad_inches=0.02)
+        fig.savefig(FIG / f"{name}.{ext}", dpi=600, bbox_inches="tight", pad_inches=0.02,
+                    metadata={"CreationDate": None} if ext == "pdf" else None)
     plt.close(fig)
     print("wrote", FIG / f"{name}.png")
 
