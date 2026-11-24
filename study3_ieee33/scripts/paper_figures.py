@@ -243,13 +243,16 @@ if hf.exists():
     ph = B.groupby(["controller", "scenario"])[MET].mean()
     extra["half"] = {c: {m: float(ph.loc[c][m].mean()) for m in MET} for c in ph.index.get_level_values(0).unique()}
     extra["half_paired"] = {}
-    for a, b in [("td3", "fixed_tuned"), ("td3", "fixed_feasible"), ("ddpg", "fixed_feasible")]:
+    for a, b in [("td3", "fixed_tuned"), ("td3", "fixed_feasible"), ("ddpg", "fixed_feasible"), ("ddpg", "fixed_tuned"),
+                 ("td3", "fixed_retuned"), ("td3", "fixed_retuned_feasible"), ("ddpg", "fixed_retuned_feasible")]:
         if a in extra["half"] and b in extra["half"]:
             extra["half_paired"][f"{a}_vs_{b}"] = {}
             for m in ["return", "nadir_hz", "rocof_max_hz_s"]:
                 x = ph.loc[a][m].to_numpy(float) - ph.loc[b][m].to_numpy(float)
                 nz = x[np.abs(x) > 1e-12]
-                extra["half_paired"][f"{a}_vs_{b}"][m] = {"mean_diff": float(x.mean()), "p": float(wilcoxon(nz).pvalue) if len(nz) else 1.0}
+                extra["half_paired"][f"{a}_vs_{b}"][m] = {"mean_diff": float(x.mean()), "p": float(wilcoxon(nz).pvalue) if len(nz) else 1.0,
+                                                          "a_better_frac": float(np.mean(x > 1e-12) if m == "return" else np.mean(x < -1e-12))}
+    extra["half_seed_return"] = {c: B[B.controller == c].groupby("seed")["return"].mean().tolist() for c in ("td3", "ddpg")}
 num.update(extra)
 json.dump(num, open(R / "paper_numbers.json", "w"), indent=1)
 print("added reviewer items:", list(extra))
