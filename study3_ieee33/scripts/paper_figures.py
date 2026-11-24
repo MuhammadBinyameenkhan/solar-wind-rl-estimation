@@ -223,3 +223,32 @@ num["hp_runs"] = hp
 
 json.dump(num, open(R / "paper_numbers.json", "w"), indent=1)
 print("wrote", R / "paper_numbers.json")
+
+# ------------------------------------------------------------------ reviewer items (added in revision 1)
+extra = {}
+ci = R / "oracle_ci.json"
+if ci.exists():
+    extra["oracle_ci"] = json.load(open(ci))
+w = R / "oracle_weights" / "summary.csv"
+if w.exists():
+    extra["weights"] = pd.read_csv(w).to_dict("records")
+    comp = pd.read_csv(R / "oracle_weights" / "components.csv")
+    t = comp[(comp.H == 3.0) & (comp.D == 10.0)]
+    extra["voltage"] = {"tuned_min": float(t.vmin.min()), "tuned_max": float(t.vmax.max()),
+                        "all_min": float(comp.vmin.min()), "all_max": float(comp.vmax.max())}
+hf = R / "half_events" / "per_scenario.csv"
+if hf.exists():
+    B = pd.read_csv(hf)
+    ph = B.groupby(["controller", "scenario"])[MET].mean()
+    extra["half"] = {c: {m: float(ph.loc[c][m].mean()) for m in MET} for c in ph.index.get_level_values(0).unique()}
+    extra["half_paired"] = {}
+    for a, b in [("td3", "fixed_tuned"), ("td3", "fixed_feasible"), ("ddpg", "fixed_feasible")]:
+        if a in extra["half"] and b in extra["half"]:
+            extra["half_paired"][f"{a}_vs_{b}"] = {}
+            for m in ["return", "nadir_hz", "rocof_max_hz_s"]:
+                x = ph.loc[a][m].to_numpy(float) - ph.loc[b][m].to_numpy(float)
+                nz = x[np.abs(x) > 1e-12]
+                extra["half_paired"][f"{a}_vs_{b}"][m] = {"mean_diff": float(x.mean()), "p": float(wilcoxon(nz).pvalue) if len(nz) else 1.0}
+num.update(extra)
+json.dump(num, open(R / "paper_numbers.json", "w"), indent=1)
+print("added reviewer items:", list(extra))
