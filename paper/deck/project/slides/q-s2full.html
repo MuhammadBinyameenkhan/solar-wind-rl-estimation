@@ -1,0 +1,22 @@
+<section id="q-s2full" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Results</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: Can we see the full Study 2 table?</h2>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:23px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:30%">Controller (200 test scenarios)</th><th style="width:10%">Nadir (Hz)</th><th style="width:11%">RoCoF (Hz/s)</th><th style="width:11%">BESS (kWh)</th><th style="width:13%">Infeasible (s)</th><th style="width:13%">Saturation (s)</th><th style="width:12%">Return</th></tr>
+<tr><td>Fixed VSG, tuned (3 s, 15 pu)</td><td>0.451</td><td>1.228</td><td>0.798</td><td>0.536</td><td>0.0131</td><td>−80.7</td></tr>
+<tr><td>Fixed VSG, tuned + constraint</td><td>0.451</td><td>1.228</td><td>0.798</td><td>0.001</td><td>0.0135</td><td>−80.8</td></tr>
+<tr><td>Fixed VSG, standard (3 s, 20 pu)</td><td>0.382</td><td>1.237</td><td>0.951</td><td>0.527</td><td>0.0171</td><td>−90.0</td></tr>
+<tr><td>Bang-bang VSG</td><td>0.379</td><td>1.208</td><td>0.954</td><td>0.787</td><td>0.0162</td><td>−90.6</td></tr>
+<tr style="background:#F2E6CF"><td>TD3, final policy</td><td>0.407</td><td>1.213</td><td>0.822</td><td>0.008</td><td>0.0185</td><td>−91.2</td></tr>
+<tr><td>TD3 without constraint, final</td><td>0.386</td><td>1.207</td><td>0.843</td><td>1.989</td><td>0.0162</td><td>−90.1</td></tr>
+<tr><td>DDPG, final policy</td><td>0.473</td><td>1.435</td><td>0.876</td><td>0.012</td><td>0.0236</td><td>−98.8</td></tr>
+<tr><td>BESS droop (no inertia)</td><td>0.630</td><td>5.547</td><td>0.945</td><td>0.019</td><td>0.1629</td><td>−163.8</td></tr>
+<tr><td>Diesel only</td><td>3.07*</td><td>7.436</td><td>0.000</td><td>0.000</td><td>0.0000</td><td>−501.3</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Learned controllers averaged over five seeds. Nadir: worst-event frequency deviation. RoCoF over 100 ms. *97.5 % of episodes collapse. Saturation column from results/pareto_summary.csv.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B24</p>
+<aside>Table 4.4 with the saturation column added from the results file, now with the measured EGAT load. The tuned VSG has the best return; TD3 has a better nadir but uses more energy; the constraint takes TD3's infeasible commitment from 1.99 to 0.01 seconds per episode; DDPG is worse than TD3 on nadir, RoCoF and return. Saturation is short, 0.013 to 0.024 seconds for the VSG controllers, and the constraint does not change it significantly: 0.0131 to 0.0135 for the tuned VSG, 0.0162 to 0.0185 for TD3. Source: proposal Table 4.4; results/per_scenario.csv.</aside>
+</section>

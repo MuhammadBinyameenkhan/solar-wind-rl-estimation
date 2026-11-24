@@ -1,0 +1,20 @@
+# Fast end-to-end check on synthetic sample data (minutes on a laptop CPU).
+# Generate the sample data first:  python scripts/make_sample_data.py
+base: default.yaml
+
+data:
+  era5_csv: data/sample/era5_SYNTHETIC.csv
+  nasa_power_csv: data/sample/nasa_power_SYNTHETIC.csv
+  processed_csv: data/sample/hourly_resource_SYNTHETIC.csv
+
+train:
+  episodes: 40
+  seeds: [0, 1]
+  warmup_steps: 1000
+  eval_every: 20
+  eval_episodes: 5
+  out_dir: runs_smoke
+
+eval:
+  n_scenarios: 20
+  out_dir: results_smoke

@@ -1,0 +1,28 @@
+<section id="lit-map" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">2 · Literature review · positioning</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">How the parameters adapt vs what limits them</h2>
+</div>
+<div style="display:grid;grid-template-columns:300px 1fr 1fr 1fr;gap:12px">
+<p style="font-size:24px;color:#5A6270;padding:8px 0">Capability check ↓ · Adaptation →</p>
+<p style="font-size:26px;font-weight:600;text-align:center;padding:8px;background:#E4E8EC;border-radius:8px">Fixed parameters</p>
+<p style="font-size:26px;font-weight:600;text-align:center;padding:8px;background:#E4E8EC;border-radius:8px">Rule-based</p>
+<p style="font-size:26px;font-weight:600;text-align:center;padding:8px;background:#E4E8EC;border-radius:8px">Learning-based</p>
+<p style="font-size:26px;font-weight:600;line-height:1.3;padding:20px 16px;background:#E4E8EC;border-radius:8px">Dispatch-aware headroom</p>
+<div style="display:flex;align-items:center;justify-content:center;background:#FFFDF8;border:1px dashed #C9C2B2;border-radius:8px;padding:20px"><p style="font-size:26px;color:#8A8F98">—</p></div>
+<div style="display:flex;align-items:center;justify-content:center;background:#FFFDF8;border:1px dashed #C9C2B2;border-radius:8px;padding:20px"><p style="font-size:26px;color:#8A8F98">—</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;justify-content:center;background:#13233A;border-radius:8px;padding:20px 24px"><p style="font-size:28px;font-weight:600;color:#E3A13B">This thesis</p><p style="font-size:24px;line-height:1.35;color:#F6F4EE">TREC, IREMOS, Study 2: direction-aware, time-separated</p></div>
+<p style="font-size:26px;font-weight:600;line-height:1.3;padding:20px 16px;background:#E4E8EC;border-radius:8px">Fixed bound or SoC limit</p>
+<div style="display:flex;flex-direction:column;gap:6px;justify-content:center;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:8px;padding:20px 24px"><p style="font-size:24px;line-height:1.35">Paquette 2015, Qoria 2020</p><p style="font-size:24px;color:#5A6270">current limiting</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;justify-content:center;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:8px;padding:20px 24px"><p style="font-size:24px;line-height:1.35">Shi 2024 · static J bound</p><p style="font-size:24px;line-height:1.35">Han 2023 · SoC bands</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;justify-content:center;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:8px;padding:20px 24px"><p style="font-size:24px;line-height:1.35">Lu &amp; Zhuan 2024 · J–D region</p><p style="font-size:24px;line-height:1.35">Egbomwan 2025 · safety filter</p></div>
+<p style="font-size:26px;font-weight:600;line-height:1.3;padding:20px 16px;background:#E4E8EC;border-radius:8px">No capability check</p>
+<div style="display:flex;flex-direction:column;gap:6px;justify-content:center;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:8px;padding:20px 24px"><p style="font-size:24px;line-height:1.35">Zhong &amp; Weiss 2011</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;justify-content:center;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:8px;padding:20px 24px"><p style="font-size:24px;line-height:1.35">Alipoor 2015</p><p style="font-size:24px;line-height:1.35">Li 2017</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;justify-content:center;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:8px;padding:20px 24px"><p style="font-size:24px;line-height:1.35">Afifi 2023 · Egbomwan 2023</p><p style="font-size:24px;line-height:1.35">Oboreh-Snapps 2024</p><p style="font-size:24px;line-height:1.35">Criollo 2026 · Li 2026</p></div>
+</div>
+<p style="font-size:28px;line-height:1.45;width:1600px">Where limits exist they are <b>fixed at design time</b>; none follows the power the converter has already committed to the EMS dispatch.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">10</p>
+<aside>This map places each study by two questions: how do the parameters adapt, and what limits them. The bottom row is the crowded one: most adaptive and learning schemes do not check converter capability at all. In the middle row, limits exist but are fixed at design time: a static inertia bound from the rated power in Shi, state-of-charge bands in Han, a fixed inertia–damping region in Lu and Zhuan, and fixed power bounds in a safety filter in Egbomwan 2025. The top row, headroom that follows the energy-management dispatch, is empty except for this thesis. Positions are qualitative and based on each paper's stated method.</aside>
+</section>

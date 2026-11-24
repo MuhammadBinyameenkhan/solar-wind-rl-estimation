@@ -1,0 +1,27 @@
+
+RMS model vs Simscape EMT (4 scenarios: [9 10 11 12]; solver: script-only EMT bench)
+controller      metric (mean)               RMS        EMT       diff
+fixed_tuned     nadir_hz                 0.6844     0.6958       1.7%
+fixed_tuned     rocof_max_hz_s           1.6132     4.1003     154.2%
+fixed_tuned     rocof_500ms_hz_s         1.1521     1.2647       9.8%
+fixed_tuned     rotor_rocof_hz_s              -     2.9108
+fixed_tuned     bess_energy_kwh          0.8054     0.8068       0.2%
+fixed_tuned     infeasible_commit_s      0.0000     0.0000
+fixed_tuned     saturation_s             0.0725     0.1625     124.1%
+fixed_tuned     rmse_df_hz                    -     0.0179
+fixed_feasible  nadir_hz                 0.6844     0.6958       1.7%
+fixed_feasible  rocof_max_hz_s           1.6132     4.1003     154.2%
+fixed_feasible  rocof_500ms_hz_s         1.1521     1.2647       9.8%
+fixed_feasible  rotor_rocof_hz_s              -     2.9108
+fixed_feasible  bess_energy_kwh          0.8054     0.8068       0.2%
+fixed_feasible  infeasible_commit_s      0.0000     0.0000
+fixed_feasible  saturation_s             0.0725     0.1625     124.1%
+fixed_feasible  rmse_df_hz                    -     0.0179
+policy          nadir_hz                 0.6866     0.7400       7.8%
+policy          rocof_max_hz_s           1.9649     4.1521     111.3%
+policy          rocof_500ms_hz_s         1.2087     1.3858      14.7%
+policy          rotor_rocof_hz_s              -     3.2665
+policy          bess_energy_kwh          0.8741     0.8694      -0.5%
+policy          infeasible_commit_s      0.0125     0.0250     100.0%
+policy          saturation_s             0.1075     0.1725      60.5%
+policy          rmse_df_hz                    -     0.0197

@@ -1,0 +1,21 @@
+<section id="studies" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">3 · Methodology · two connected studies</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">Study 1 builds the framework; Study 2 stresses it</h2>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:18%">Aspect</th><th style="width:38%">Study 1 · converter-only</th><th style="width:44%">Study 2 · hybrid diesel microgrid</th></tr>
+<tr><td>System</td><td>2.5 MVA BESS-VSG, 500 kW PV, 500 kW wind</td><td>2 MVA: 0.5 MW diesel, 0.5 MW/2 MWh BESS-VSG, 0.8 MW PV, 1 MW wind</td></tr>
+<tr><td>Physical inertia</td><td>residual H_sys = 0.5 s</td><td>diesel generator, H_d = 2 s</td></tr>
+<tr><td>Weather</td><td>measured 1-Hz records (BSRN, FINO1)</td><td>ERA5 + NASA POWER, 2024, Nakhon Ratchasima</td></tr>
+<tr><td>Agent action</td><td>J, D, K_q every 20 ms</td><td>residual J_v, D_v, PV share α every 50 ms</td></tr>
+<tr><td>Feasibility</td><td>summed rule, proportional derating</td><td>direction-aware, time-separated; rules compared</td></tr>
+<tr><td>Limits</td><td>2 Hz/s RoCoF, 0.5 Hz deviation</td><td>1 Hz/s RoCoF (500 ms), ±0.2 Hz band</td></tr>
+<tr><td>Statistics</td><td>10 seeds; t-tests, Bonferroni</td><td>5 seeds; 200 test scenarios; Wilcoxon + Holm</td></tr>
+<tr><td>Validation</td><td>averaged model</td><td>MATLAB re-implementation; Simscape EMT</td></tr>
+<tr><td>Output</td><td>TREC (under review); IREMOS (to submit)</td><td>IREA manuscript (in preparation)</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">14</p>
+<aside>The thesis has two connected studies. Study 1, published as TREC and IREMOS, builds the headroom-feasible learning framework in a converter-only microgrid with residual inertia of half a second and measured one-hertz weather data, over ten seeds. Study 2 moves to a hybrid microgrid where a two-second diesel generator shares every step, uses a full year of site data for Nakhon Ratchasima, refines the feasibility rule to be direction-aware and time-separated, and adds MATLAB and EMT validation. Study 2 changes what matters physically: a real synchronous machine, real site data and a stricter definition of feasibility. [Update the TREC and IREMOS status if it changes before the exam.]</aside>
+</section>

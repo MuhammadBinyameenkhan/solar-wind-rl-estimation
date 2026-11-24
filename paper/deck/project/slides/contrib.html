@@ -1,0 +1,25 @@
+<section id="contrib" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#0E6E78">5 · Contributions and limitations</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1">What is new, and what is not yet shown</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:3;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#0E6E78">Contributions</p>
+<div style="display:flex;gap:16px;align-items:start;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 24px"><x-icon name="CheckCircle" style="color:#0E6E78;width:40px;height:40px"></x-icon><p style="font-size:26px;line-height:1.4"><b>Feasibility layer</b> — direction-aware, time-separated headroom requirement, and a comparison of derating rules</p></div>
+<div style="display:flex;gap:16px;align-items:start;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 24px"><x-icon name="CheckCircle" style="color:#0E6E78;width:40px;height:40px"></x-icon><p style="font-size:26px;line-height:1.4"><b>Oracle bound</b> — a training-free test of how much adaptive scheduling can gain</p></div>
+<div style="display:flex;gap:16px;align-items:start;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 24px"><x-icon name="CheckCircle" style="color:#0E6E78;width:40px;height:40px"></x-icon><p style="font-size:26px;line-height:1.4"><b>Fair protocol</b> — tuned baselines, several seeds, paired tests; residual agents that start as the tuned VSG</p></div>
+<div style="display:flex;gap:16px;align-items:start;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 24px"><x-icon name="CheckCircle" style="color:#0E6E78;width:40px;height:40px"></x-icon><p style="font-size:26px;line-height:1.4"><b>Validation chain</b> — MATLAB re-implementation and Simscape EMT; PLL RoCoF spikes and limiter activity quantified</p></div>
+</div>
+<div style="flex:2;display:flex;flex-direction:column;gap:16px;background:#13233A;border-radius:12px;padding:28px 32px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#E3A13B">Limitations</p>
+<p style="font-size:26px;line-height:1.4;color:#F6F4EE">Single bus; regional EGAT demand scaled to the microgrid; one site and one year</p>
+<p style="font-size:26px;line-height:1.4;color:#F6F4EE">EMT shares the averaged model’s parameters; 12 scenarios, one policy</p>
+<p style="font-size:26px;line-height:1.4;color:#F6F4EE">Constraint guarantees commitments, not freedom from saturation</p>
+<p style="font-size:26px;line-height:1.4;color:#F6F4EE">Agents trained with clipping, not joint scaling; no hardware test yet</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">30</p>
+<aside>Four contributions. First, a feasibility layer that checks virtual inertia and damping against the headroom that remains after dispatch, in the direction of the event and at the instant each mechanism peaks, with a comparison of how to derate. Second, the oracle bound, a cheap go/no-go test before training. Third, an evaluation protocol that makes learning claims trustworthy. Fourth, a validation chain beyond the averaged model. And the limitations, stated plainly: single bus, a regional demand profile scaled to the microgrid, one site; the EMT model shares the averaged model's parameters and covers only twelve scenarios; the constraint guarantees commitments, not freedom from saturation; the agents were trained with clipping; and there is no hardware test yet. Each limitation maps to a task in the plan.</aside>
+</section>

@@ -1,0 +1,190 @@
+site:
+  name: Nakhon Ratchasima, Thailand
+  latitude: 14.9799
+  longitude: 102.0977
+  elevation_m: null
+  utc_offset_hours: 7.0
+data:
+  era5_csv: data/raw/era5_wind_2024.nc
+  nasa_power_csv: data/raw/nasa_power_solar_2024.csv
+  load_csv: data/raw/egat_northeast_2024_load.csv
+  processed_csv: data/processed/hourly_resource.csv
+  era5_columns: {}
+  nasa_columns: {}
+  nasa_time_standard: auto
+  nasa_utc_offset_hours: null
+  split:
+    method: weekly_blocks
+    train: 0.7
+    val: 0.15
+    test: 0.15
+    test_years: []
+    val_years: []
+system:
+  f_nominal_hz: 50.0
+  s_base_mva: 2.0
+  wind:
+    rated_mw: 1.0
+    hub_height_m: 100.0
+    cut_in_ms: 2.5
+    rated_speed_ms: 10.0
+    cut_out_ms: 25.0
+    shear_exponent: 0.143
+    power_curve_csv: null
+    turbulence_intensity: 0.1
+    turbulence_time_constant_s: 2.0
+    rotor_smoothing_s: 0.5
+  pv:
+    rated_mw: 0.8
+    deload_fraction: 0.15
+    temp_coeff_per_c: -0.004
+    noct_c: 45.0
+    derate: 0.9
+    response_time_s: 0.08
+  bess:
+    power_mw: 0.5
+    energy_mwh: 2.0
+    soc_init_range:
+    - 0.3
+    - 0.9
+    soc_min: 0.1
+    soc_max: 0.95
+    soc_taper: 0.05
+    eta_charge: 0.95
+    eta_discharge: 0.95
+    secondary_ki: 2.0
+  diesel:
+    rated_mw: 0.5
+    inertia_h_s: 2.0
+    damping_pu: 2.0
+    sync_coeff_pu: 0.8
+    droop: 0.05
+    governor_time_s: 0.2
+    engine_time_s: 0.5
+    min_load_frac: 0.3
+    max_dispatch_frac: 0.85
+    ramp_pu_per_s: 1.0
+    secondary_ki: 2.0
+  load:
+    peak_mw: 0.8
+    min_mw: 0.3
+    damping_pu: 1.0
+    noise_frac: 0.005
+  vsg:
+    h_min_s: 0.2
+    h_max_s: 8.0
+    d_min_pu: 0.0
+    d_max_pu: 50.0
+    alpha_min: 0.0
+    alpha_max: 1.0
+    sync_coeff_pu: 2.0
+    measurement_filter_s: 0.02
+    gfl_response_s: 0.05
+    nominal_h_s: 3.0
+    nominal_d_pu: 20.0
+    nominal_alpha: 0.3
+  ems:
+    enabled: true
+    diesel_target_frac: 0.6
+    max_dispatch_frac: 0.8
+  disturbance:
+    step_mw_range:
+    - 0.2
+    - 0.4
+    n_events_range:
+    - 2
+    - 3
+    time_s_range:
+    - 0.5
+    - 1.5
+    min_separation_s: 7.0
+    settle_tail_s: 5.0
+    max_cumulative_mw: 0.4
+    prob_load_increase: 0.75
+    design_step_mw: 0.4
+    adequacy_margin: 1.0
+  grid_code:
+    f_dev_limit_hz: 1.0
+    f_target_hz: 0.5
+    rocof_limit_hz_s: 1.0
+    rocof_window_s: 0.1
+    settling_band_hz: 0.1
+env:
+  episode_s: 30.0
+  agent_dt_s: 0.05
+  sim_dt_s: 0.002
+  headroom_constraint: false
+  projection: band_power
+  param_filter_s: 0.25
+  action_dims: 3
+  action_mode: residual
+  residual_base: tuned
+  terminate_dev_hz: 3.0
+  reward:
+    f_band_hz: 0.2
+    rocof_band_hz_s: 1.0
+    w_freq_inband: 0.02
+    w_freq: 1.0
+    w_rocof: 0.5
+    w_bess: 0.1
+    w_fast: 2.0
+    w_sat: 2.0
+    w_violation: 1.0
+    w_action_mag: 0.05
+    w_action_rate: 0.3
+    collapse_penalty: 50.0
+train:
+  algo: td3
+  episodes: 1000
+  seeds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  hidden:
+  - 256
+  - 256
+  actor_lr: 0.0001
+  actor_zero_init: true
+  critic_lr: 0.0003
+  gamma: 0.99
+  tau: 0.005
+  batch_size: 256
+  buffer_size: 1000000
+  warmup_steps: 10000
+  updates_per_step: 0.5
+  expl_noise: 0.1
+  expl_noise_final: 0.03
+  policy_noise: 0.2
+  noise_clip: 0.5
+  policy_delay: 2
+  eval_every: 50
+  eval_episodes: 20
+  device: cpu
+  out_dir: runs
+eval:
+  n_scenarios: 200
+  scenario_seed: 20260
+  controllers:
+  - none
+  - droop
+  - fixed
+  - fixed_tuned
+  - fixed_feasible
+  - bang_bang
+  - adaptive_rocof
+  - ddpg
+  - td3
+  baseline_params:
+    fixed_tuned:
+      h: 3.0
+      d: 15.0
+      alpha: 1.0
+    bang_bang:
+      h_big: 4.0
+      h_small: 3.0
+    adaptive_rocof:
+      k_h: 0.0
+      k_d: 0.0
+  out_dir: results

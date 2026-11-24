@@ -1,0 +1,20 @@
+<section id="q-emtmodel" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Validation</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: What is inside the Simscape EMT model?</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start"><div style="flex:1;display:flex;flex-direction:column;gap:16px"><table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:23px;color:#13233A;width:980px;background:#FFFDF8">
+<tr><th style="width:32%">Element</th><th style="width:68%">Value</th></tr>
+<tr><td>System</td><td>Three-phase 400 V, 50 Hz, 2 MVA; Z<sub>b</sub> = 0.08 Ω</td></tr>
+<tr><td>VSG coupling</td><td>X = 1/K<sub>s</sub> = 0.5 pu, X/R = 10 → 4 mΩ, 127 µH</td></tr>
+<tr><td>Diesel coupling</td><td>X = 1/K<sub>d</sub> = 1.25 pu → 10 mΩ, 318 µH</td></tr>
+<tr><td>Shunt load</td><td>2 % resistive, 4 Ω</td></tr>
+<tr><td>PLL</td><td>SRF-PLL, 20 Hz bandwidth, ζ = 0.7</td></tr>
+<tr><td>Converter limiter</td><td>On measured power, gain 100</td></tr>
+<tr><td>Solver</td><td>T<sub>s</sub> = 100 µs, 0.5 s warm-up; MATLAB R2021a</td></tr>
+</table>
+</div><div style="width:620px;display:flex;flex-direction:column;gap:16px"><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Same controller code</p><p style="font-size:24px;line-height:1.4;color:#13233A">VSG swing law, EMS dispatch, feasibility layer and the TD3 actor run unchanged at the 50 ms decision interval.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Why the coupling is matched</p><p style="font-size:24px;line-height:1.4;color:#13233A">Reactances equal the inverse synchronising coefficients of the averaged model, so differences come only from what the averaged model neglects.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">What it adds</p><p style="font-size:24px;line-height:1.4;color:#13233A">Network electromagnetics, nonlinear power–angle relation, voltage and Q, PLL, limiter on measured power. Diesel: EMF behind reactance with swing, governor, AGC.</p></div></div></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B26</p>
+<aside>The EMT model, built with Simscape Electrical Specialized Power Systems, is a three-phase 400 volt system on the 2 MVA base. The VSG is an average-model converter behind its coupling impedance; the diesel is an internal voltage behind its reactance with swing equation, governor and AGC; the loads and renewable base power are a PLL-synchronised grid-following injection. The coupling reactances are set to one over the synchronising coefficients, 0.5 and 1.25 per-unit, so the linearised behaviour matches the averaged model by construction, and any difference is due to physics the averaged model leaves out. The step is 100 microseconds. An independent script solver of the same circuit agrees with Simscape within about 2 percent. Source: Section 3.10; matlab/simscape/vsgrl_emt_params.m.</aside>
+</section>

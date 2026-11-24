@@ -1,0 +1,957 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="401.923718pt" height="259.344pt" viewBox="0 0 401.923718 259.344" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-11-09T16:34:23.820430</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 259.344 
+L 401.923718 259.344 
+L 401.923718 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 12.044651 236.22854 
+L 340.21507 236.22854 
+L 340.21507 117.612726 
+L 12.044651 117.612726 
+L 12.044651 236.22854 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke-dasharray: 2.4,1.2; stroke-dashoffset: 0; stroke: #7f7f7f; stroke-width: 0.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 17.975442 108.914233 
+L 381.730605 108.914233 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 3.2"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 44.664 28.255479 
+L 44.664 37.744744 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 46.64093 28.255479 
+L 46.64093 37.744744 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 45.652465 54.350958 
+L 45.652465 72.538716 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 45.652465 87.958772 
+L 45.652465 95.471107 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 45.652465 101.401898 
+L 45.652465 108.914233 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_7">
+    <path d="M 136.591256 17.18467 
+L 136.591256 11.649265 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_8">
+    <path d="M 136.591256 26.673935 
+L 136.591256 32.20934 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_9">
+    <path d="M 136.591256 32.20934 
+L 136.591256 36.558586 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_10">
+    <path d="M 136.591256 53.1648 
+L 136.591256 72.538716 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_11">
+    <path d="M 136.591256 87.958772 
+L 136.591256 95.471107 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_12">
+    <path d="M 136.591256 101.401898 
+L 136.591256 108.914233 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_13">
+    <path d="M 227.530047 28.255479 
+L 227.530047 36.558586 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_14">
+    <path d="M 227.530047 53.1648 
+L 227.530047 95.866493 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_15">
+    <path d="M 227.530047 101.401898 
+L 227.530047 108.914233 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_16">
+    <path d="M 314.514977 35.372428 
+L 314.514977 17.18467 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 1.3"/>
+   </g>
+   <g id="line2d_17">
+    <path d="M 314.514977 35.372428 
+L 314.514977 36.558586 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_18">
+    <path d="M 314.514977 53.1648 
+L 314.514977 95.866493 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_19">
+    <path d="M 314.514977 101.401898 
+L 314.514977 108.914233 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_20">
+    <path d="M 361.961302 108.914233 
+L 361.961302 120.775814 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_21">
+    <path d="M 361.961302 126.311219 
+L 361.961302 136.591256 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_22">
+    <path d="M 184.037581 111.088856 
+L 184.037581 123.543516 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke-dasharray: 2.4,1.2; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.8"/>
+   </g>
+   <g id="line2d_23">
+    <path d="M 128.64453 201.829953 
+L 121.566586 201.829953 
+L 121.566586 59.095591 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #1f5fa8; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_24">
+    <path d="M 294.745674 153.988242 
+L 294.745674 63.444837 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_25">
+    <path d="M 245.322419 63.444837 
+L 296.722605 63.444837 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_26">
+    <path d="M 81.237209 111.088856 
+L 81.237209 153.988242 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke-dasharray: 2.4,1.2; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.8"/>
+   </g>
+   <g id="line2d_27">
+    <path d="M 33.790884 162.291349 
+L 21.929302 162.291349 
+L 21.929302 21.13853 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #b2322b; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_28">
+    <path d="M 104.960372 162.291349 
+L 110.495777 162.291349 
+L 110.495777 55.932502 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #b2322b; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_29">
+    <path d="M 6.11386 249.671665 
+L 19.952372 249.671665 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_30">
+    <path d="M 73.329488 249.671665 
+L 87.168 249.671665 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #1f5fa8; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_31">
+    <path d="M 172.176 249.671665 
+L 186.014512 249.671665 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #b2322b; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_32">
+    <path d="M 255.20707 249.671665 
+L 269.045581 249.671665 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_33">
+    <path d="M 318.468837 249.671665 
+L 332.307349 249.671665 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="text_1">
+    <text style="font-style: italic; font-size: 7px; font-family: 'Nimbus Roman'; text-anchor: end" x="381.730605" y="100.369056" transform="rotate(-0 381.730605 100.369056)">AC bus, 400 V, 50 Hz</text>
+   </g>
+   <g id="patch_3">
+    <path d="M 30.736913 32.172005 
+L 60.568017 32.172005 
+L 60.568017 10.105056 
+L 30.736913 10.105056 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #f2f2f2; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 45.652465 54.350958 
+C 47.854475 54.350958 49.966592 53.47609 51.523648 51.919034 
+C 53.080704 50.361978 53.955572 48.249861 53.955572 46.047851 
+C 53.955572 43.845841 53.080704 41.733724 51.523648 40.176668 
+C 49.966592 38.619612 47.854475 37.744744 45.652465 37.744744 
+C 43.450455 37.744744 41.338338 38.619612 39.781282 40.176668 
+C 38.224226 41.733724 37.349358 43.845841 37.349358 46.047851 
+C 37.349358 48.249861 38.224226 50.361978 39.781282 51.919034 
+C 41.338338 53.47609 43.450455 54.350958 45.652465 54.350958 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 45.652465 77.678735 
+C 46.333813 77.678735 46.987951 77.407782 47.469736 76.925997 
+C 47.951522 76.444211 48.222474 75.790073 48.222474 75.108726 
+C 48.222474 74.427378 47.951522 73.77324 47.469736 73.291455 
+C 46.987951 72.809669 46.333813 72.538716 45.652465 72.538716 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 45.652465 82.818753 
+C 46.333813 82.818753 46.987951 82.547801 47.469736 82.066015 
+C 47.951522 81.58423 48.222474 80.930092 48.222474 80.248744 
+C 48.222474 79.567397 47.951522 78.913259 47.469736 78.431473 
+C 46.987951 77.949688 46.333813 77.678735 45.652465 77.678735 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 45.652465 87.958772 
+C 46.333813 87.958772 46.987951 87.687819 47.469736 87.206034 
+C 47.951522 86.724248 48.222474 86.07011 48.222474 85.388763 
+C 48.222474 84.707415 47.951522 84.053277 47.469736 83.571492 
+C 46.987951 83.089706 46.333813 82.818753 45.652465 82.818753 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 42.884763 101.401898 
+L 48.420167 101.401898 
+L 48.420167 95.866493 
+L 42.884763 95.866493 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_2">
+    <!-- $X_d$ -->
+    <g transform="translate(51.978642 81.332051)">
+     <text>
+      <tspan x="0" y="-0.421875" style="font-style: italic; font-size: 7px; font-family: 'STIXGeneral'">X</tspan>
+      <tspan x="4.276978" y="0.628125" style="font-style: italic; font-size: 4.9px; font-family: 'STIXGeneral'">d</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(63.840223 44.599132)">0.5 MW</text>
+    <!-- $H_d$ = 2 s -->
+    <g transform="translate(63.840223 51.555851)">
+     <text>
+      <tspan x="0" y="-0.40625" style="font-style: italic; font-size: 6.8px; font-family: 'STIXGeneral'">H</tspan>
+      <tspan x="4.907318" y="0.61375" style="font-style: italic; font-size: 4.76px; font-family: 'STIXGeneral'">d</tspan>
+      <tspan x="7.592214" y="-0.40625" style="font-size: 6.8px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="9.291417" y="-0.40625" style="font-size: 6.8px; font-family: 'Nimbus Roman'">=</tspan>
+      <tspan x="13.124837" y="-0.40625" style="font-size: 6.8px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="14.82404" y="-0.40625" style="font-size: 6.8px; font-family: 'Nimbus Roman'">2</tspan>
+      <tspan x="18.222463" y="-0.40625" style="font-size: 6.8px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="19.921666" y="-0.40625" style="font-size: 6.8px; font-family: 'Nimbus Roman'">s</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 6px; font-family: 'Nimbus Roman'; text-anchor: middle" x="127.101991" y="17.096512" transform="rotate(-0 127.101991 17.096512)">+</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 128.288149 53.1648 
+L 144.894363 53.1648 
+L 144.894363 36.558586 
+L 128.288149 36.558586 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 136.591256 77.678735 
+C 137.272603 77.678735 137.926741 77.407782 138.408527 76.925997 
+C 138.890312 76.444211 139.161265 75.790073 139.161265 75.108726 
+C 139.161265 74.427378 138.890312 73.77324 138.408527 73.291455 
+C 137.926741 72.809669 137.272603 72.538716 136.591256 72.538716 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 136.591256 82.818753 
+C 137.272603 82.818753 137.926741 82.547801 138.408527 82.066015 
+C 138.890312 81.58423 139.161265 80.930092 139.161265 80.248744 
+C 139.161265 79.567397 138.890312 78.913259 138.408527 78.431473 
+C 137.926741 77.949688 137.272603 77.678735 136.591256 77.678735 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 136.591256 87.958772 
+C 137.272603 87.958772 137.926741 87.687819 138.408527 87.206034 
+C 138.890312 86.724248 139.161265 86.07011 139.161265 85.388763 
+C 139.161265 84.707415 138.890312 84.053277 138.408527 83.571492 
+C 137.926741 83.089706 137.272603 82.818753 136.591256 82.818753 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 133.823553 101.401898 
+L 139.358958 101.401898 
+L 139.358958 95.866493 
+L 133.823553 95.866493 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_5">
+    <!-- $X_v$ -->
+    <g transform="translate(142.917433 81.332051)">
+     <text>
+      <tspan x="0" y="-0.421875" style="font-style: italic; font-size: 7px; font-family: 'STIXGeneral'">X</tspan>
+      <tspan x="4.276978" y="0.628125" style="font-style: italic; font-size: 4.9px; font-family: 'STIXGeneral'">v</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(149.243609 20.439677)">BESS</text>
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(149.243609 27.960584)">0.5 MW / 2 MWh</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'; fill: #1f5fa8" transform="translate(149.243609 42.702693)">grid-forming</text>
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'; fill: #1f5fa8" transform="translate(149.243609 50.852068)">VSG</text>
+   </g>
+   <g id="patch_14">
+    <path d="M 217.250009 28.255479 
+L 234.646995 28.255479 
+L 238.600856 15.603126 
+L 221.20387 15.603126 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #dfe8f3; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 219.22694 53.1648 
+L 235.833153 53.1648 
+L 235.833153 36.558586 
+L 219.22694 36.558586 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 224.762344 101.401898 
+L 230.297749 101.401898 
+L 230.297749 95.866493 
+L 224.762344 95.866493 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(241.763944 20.439677)">PV 0.8 MW</text>
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(241.763944 27.960584)">15 % de-loaded</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(240.1824 42.702693)">grid-</text>
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(240.1824 50.182693)">following</text>
+   </g>
+   <g id="patch_17">
+    <path d="M 306.21187 53.1648 
+L 322.818084 53.1648 
+L 322.818084 36.558586 
+L 306.21187 36.558586 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 311.747274 101.401898 
+L 317.282679 101.401898 
+L 317.282679 95.866493 
+L 311.747274 95.866493 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(328.748874 20.463584)">Wind 1.0 MW</text>
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(328.748874 27.943584)">IEC class III</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(327.16733 42.702693)">grid-</text>
+    <text style="font-size: 6.8px; font-family: 'Nimbus Roman'" transform="translate(327.16733 50.182693)">following</text>
+   </g>
+   <g id="patch_19">
+    <path d="M 359.1936 126.311219 
+L 364.729005 126.311219 
+L 364.729005 120.775814 
+L 359.1936 120.775814 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(355.153505 159.839039)">Load</text>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(345.127693 167.062429)">0.3–0.8 MW</text>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(343.825224 173.784632)">(EGAT 2024)</text>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(355.403584 180.592945)">steps</text>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(345.127693 188.842429)">0.2–0.4 MW</text>
+   </g>
+   <g id="text_13">
+    <text style="font-style: italic; font-size: 6.8px; font-family: 'Nimbus Roman'; text-anchor: end; fill: #555555" x="337.447367" y="230.909851" transform="rotate(-0 337.447367 230.909851)">Control layer</text>
+   </g>
+   <g id="patch_20">
+    <path d="M 136.671405 140.14973 
+L 231.403758 140.14973 
+L 231.403758 123.543516 
+L 136.671405 123.543516 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_14">
+    <!-- $s_t$ -->
+    <g transform="translate(186.805284 148.313386)">
+     <text>
+      <tspan x="0" y="-0" style="font-style: italic; font-size: 6.8px; font-family: 'STIXGeneral'">s</tspan>
+      <tspan x="2.643967" y="1.02" style="font-style: italic; font-size: 4.76px; font-family: 'STIXGeneral'">t</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="patch_21">
+    <path d="M 131.338905 173.439823 
+L 236.736258 173.439823 
+L 236.736258 151.142874 
+L 131.338905 151.142874 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #1f5fa8; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_15">
+    <!-- $(J_v, D_v, \alpha)_{\rm cmd}$ -->
+    <g style="fill: #1f5fa8" transform="translate(186.805284 183.268451)">
+     <text>
+      <tspan x="0" y="-0.546875" style="font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">(</tspan>
+      <tspan x="7.46965" y="-0.546875" style="font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">,</tspan>
+      <tspan x="17.545052" y="-0.546875" style="font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">,</tspan>
+      <tspan x="24.153199" y="-0.546875" style="font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">)</tspan>
+      <tspan x="2.195709" y="-0.546875" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">J</tspan>
+      <tspan x="10.438072" y="-0.546875" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">D</tspan>
+      <tspan x="20.513474" y="-0.546875" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">α</tspan>
+      <tspan x="5.123322" y="0.443125" style="font-style: italic; font-size: 4.62px; font-family: 'STIXGeneral'; fill: #1f5fa8">v</tspan>
+      <tspan x="15.198723" y="0.443125" style="font-style: italic; font-size: 4.62px; font-family: 'STIXGeneral'; fill: #1f5fa8">v</tspan>
+      <tspan x="26.452858" y="0.443125" style="font-size: 4.62px; font-family: 'STIXGeneral'; fill: #1f5fa8">c</tspan>
+      <tspan x="28.502186" y="0.443125" style="font-size: 4.62px; font-family: 'STIXGeneral'; fill: #1f5fa8">m</tspan>
+      <tspan x="32.093115" y="0.443125" style="font-size: 4.62px; font-family: 'STIXGeneral'; fill: #1f5fa8">d</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="patch_22">
+    <path d="M 128.64453 212.978428 
+L 239.430633 212.978428 
+L 239.430633 190.681479 
+L 128.64453 190.681479 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #e8eff8; stroke: #1f5fa8; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_16">
+    <!-- $J_v, D_v, \alpha$ -->
+    <g style="fill: #1f5fa8" transform="translate(128.446702 94.20314) rotate(-90)">
+     <text>
+      <tspan x="0" y="-0.6875" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">J</tspan>
+      <tspan x="8.242363" y="-0.6875" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">D</tspan>
+      <tspan x="18.317765" y="-0.6875" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">α</tspan>
+      <tspan x="2.927612" y="0.3025" style="font-style: italic; font-size: 4.62px; font-family: 'STIXGeneral'; fill: #1f5fa8">v</tspan>
+      <tspan x="13.003014" y="0.3025" style="font-style: italic; font-size: 4.62px; font-family: 'STIXGeneral'; fill: #1f5fa8">v</tspan>
+      <tspan x="5.273941" y="-0.6875" style="font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">,</tspan>
+      <tspan x="15.349342" y="-0.6875" style="font-size: 6.6px; font-family: 'STIXGeneral'; fill: #1f5fa8">,</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="patch_23">
+    <path d="M 256.221998 212.978428 
+L 333.269351 212.978428 
+L 333.269351 190.681479 
+L 256.221998 190.681479 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_24">
+    <path d="M 257.184 173.439823 
+L 332.307349 173.439823 
+L 332.307349 151.142874 
+L 257.184 151.142874 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #b2322b; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_17">
+    <!-- $P_{b0}$ -->
+    <g style="fill: #b2322b" transform="translate(297.513377 183.305051)">
+     <text>
+      <tspan x="0" y="-0.5625" style="font-style: italic; font-size: 6.8px; font-family: 'STIXGeneral'; fill: #b2322b">P</tspan>
+      <tspan x="4.152863" y="0.4575" style="font-style: italic; font-size: 4.76px; font-family: 'STIXGeneral'; fill: #b2322b">b</tspan>
+      <tspan x="6.531758" y="0.4575" style="font-size: 4.76px; font-family: 'STIXGeneral'; fill: #b2322b">0</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 6.2px; font-family: 'Nimbus Roman'; fill: #b2322b" transform="translate(290.012572 99.364367) rotate(-90)">curtailment</text>
+   </g>
+   <g id="text_19">
+    <!-- $\Delta f$ -->
+    <g transform="translate(83.609526 135.858726)">
+     <text>
+      <tspan x="0" y="-0.390625" style="font-size: 6.8px; font-family: 'STIXGeneral'">Δ</tspan>
+      <tspan x="4.907318" y="-0.390625" style="font-style: italic; font-size: 6.8px; font-family: 'STIXGeneral'">f</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="patch_25">
+    <path d="M 33.790884 173.439823 
+L 104.960372 173.439823 
+L 104.960372 151.142874 
+L 33.790884 151.142874 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #b2322b; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_20">
+    <!-- $\Delta P_{ref}$ (governor) -->
+    <g style="fill: #b2322b" transform="translate(17.1328 86.829767) rotate(-90)">
+     <text>
+      <tspan x="0" y="-0.6875" style="font-size: 6.4px; font-family: 'STIXGeneral'; fill: #b2322b">Δ</tspan>
+      <tspan x="4.613998" y="-0.6875" style="font-style: italic; font-size: 6.4px; font-family: 'STIXGeneral'; fill: #b2322b">P</tspan>
+      <tspan x="8.518631" y="0.2725" style="font-style: italic; font-size: 4.48px; font-family: 'STIXGeneral'; fill: #b2322b">r</tspan>
+      <tspan x="10.258783" y="0.2725" style="font-style: italic; font-size: 4.48px; font-family: 'STIXGeneral'; fill: #b2322b">e</tspan>
+      <tspan x="12.244975" y="0.2725" style="font-style: italic; font-size: 4.48px; font-family: 'STIXGeneral'; fill: #b2322b">f</tspan>
+      <tspan x="13.776582" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b"> </tspan>
+      <tspan x="15.374223" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">(</tspan>
+      <tspan x="17.50229" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">g</tspan>
+      <tspan x="20.697572" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">o</tspan>
+      <tspan x="23.892854" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">v</tspan>
+      <tspan x="27.088136" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">e</tspan>
+      <tspan x="29.925553" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">r</tspan>
+      <tspan x="32.05362" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">n</tspan>
+      <tspan x="35.248902" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">o</tspan>
+      <tspan x="38.444184" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">r</tspan>
+      <tspan x="40.572251" y="-0.6875" style="font-size: 6.4px; font-family: 'Nimbus Roman'; fill: #b2322b">)</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="text_21">
+    <!-- $P_{set}$ -->
+    <g style="fill: #b2322b" transform="translate(105.96786 88.11014) rotate(-90)">
+     <text>
+      <tspan x="0" y="-0.5625" style="font-style: italic; font-size: 6.8px; font-family: 'STIXGeneral'; fill: #b2322b">P</tspan>
+      <tspan x="4.152863" y="0.4575" style="font-style: italic; font-size: 4.76px; font-family: 'STIXGeneral'; fill: #b2322b">s</tspan>
+      <tspan x="6.003639" y="0.4575" style="font-style: italic; font-size: 4.76px; font-family: 'STIXGeneral'; fill: #b2322b">e</tspan>
+      <tspan x="8.116093" y="0.4575" style="font-style: italic; font-size: 4.76px; font-family: 'STIXGeneral'; fill: #b2322b">t</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'; text-anchor: start" x="23.11546" y="250.879465" transform="rotate(-0 23.11546 250.879465)">Power circuit</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'; text-anchor: start" x="90.331088" y="250.879465" transform="rotate(-0 90.331088 250.879465)">VSG parameter scheduling</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'; text-anchor: start" x="189.1776" y="250.879465" transform="rotate(-0 189.1776 250.879465)">Secondary control</text>
+   </g>
+   <g id="text_25">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'; text-anchor: start" x="272.20867" y="250.879465" transform="rotate(-0 272.20867 250.879465)">EMS (hourly)</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'; text-anchor: start" x="335.470437" y="250.879465" transform="rotate(-0 335.470437 250.879465)">Frequency measurement</text>
+   </g>
+   <g id="line2d_34">
+    <path d="M 129.869693 17.18467 
+L 143.312819 17.18467 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 1.4"/>
+   </g>
+   <g id="line2d_35">
+    <path d="M 133.032781 20.347758 
+L 140.14973 20.347758 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 2.2"/>
+   </g>
+   <g id="line2d_36">
+    <path d="M 129.869693 23.510847 
+L 143.312819 23.510847 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 1.4"/>
+   </g>
+   <g id="line2d_37">
+    <path d="M 133.032781 26.673935 
+L 140.14973 26.673935 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 2.2"/>
+   </g>
+   <g id="line2d_38">
+    <path d="M 128.288149 53.1648 
+L 144.894363 36.558586 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="line2d_39">
+    <path d="M 223.049005 28.255479 
+L 227.002865 15.603126 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.5"/>
+   </g>
+   <g id="line2d_40">
+    <path d="M 228.848 28.255479 
+L 232.80186 15.603126 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.5"/>
+   </g>
+   <g id="line2d_41">
+    <path d="M 219.22694 21.929302 
+L 236.623926 21.929302 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.5"/>
+   </g>
+   <g id="line2d_42">
+    <path d="M 219.22694 53.1648 
+L 235.833153 36.558586 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="patch_26">
+    <path d="M 314.514977 17.18467 
+L 312.888053 12.727691 
+L 314.514977 5.323088 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.7; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_27">
+    <path d="M 314.514977 17.18467 
+L 311.468582 20.822117 
+L 304.242546 23.11546 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.7; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_28">
+    <path d="M 314.514977 17.18467 
+L 319.188295 18.004201 
+L 324.787408 23.11546 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.7; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_43">
+    <path d="M 306.21187 53.1648 
+L 322.818084 36.558586 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.9"/>
+   </g>
+   <g id="patch_29">
+    <path d="M 361.961302 136.591256 
+Q 361.961302 143.312819 361.961302 149.028151 
+" style="fill: none; stroke: #000000; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 363.361302 146.228151 
+L 361.961302 149.028151 
+L 360.561302 146.228151 
+z
+" style="stroke: #000000; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_30">
+    <path d="M 184.037581 140.14973 
+Q 184.037581 147.068986 184.037581 152.982011 
+" style="fill: none; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 185.437581 150.182011 
+L 184.037581 152.982011 
+L 182.637581 150.182011 
+z
+" style="stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #000000; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_31">
+    <path d="M 184.037581 170.594456 
+Q 184.037581 182.060651 184.037581 192.520616 
+" style="fill: none; stroke: #1f5fa8; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 185.437581 189.720616 
+L 184.037581 192.520616 
+L 182.637581 189.720616 
+z
+" style="fill: #1f5fa8; stroke: #1f5fa8; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_32">
+    <path d="M 121.566586 59.095591 
+Q 124.927367 55.14173 127.636465 51.954556 
+" style="fill: none; stroke: #1f5fa8; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 124.756335 53.181279 
+L 127.636465 51.954556 
+L 126.889765 54.994694 
+z
+" style="fill: #1f5fa8; stroke: #1f5fa8; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_33">
+    <path d="M 256.221998 201.829953 
+Q 247.826315 201.829953 240.436864 201.829953 
+" style="fill: none; stroke: #000000; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 243.236864 203.229953 
+L 240.436864 201.829953 
+L 243.236864 200.429953 
+z
+" style="stroke: #000000; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_34">
+    <path d="M 294.745674 170.594456 
+Q 294.745674 182.060651 294.745674 192.520616 
+" style="fill: none; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 296.145674 189.720616 
+L 294.745674 192.520616 
+L 293.345674 189.720616 
+z
+" style="fill: #b2322b; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_35">
+    <path d="M 245.322419 63.444837 
+Q 240.577786 59.293284 236.590419 55.804338 
+" style="fill: none; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 237.775727 58.701758 
+L 236.590419 55.804338 
+L 239.61954 56.594543 
+z
+" style="fill: #b2322b; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_36">
+    <path d="M 296.722605 63.444837 
+Q 301.467237 59.293284 305.454604 55.804338 
+" style="fill: none; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 302.425483 56.594543 
+L 305.454604 55.804338 
+L 304.269296 58.701758 
+z
+" style="fill: #b2322b; stroke-dasharray: 2.7,1.35; stroke-dashoffset: 0; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_37">
+    <path d="M 21.929302 21.13853 
+Q 26.377395 21.13853 29.819258 21.13853 
+" style="fill: none; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 27.019258 19.73853 
+L 29.819258 21.13853 
+L 27.019258 22.53853 
+z
+" style="fill: #b2322b; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="patch_38">
+    <path d="M 110.495777 55.932502 
+Q 119.391963 50.001712 127.450914 44.629077 
+" style="fill: none; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+    <path d="M 124.344593 45.017367 
+L 127.450914 44.629077 
+L 125.897754 47.347108 
+z
+" style="fill: #b2322b; stroke: #b2322b; stroke-width: 0.9; stroke-linecap: round"/>
+   </g>
+   <g id="text_27">
+    <text style="font-size: 6.5px; font-family: 'Nimbus Roman'" transform="translate(37.44266 19.588179)">Diesel</text>
+    <text style="font-size: 6.5px; font-family: 'Nimbus Roman'" transform="translate(37.071957 26.38728)">engine</text>
+   </g>
+   <g id="text_28">
+    <text style="font-size: 6.5px; font-family: 'Nimbus Roman'; text-anchor: middle" x="45.652465" y="45.458114" transform="rotate(-0 45.652465 45.458114)">SG</text>
+   </g>
+   <g id="line2d_44">
+    <path d="M 42.093991 49.21094 
+L 42.239235 49.387902 
+L 42.384478 49.56196 
+L 42.529722 49.730253 
+L 42.674966 49.89002 
+L 42.82021 50.038635 
+L 42.965454 50.173661 
+L 43.110698 50.292878 
+L 43.255942 50.39433 
+L 43.401185 50.476351 
+L 43.546429 50.537593 
+L 43.691673 50.577052 
+L 43.836917 50.59408 
+L 43.982161 50.588396 
+L 44.127405 50.560095 
+L 44.272649 50.50964 
+L 44.417892 50.437861 
+L 44.563136 50.345936 
+L 44.70838 50.235374 
+L 44.853624 50.107991 
+L 44.998868 49.965879 
+L 45.144112 49.81137 
+L 45.289355 49.647002 
+L 45.434599 49.475475 
+L 45.579843 49.299603 
+L 45.725087 49.122276 
+L 45.870331 48.946404 
+L 46.015575 48.774877 
+L 46.160819 48.610509 
+L 46.306062 48.456 
+L 46.451306 48.313888 
+L 46.59655 48.186505 
+L 46.741794 48.075943 
+L 46.887038 47.984018 
+L 47.032282 47.912239 
+L 47.177526 47.861784 
+L 47.322769 47.833483 
+L 47.468013 47.827799 
+L 47.613257 47.844827 
+L 47.758501 47.884286 
+L 47.903745 47.945529 
+L 48.048989 48.027549 
+L 48.194233 48.129001 
+L 48.339476 48.248218 
+L 48.48472 48.383244 
+L 48.629964 48.531859 
+L 48.775208 48.691626 
+L 48.920452 48.859919 
+L 49.065696 49.033977 
+L 49.21094 49.21094 
+" clip-path="url(#pb701e5c0c1)" style="fill: none; stroke: #000000; stroke-width: 0.7; stroke-linecap: square"/>
+   </g>
+   <g id="text_29">
+    <text style="font-size: 7px; font-family: 'Nimbus Roman'; text-anchor: middle" x="132.439702" y="41.99114" transform="rotate(-0 132.439702 41.99114)">=</text>
+   </g>
+   <g id="text_30">
+    <text style="font-size: 8px; font-family: 'Nimbus Roman'; text-anchor: middle" x="140.742809" y="50.477247" transform="rotate(-0 140.742809 50.477247)">~</text>
+   </g>
+   <g id="text_31">
+    <text style="font-size: 7px; font-family: 'Nimbus Roman'; text-anchor: middle" x="223.378493" y="41.99114" transform="rotate(-0 223.378493 41.99114)">=</text>
+   </g>
+   <g id="text_32">
+    <text style="font-size: 8px; font-family: 'Nimbus Roman'; text-anchor: middle" x="231.6816" y="50.477247" transform="rotate(-0 231.6816 50.477247)">~</text>
+   </g>
+   <g id="patch_39">
+    <path d="M 314.514977 18.963907 
+C 314.986836 18.963907 315.439433 18.776435 315.773087 18.44278 
+C 316.106742 18.109126 316.294214 17.656529 316.294214 17.18467 
+C 316.294214 16.712811 316.106742 16.260214 315.773087 15.926559 
+C 315.439433 15.592904 314.986836 15.405433 314.514977 15.405433 
+C 314.043118 15.405433 313.590521 15.592904 313.256866 15.926559 
+C 312.923211 16.260214 312.73574 16.712811 312.73574 17.18467 
+C 312.73574 17.656529 312.923211 18.109126 313.256866 18.44278 
+C 313.590521 18.776435 314.043118 18.963907 314.514977 18.963907 
+z
+" clip-path="url(#pb701e5c0c1)"/>
+   </g>
+   <g id="text_33">
+    <text style="font-size: 7px; font-family: 'Nimbus Roman'; text-anchor: middle" x="310.363423" y="41.99114" transform="rotate(-0 310.363423 41.99114)">~</text>
+   </g>
+   <g id="text_34">
+    <text style="font-size: 8px; font-family: 'Nimbus Roman'; text-anchor: middle" x="318.66653" y="50.477247" transform="rotate(-0 318.66653 50.477247)">~</text>
+   </g>
+   <g id="text_35">
+    <!-- PLL + 20 ms filter: $\Delta f$, RoCoF -->
+    <g transform="translate(143.183581 133.430623)">
+     <text>
+      <tspan x="0" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">P</tspan>
+      <tspan x="3.666107" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">L</tspan>
+      <tspan x="7.694855" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">L</tspan>
+      <tspan x="11.723602" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="13.372025" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">+</tspan>
+      <tspan x="17.090881" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="18.739304" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">2</tspan>
+      <tspan x="22.036163" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">0</tspan>
+      <tspan x="25.333023" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="26.981445" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">m</tspan>
+      <tspan x="32.111343" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">s</tspan>
+      <tspan x="34.6763" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="36.324722" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">f</tspan>
+      <tspan x="38.520432" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">i</tspan>
+      <tspan x="40.353485" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">l</tspan>
+      <tspan x="42.186539" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">t</tspan>
+      <tspan x="44.019592" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">e</tspan>
+      <tspan x="46.947205" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">r</tspan>
+      <tspan x="49.142914" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">:</tspan>
+      <tspan x="50.975967" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="59.218094" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">,</tspan>
+      <tspan x="60.866516" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="62.514938" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">R</tspan>
+      <tspan x="66.912933" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">o</tspan>
+      <tspan x="70.209793" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">C</tspan>
+      <tspan x="74.607788" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">o</tspan>
+      <tspan x="77.904648" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">F</tspan>
+      <tspan x="52.62439" y="-0.5" style="font-size: 6.6px; font-family: 'STIXGeneral'">Δ</tspan>
+      <tspan x="57.38504" y="-0.5" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'">f</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="text_36">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(137.612769 160.030849)">DRL agent (residual TD3 / DDPG)</text>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(149.156066 167.637349)">or fixed VSG, every 50 ms</text>
+   </g>
+   <g id="text_37">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(134.906253 199.569453)">Direction-aware headroom projection</text>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(150.773581 207.159453)">(clipping or joint scaling)</text>
+   </g>
+   <g id="text_38">
+    <!-- Headroom $h_{up}$, $h_{dn}$ -->
+    <g transform="translate(270.094674 199.321953)">
+     <text>
+      <tspan x="0" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">H</tspan>
+      <tspan x="4.760651" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">e</tspan>
+      <tspan x="7.688263" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">a</tspan>
+      <tspan x="10.615875" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">d</tspan>
+      <tspan x="13.912735" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">r</tspan>
+      <tspan x="16.108444" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">o</tspan>
+      <tspan x="19.405304" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">o</tspan>
+      <tspan x="22.702164" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">m</tspan>
+      <tspan x="27.832062" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="37.708404" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'">,</tspan>
+      <tspan x="39.356827" y="-0.5" style="font-size: 6.6px; font-family: 'Nimbus Roman'"> </tspan>
+      <tspan x="29.480484" y="-0.5" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'">h</tspan>
+      <tspan x="41.005249" y="-0.5" style="font-style: italic; font-size: 6.6px; font-family: 'STIXGeneral'">h</tspan>
+      <tspan x="32.777344" y="0.49" style="font-style: italic; font-size: 4.62px; font-family: 'STIXGeneral'">u</tspan>
+      <tspan x="35.085146" y="0.49" style="font-style: italic; font-size: 4.62px; font-family: 'STIXGeneral'">p</tspan>
+      <tspan x="44.302109" y="0.49" style="font-style: italic; font-size: 4.62px; font-family: 'STIXGeneral'">d</tspan>
+      <tspan x="46.60991" y="0.49" style="font-style: italic; font-size: 4.62px; font-family: 'STIXGeneral'">n</tspan>
+     </text>
+    </g>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(262.521174 207.294547)">(SoC limits, PV reserve)</text>
+   </g>
+   <g id="text_39">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(266.881815 160.030849)">EMS (hourly): BESS</text>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(267.133956 167.623943)">dispatch, curtailment</text>
+   </g>
+   <g id="text_40">
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(44.344612 160.030849)">Secondary control:</text>
+    <text style="font-size: 6.6px; font-family: 'Nimbus Roman'" transform="translate(40.853831 167.623943)">AGC, BESS set-point</text>
+   </g>
+   <g id="patch_40">
+    <path d="M 184.037581 111.088856 
+C 184.614298 111.088856 185.167472 110.859724 185.575272 110.451923 
+C 185.983073 110.044123 186.212205 109.490949 186.212205 108.914233 
+C 186.212205 108.337516 185.983073 107.784342 185.575272 107.376542 
+C 185.167472 106.968741 184.614298 106.739609 184.037581 106.739609 
+C 183.460865 106.739609 182.907691 106.968741 182.499891 107.376542 
+C 182.09209 107.784342 181.862958 108.337516 181.862958 108.914233 
+C 181.862958 109.490949 182.09209 110.044123 182.499891 110.451923 
+C 182.907691 110.859724 183.460865 111.088856 184.037581 111.088856 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_41">
+    <path d="M 81.237209 111.088856 
+C 81.813926 111.088856 82.3671 110.859724 82.7749 110.451923 
+C 83.182701 110.044123 83.411833 109.490949 83.411833 108.914233 
+C 83.411833 108.337516 83.182701 107.784342 82.7749 107.376542 
+C 82.3671 106.968741 81.813926 106.739609 81.237209 106.739609 
+C 80.660492 106.739609 80.107319 106.968741 79.699518 107.376542 
+C 79.291718 107.784342 79.062586 108.337516 79.062586 108.914233 
+C 79.062586 109.490949 79.291718 110.044123 79.699518 110.451923 
+C 80.107319 110.859724 80.660492 111.088856 81.237209 111.088856 
+z
+" clip-path="url(#pb701e5c0c1)" style="fill: #ffffff; stroke: #000000; stroke-width: 0.9; stroke-linejoin: miter"/>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pb701e5c0c1">
+   <rect x="2.16" y="2.16" width="395.386047" height="255.024"/>
+  </clipPath>
+ </defs>
+</svg>

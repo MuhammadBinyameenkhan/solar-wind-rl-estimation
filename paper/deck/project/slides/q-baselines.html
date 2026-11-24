@@ -1,0 +1,18 @@
+<section id="q-baselines" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Evaluation</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: Were the baselines fair?</h2>
+</div>
+<div style="display:flex;gap:24px"><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Same data</p><p style="font-size:24px;line-height:1.4;color:#13233A">Every controller sees the same scenarios, operating points and noise sequences; tuning uses validation data only, testing uses 200 unseen test scenarios.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Same objective</p><p style="font-size:24px;line-height:1.4;color:#13233A">The fixed VSG (3 s, 15 pu) and the rule-based VSGs are tuned on validation data with the same cost the agents optimise.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Same plant limits</p><p style="font-size:24px;line-height:1.4;color:#13233A">The rate limiter and feasibility layer are applied identically to every controller.</p></div></div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:36%">Controller family</th><th style="width:30%">Study 1</th><th style="width:34%">Study 2</th></tr>
+<tr><td>No virtual inertia / BESS droop</td><td>No VSG</td><td>Diesel only; BESS droop (no inertia)</td></tr>
+<tr><td>Literature fixed VSGs</td><td>(1, 10), (4, 30), (15, 60)</td><td>Standard (3, 20); grid incl. (4, 30), (8, 50)</td></tr>
+<tr><td>Tuned fixed VSG</td><td>(0 s, 35 pu)</td><td>(3 s, 15 pu)</td></tr>
+<tr><td>Rule-based adaptive (Alipoor, Li family)</td><td>Tuned</td><td>Bang-bang and RoCoF-adaptive, tuned</td></tr>
+<tr><td>Learned</td><td>DDPG, TD3, 10 seeds</td><td>Residual DDPG, TD3, TD3 without constraint, 5 seeds</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B18</p>
+<aside>The main criticism of the learning-VSG literature is untuned or hand-picked baselines, so fairness is built into the protocol. Every controller is tuned on validation data with the same objective, tested on the same unseen scenarios with the same noise, and passes the same rate limiter and feasibility layer. The tuned fixed VSG in Study 1 is interesting: zero inertia and 35 per-unit damping, which again shows that damping does most of the work. Source: Section 3.9, Tables 4.1, 4.3, 4.4.</aside>
+</section>

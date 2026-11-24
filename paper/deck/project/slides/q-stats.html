@@ -1,0 +1,19 @@
+<section id="q-stats" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Evaluation</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: Which statistics, and are the differences significant?</h2>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:1664px;background:#FFFDF8">
+<tr><th style="width:34%">TD3 vs tuned fixed VSG (200 scenarios)</th><th style="width:16%">Median diff.</th><th style="width:16%">TD3 better in</th><th style="width:16%">p<sub>Holm</sub></th><th style="width:18%">Verdict</th></tr>
+<tr><td>Worst-event nadir (Hz)</td><td>−0.045</td><td>88.5 %</td><td>8 × 10⁻²⁵</td><td>TD3 better</td></tr>
+<tr><td>Max RoCoF, 100 ms (Hz/s)</td><td>−0.039</td><td>65.5 %</td><td>0.04</td><td>TD3 better</td></tr>
+<tr><td>Settling time (s)</td><td>+0.47</td><td>24 %</td><td>2 × 10⁻¹⁴</td><td>Tuned VSG better</td></tr>
+<tr><td>BESS energy (kWh)</td><td>+0.022</td><td>18 %</td><td>9 × 10⁻²⁰</td><td>TD3 uses more</td></tr>
+<tr><td>Objective return</td><td>−9.0</td><td>1.5 %</td><td>1 × 10⁻³²</td><td>Tuned VSG better</td></tr>
+<tr><td>TD3 vs DDPG, nadir / RoCoF</td><td>−0.065 / −0.166</td><td>94.5 / 76.5 %</td><td>&lt; 10⁻¹⁷</td><td>TD3 better</td></tr>
+</table>
+<div style="display:flex;gap:24px"><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Study 2</p><p style="font-size:24px;line-height:1.4;color:#13233A">Paired Wilcoxon signed-rank over 200 test scenarios (differences are not normal), Holm correction across all comparisons.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#0E6E78">Study 1</p><p style="font-size:24px;line-height:1.4;color:#13233A">Mean ± 95 % CI over 10 seeds; one-sample t-tests against deterministic baselines; Welch's t-test between algorithms; Bonferroni.</p></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFDF8;border:1px solid #DDD8CC;border-radius:12px;padding:20px 28px"><p style="font-size:26px;font-weight:600;color:#9A5B0C">Why seeds</p><p style="font-size:24px;line-height:1.4;color:#13233A">DRL results vary with the seed and the checkpoint (Henderson et al., 2018; Agarwal et al., 2021).</p></div></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B19</p>
+<aside>Study 2 uses the paired Wilcoxon signed-rank test, because each scenario is run by every controller, so differences are paired, and they are not normally distributed; Holm controls the family-wise error across all comparisons. With the measured EGAT load, TD3 beats the tuned VSG on the nadir in 88.5 percent of scenarios, p Holm 8 times 10 to the minus 25, and now also slightly on RoCoF, p 0.04; it settles later, uses more BESS energy, and the tuned VSG has the better objective. Against DDPG, TD3 is better on nadir and RoCoF with p below 10 to the minus 17. Study 1 uses means with 95 percent intervals over ten seeds. Source: results/significance.csv, Section 3.9.</aside>
+</section>

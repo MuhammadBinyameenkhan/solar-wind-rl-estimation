@@ -1,0 +1,18 @@
+<section id="oracle" data-transition="fade" style="background:#13233A;color:#F6F4EE;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#E3A13B">4 · Preliminary results · Study 2 · oracle bound (RQ3)</p>
+<div style="display:flex;align-items:center;gap:72px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:280px;font-weight:600;line-height:1;color:#E3A13B;min-width:max-content">1.3 %</p>
+<div style="display:flex;flex-direction:column;gap:20px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:56px;font-weight:600;line-height:1.15;color:#F6F4EE">is the most any adaptive scheduler can gain here</h2>
+<p style="font-size:30px;line-height:1.45;color:#C9D3DF">Best single setting (3 s, 15 pu): return −94.71. Per-scenario oracle: −93.48. Known before a single agent was trained.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:4px solid #E3A13B;padding:20px 0 0 0"><h3 style="font-size:30px;font-weight:600;color:#F6F4EE">Why so small</h3><p style="font-size:26px;line-height:1.4;color:#C9D3DF">About 71 % of each step lands on the VSG instantly, whatever J_v and D_v are.</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:4px solid #E3A13B;padding:20px 0 0 0"><h3 style="font-size:30px;font-weight:600;color:#F6F4EE">And short</h3><p style="font-size:26px;line-height:1.4;color:#C9D3DF">Secondary control restores frequency in 10–20 s, leaving J_v and D_v little to shape.</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-top:4px solid #E3A13B;padding:20px 0 0 0"><h3 style="font-size:30px;font-weight:600;color:#F6F4EE">And flat</h3><p style="font-size:26px;line-height:1.4;color:#C9D3DF">The oracle’s damping barely follows headroom: about 12 pu in every tercile.</p></div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#C9D3DF">M. B. Khan · Feasible synthetic inertia · Proposal defence</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#C9D3DF;text-align:right">23</p>
+<aside>This is the key number for research question three, and I had it before training any agent. With the measured EGAT load, on forty validation scenarios the best single fixed setting reaches a return of minus 94.71; an oracle that picks the best of 24 settings separately for each scenario reaches minus 93.48. So any scenario-level adaptive scheduler can improve the objective by at most 1.3 percent. The reasons are physical: the synchronous coupling gives the VSG about 71 percent of each step instantly, secondary control restores frequency within 10 to 20 seconds, and the best damping, about 12 per-unit, hardly depends on headroom. This is why I propose the oracle as a go/no-go test before training.</aside>
+</section>

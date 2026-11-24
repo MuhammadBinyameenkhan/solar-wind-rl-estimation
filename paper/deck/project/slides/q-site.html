@@ -1,0 +1,17 @@
+<section id="q-site" data-transition="fade" style="background:#F6F4EE;color:#13233A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9A5B0C">Backup · Motivation</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:54px;font-weight:600;line-height:1.1">Q: Why Nakhon Ratchasima, and how were the data split?</h2>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start"><img src="/_blob/26f4e3513071e0403d55fc8bbfd0e20a" alt="Daily means of 2024 wind, PV and load operating points with validation and test weeks shaded" style="width:860px;height:600px;object-fit:contain;background:#FFFDF8;border-radius:12px"><div style="flex:1;display:flex;flex-direction:column;gap:20px"><table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#13233A;width:764px;background:#FFFDF8">
+<tr><th style="width:26%">Subset</th><th style="width:18%">Hours</th><th style="width:19%">Wind CF</th><th style="width:19%">PV CF</th><th style="width:18%">RES</th></tr>
+<tr><td>All</td><td>8777</td><td>9.5 %</td><td>17.3 %</td><td>44 %</td></tr>
+<tr><td>Train</td><td>6425</td><td>10.5 %</td><td>17.2 %</td><td>46 %</td></tr>
+<tr><td>Val.</td><td>1176</td><td>7.7 %</td><td>17.1 %</td><td>40 %</td></tr>
+<tr><td>Test</td><td>1176</td><td>6.3 %</td><td>18.1 %</td><td>40 %</td></tr>
+</table>
+<ul style="width:764px;display:flex;flex-direction:column;gap:8px;padding-left:32px;margin:0"><li style="font-size:24px;line-height:1.4">14.98° N, 102.10° E, 226 m; low-wind site, ERA5 mean 4.2 m/s at 100 m</li><li style="font-size:24px;line-height:1.4">ERA5 100 m wind on a 2 × 2 grid, bilinear; NASA POWER irradiance and temperature, LST → UTC</li><li style="font-size:24px;line-height:1.4">Weekly blocks: 5 train, 1 validation, 1 test in every 7 weeks, so all seasons appear in each subset</li><li style="font-size:24px;line-height:1.4">Load: measured EGAT 2024 Northeast-region demand, peak-scaled to 0.8 MW; no test draw needs screening</li></ul></div></div>
+<p style="position:absolute;left:128px;bottom:64px;width:1300px;font-size:24px;color:#5A6270">M. B. Khan · Feasible synthetic inertia · Backup slides</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:24px;color:#5A6270;text-align:right">B4</p>
+<aside>The site of the thesis is Nakhon Ratchasima. With one year of data a chronological split would put a whole season in the test set, so the hours are divided into weekly blocks, five for training, one for validation and one for testing in every seven, which keeps all seasons in every subset. ERA5 reanalysis gives the 100 m wind, interpolated bilinearly from a 2 by 2 grid; NASA POWER gives irradiance and temperature, converted from local solar time to UTC. Air density comes from temperature and pressure at 226 m. Inside each hour, 10 percent turbulence and 0.5 percent load noise are added, and two or three load steps of 0.2 to 0.4 MW. Source: Sections 3.2, 4.3.1, Table 4.2.</aside>
+</section>
